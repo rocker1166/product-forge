@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 250" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+  <rect width="1200" height="250" rx="20" fill="#f8fafc" stroke="#e2e8f0"/>
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#64748b"/></marker></defs>
+  <g font-size="16" text-anchor="middle">
+    <g><rect x="24" y="60" width="150" height="110" rx="14" fill="#fff" stroke="#cbd5e1"/><text x="99" y="100" font-size="30">💡</text><text x="99" y="135" font-weight="700" fill="#0f172a">One-line idea</text><text x="99" y="157" fill="#64748b" font-size="13">"Invoices for small firms"</text></g>
+    <g><rect x="210" y="40" width="230" height="150" rx="14" fill="#fff7ed" stroke="#f97316"/><text x="325" y="72" font-weight="800" fill="#c2410c">/forge-prd</text>
+      <text x="325" y="98" fill="#334155" font-size="13">4 research passes</text><text x="325" y="118" fill="#334155" font-size="13">merge · fact check</text><text x="325" y="138" fill="#334155" font-size="13">structure check · walk · attack</text><text x="325" y="158" fill="#334155" font-size="13">evidence audit</text></g>
+    <g><rect x="476" y="60" width="170" height="110" rx="14" fill="#fff" stroke="#cbd5e1"/><text x="561" y="95" font-weight="700" fill="#0f172a">You decide</text><text x="561" y="120" fill="#64748b" font-size="13">2-page owner sheet</text><text x="561" y="140" fill="#64748b" font-size="13">clickable mock</text></g>
+    <g><rect x="682" y="60" width="170" height="110" rx="14" fill="#f0f9ff" stroke="#38bdf8"/><text x="767" y="95" font-weight="800" fill="#0369a1">forge handoff</text><text x="767" y="120" fill="#334155" font-size="13">REQUIREMENTS · ids</text><text x="767" y="140" fill="#334155" font-size="13">AGENTS.md · CONTEXT.md</text></g>
+    <g><rect x="888" y="40" width="160" height="150" rx="14" fill="#f7fee7" stroke="#84cc16"/><text x="968" y="72" font-weight="800" fill="#3f6212">/forge-build</text><text x="968" y="98" fill="#334155" font-size="13">API contract first</text><text x="968" y="118" fill="#334155" font-size="13">parallel builders</text><text x="968" y="138" fill="#334155" font-size="13">fix pass on the app</text><text x="968" y="158" fill="#334155" font-size="13">blind review</text></g>
+    <g><rect x="1078" y="75" width="104" height="80" rx="14" fill="#0f172a"/><text x="1130" y="110" font-size="24">✅</text><text x="1130" y="138" fill="#f8fafc" font-weight="700" font-size="14">gate: 0 open</text></g>
+  </g>
+  <g stroke="#64748b" stroke-width="2" marker-end="url(#a)"><line x1="176" y1="115" x2="206" y2="115"/><line x1="442" y1="115" x2="472" y2="115"/><line x1="648" y1="115" x2="678" y2="115"/><line x1="854" y1="115" x2="884" y2="115"/><line x1="1050" y1="115" x2="1074" y2="115"/></g>
+</svg>
