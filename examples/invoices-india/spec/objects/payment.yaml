@@ -1,0 +1,83 @@
+id: payment
+name: Payment
+module: collections
+kinds: [money]
+why: money a customer paid against invoices, by hand or as an I-have-paid claim, with TDS and a numbered receipt
+links:
+  - {to: invoice, on_delete: "never removed; the payment stays on the invoice's page even when the invoice is later credited"}
+  - {to: allocation, on_delete: "allocations are never removed; a reversal turns them reversed"}
+  - {to: customer, on_delete: "a customer with a payment cannot be deleted; archive instead"}
+  - {to: number_series, on_delete: "the receipt counter is never reset or removed while a receipt exists"}
+refs: []
+abilities:
+  create: {d: now, how: "Owner or accountant presses Record payment on an issued or part-paid invoice, prefilled with the full balance, today, the last-used mode and the customer's usual TDS. A client with a share link may file an I-have-paid claim instead. Staff and viewers cannot. Staff file 'Money received' (amount, mode, photo) as a Pending check claim that an owner or accountant confirms with one tap, so the customer can have a receipt the same day. Money above the open invoices, or arriving before any invoice, is kept on account (R60).", e: ["wide:W048", "walk:F019", "walk:F004"]}
+  edit: {d: now, how: "Only the reference and the note change after saving. A wrong amount, date or invoice is fixed by reversing and recording again.", e: ["wide:W058"]}
+  search: {d: now, how: "Receipt number, reference, customer name, invoice number and amount.", e: ["wide:D357"]}
+  reverse: {d: now, how: "Owner or accountant reverses the whole payment with a reason of 5 to 200 letters; the recorder may undo within 10 seconds with no reason. There is no partial reversal. A bounced cheque is a reversal marked bounced.", e: ["wide:W059", "walk:F009"]}
+  print_pdf: {d: now, how: "Receipt with number, date, each invoice it settles, amount in figures and words, TDS, mode, reference and balance after. It says it is not a tax document.", e: ["wide:W057"]}
+  remind: {d: now, how: "A claim that nobody confirmed reminds owner and accountant on day 3 and day 7, and lapses on day 14.", e: ["judge"]}
+  schedule: {d: no, how: "Nothing retries or repeats; there is no gateway in this wave. The claim lapse is a move of the system.", e: ["judge"]}
+  export: {d: now, how: "CSV for the accountant with date, receipt, customer, invoice, mode, amount, TDS, reference and reversed; same filters as the screen; reversed rows only when asked.", e: ["wide:B064", "wide:A251"]}
+  notify: {d: now, how: "The customer gets the receipt by email unless the box is unticked; WhatsApp is offered next. Every owner is emailed at once when a payment is reversed or bounced.", e: ["judge"]}
+  api: {d: later, how: "Comes with the public API; every write will carry an idempotency key.", e: ["judge"]}
+  webhook: {d: later, how: "Waits for the public API and the gateway.", e: ["judge"]}
+answers:
+  amount: {a: "Rupees in paise, above 0 and up to 10 crore, 2 decimals; 0 is allowed only when TDS arrives later and a TDS amount is given. Income-tax TDS and GST TDS are two separate figures. Amount plus both TDS figures may not pass the balance due of the invoices it settles; a larger amount is kept on account of the customer after one tick (R60), never refused; income-tax TDS across all rows stays within 20 percent of the taxable value unless an owner overrides (R23). A foreign payment also stores the foreign amount, the rupees credited, the bank charge and the gain or loss.", e: ["judge"]}
+  settles: {a: "One or more issued or part-paid invoices of one customer, through allocation rows that add up to the amount; oldest due first by default. Draft, paid and void invoices refuse it with a clear message.", e: ["wide:W048", "wide:A029"]}
+  undo: {a: "Recorder within 10 seconds, no reason; then the owner or an accountant, with a reason. The row stays, greyed and left out of totals, the invoices are recalculated and the receipt number is never reused. A reversal is never refused for credit already spent or refunded: it writes 'Customer owes' on the credit account (R30); in a locked period it writes a new correction row dated today.", e: ["wide:W059", "wide:W037", "walk:F009", "walk:X002", "walk:F010"]}
+  fail: {a: "A claim is shown as Pending check, never as paid. Owner and accountant are told at once, reminded on day 3 and 7, and on day 14 it lapses; the client then sees not confirmed and may file again. Nothing else can hang, because no gateway is connected. After one lapsed or declined claim on an invoice, the next claim on it needs an owner to allow it, and reminders resume the day it lapses (R40).", e: ["wide:C030", "wide:C031", "walk:X015"]}
+  fee: {a: "No fee on a rupee payment. A foreign payment keeps the bank charge as its own figure beside the gross amount, the rupees credited, and the exchange gain or loss, and the invoice settles at its own currency value.", e: ["wide:D160"]}
+  dispute: {a: "There are no chargebacks without a gateway. When a customer says a recorded payment never happened, the owner reverses it with a reason; the history keeps both rows.", e: ["wide:W059"]}
+  proof: {a: "A receipt REC/YY-YY/NNNNN from its own gapless counter per firm and financial year of the payment date, given when the payment becomes active, not when a claim is filed. It states TDS and balance left and says it is not a tax document.", e: ["wide:W056", "wide:W057"]}
+  match: {a: "By hand, through the reference and the receipt number; there is no bank import in this wave. A possible duplicate (the same UTR or reference anywhere in the firm, or the same customer and amount within 3 days, reversed rows ignored) needs one more tap and names the earlier row; each save carries a client key so a retry saves once (R25).", e: ["wide:W055", "wide:D357", "walk:F008", "walk:X051", "walk:F046"]}
+tracks:
+  payment:
+    states: [{id: pending_check, start: true}, {id: active}, {id: reversed, end: true}, {id: declined, end: true}]
+    moves:
+      - {do: record, from: pending_check, to: active, who: [owner, accountant], guard: "invoice is issued or part-paid; amount above 0, or 0 when a TDS amount is given; amount plus both TDS amounts not above balance due; date not in the future in IST and not before the invoice date; reference given for cheque, bank transfer and UPI; period not locked; cash of Rs 2,00,000 or more from one person in a day, for one transaction or for one event is refused with the section 186 warning. Money above the balance is kept on account when the person ticks it (R60); TDS stays within 20 percent of taxable value across rows unless an owner overrides; cash at the limit is refused for an accountant and an owner records it with a reason, marked cash over limit (R33); a payment dated before the invoice is recorded on account, not on the invoice.", effect: "a person's save is born pending and becomes active in the same save; receipt number given, allocation rows written, invoice balance and state recalculated, history row", reverse: "reverse by the owner, or undo_save within 10 seconds", notify: [pay_receipt], e: ["wide:W048", "wide:W050", "wide:W054", "wide:A120", "walk:F004", "walk:X012", "walk:X011", "walk:X009"]}
+      - {do: confirm_claim, from: pending_check, to: active, who: [owner, accountant], guard: "claim still pending and the amount still fits the balance due of the invoice. a claim by UPI or bank transfer needs its reference, and an accountant cannot confirm a claim above Rs 10,000.00: an owner does", effect: "same as record: receipt number given now, invoice recalculated, the client's share page shows paid. a daily digest lists to the owners every payment recorded or confirmed with no bank reference", reverse: "reverse by the owner", notify: [pay_receipt], e: ["wide:C031", "wide:W056", "walk:X014"]}
+      - {do: decline_claim, from: pending_check, to: declined, who: [owner, accountant], guard: "reason of 5 to 200 letters", effect: "claim closed, invoice untouched, the client sees not confirmed", reverse: "none: the client may file a new claim or the owner records the payment by hand", notify: [pay_claim_declined], e: ["judge"]}
+      - {do: claim_lapses, from: pending_check, to: declined, who: [system], guard: "pending for 14 days", effect: "claim closed with the reason lapsed, owner told once", reverse: "none: the client may file a new claim or the owner records the payment by hand", notify: [pay_claim_lapsed], e: ["judge"]}
+      - {do: undo_save, from: active, to: reversed, who: [owner, accountant], guard: "same person who saved it, within 10 seconds", effect: "invoices recalculated, no reason asked, receipt number stays used", reverse: "record the payment again", notify: none, e: ["wide:W059"]}
+      - {do: reverse, from: active, to: reversed, who: [owner, accountant], guard: "reason of 5 to 200 letters; in a locked period it writes a new correction row dated today, tagged prior-period correction, and never moves the lock; never refused for credit already spent or refunded, a debit row 'Customer owes' is written (R30)", effect: "allocations reversed, invoice balances and states recalculated, a later credit note on the same invoice recalculated too, receipt number stays used", reverse: "record the payment again as a new payment with a new receipt", notify: [pay_reversed_owner], e: ["wide:W059", "wide:W037", "walk:F009", "walk:F010", "walk:X002", "walk:X042"]}
+      - {do: bounce, from: active, to: reversed, who: [owner, accountant], guard: "mode is cheque and the bank memo reference is written. in a locked period it writes a new row dated today tagged prior-period correction; never refused for spent or refunded credit (R30)", effect: "as reverse; an optional bank charge is kept for the accountant and is not billed to the customer", reverse: "record the payment again if the cheque is presented again", notify: [pay_reversed_owner], e: ["wide:A031", "walk:X002", "walk:X042"]}
+fields:
+  - {id: receipt_number, type: text, required: true, limit: 16, edit: "nobody", auto: true}
+  - {id: customer, type: link, required: true, edit: "nobody", auto: true}
+  - {id: paid_at, type: date, required: true, default: today, edit: "nobody; reverse and record again", msg: "The payment date cannot be in the future or before the invoice date."}
+  - {id: amount, type: money, required: true, limit: "above 0 and up to 10 crore, 2 decimals; 0 only with TDS", edit: "nobody; reverse and record again", msg: "Enter an amount above 0. With TDS it cannot be more than the balance due."}
+  - {id: kept_on_account, type: money, required: false, limit: "0 to the amount, 2 decimals", default: 0, edit: "nobody; reverse and record again", msg: "The part kept on account cannot be more than the amount."}
+  - {id: client_key, type: text, required: true, limit: 64, auto: true, edit: "nobody", msg: "Set by the app so that a retry saves once."}
+  - {id: tds_amount, type: money, required: false, limit: "0 to 20 percent of the invoice taxable value across all rows; an owner can raise it with a reason", default: 0, edit: "nobody; reverse and record again", msg: "TDS cannot be more than 20 percent of the taxable value of the invoice."}
+  - {id: gst_tds_amount, type: money, required: false, limit: "0 to 2 percent of the taxable value of the invoice", default: 0, edit: "nobody; reverse and record again", msg: "GST TDS cannot be more than 2 percent of the taxable value."}
+  - {id: tds_section, type: choice, required: false, edit: "nobody", msg: "Choose the section from the list or type another rate."}
+  - {id: mode, type: choice, required: true, edit: "nobody", msg: "Choose cash, bank transfer, UPI, cheque, card or other."}
+  - {id: reference, type: text, required: false, limit: 60, edit: "owner and accountant, any time", msg: "Enter the cheque number, bank reference or UPI reference, up to 60 letters."}
+  - {id: note, type: text, required: false, limit: 300, edit: "owner and accountant, any time", msg: "The note is longer than 300 letters."}
+  - {id: source, type: choice, required: true, default: manual, edit: "nobody", auto: true}
+  - {id: currency, type: choice, required: true, default: INR, edit: "nobody", msg: "The payment currency must be the invoice currency."}
+  - {id: inr_credited, type: money, required: false, limit: "up to 10 crore, 2 decimals", edit: "nobody", msg: "Enter the rupees that reached the bank."}
+  - {id: bank_charge, type: money, required: false, limit: "up to 1 lakh, 2 decimals", edit: "nobody", msg: "Enter the bank charge, up to 1 lakh."}
+  - {id: fx_gain_loss, type: money, required: false, limit: "signed, 2 decimals", edit: "nobody", auto: true}
+  - {id: reversed_reason, type: text, required: false, limit: 200, edit: "nobody", msg: "Write a reason of 5 to 200 letters."}
+  - {id: claim_expires_at, type: date, required: false, edit: "nobody", auto: true}
+fields_e: ["judge"]
+list:
+  search: [receipt_number, reference, customer, invoice, amount]
+  filters: [payment, mode, paid_at, customer, source]
+  sorts: [-paid_at, amount, receipt_number]
+  default_sort: -paid_at
+  columns: [paid_at, receipt_number, customer, invoice, mode, amount, tds_amount, reference, recorded_by]
+  views: [All, Pending check, This month, Reversed, Cheques, Foreign]
+  export: {rows: [selected, filtered, date range], what: [payments, allocations, TDS], formats: [CSV, XLSX], big: "over 1,000 rows comes by email; failure is emailed too"}
+  page: 50
+  e: ["wide:D357", "wide:B064"]
+volume: {y1: 6000, y3: 40000}
+queries:
+  - {id: newest, filters: [payment], sort: [-paid_at], index: [tenant, payment, paid_at], p95: 150 ms}
+  - {id: by_mode, filters: [payment, mode], sort: [-paid_at], index: [tenant, payment, mode, paid_at], p95: 150 ms}
+  - {id: one_customer, filters: [customer], sort: [-paid_at], index: [tenant, customer, paid_at], p95: 100 ms}
+  - {id: in_range, filters: [paid_at], sort: [-paid_at], index: [tenant, paid_at], p95: 150 ms}
+  - {id: claims, filters: [source, payment], sort: [-paid_at], index: [tenant, source, payment, paid_at], p95: 100 ms}
+  - {id: by_amount, filters: [], sort: [amount], index: [tenant, amount], p95: 200 ms}
+  - {id: by_receipt, filters: [], sort: [receipt_number], index: [tenant, receipt_number], p95: 100 ms}

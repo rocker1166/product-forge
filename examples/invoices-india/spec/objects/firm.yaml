@@ -1,0 +1,88 @@
+id: firm
+name: Firm
+module: core
+kinds: [master, setting]
+why: the tenant root; one service firm with its tax identity, defaults, lock date and the state of its books
+links:
+  - {to: user, on_delete: "a firm is never deleted while it holds issued documents; closing keeps books at least 8 years"}
+  - {to: membership, on_delete: "memberships go inactive with the firm; the names stay on history"}
+  - {to: history_entry, on_delete: "history stays at least 8 years after the firm is closed"}
+abilities:
+  create: {d: now, how: "Sign-up makes the firm with legal name, state and optional GSTIN, then lands on a new invoice; the signer becomes owner. A CA adds more firms from the switcher. An accountant may also create a firm for a client from the switcher, work in it, and press Hand to owner (the 7-day ownership link) when set up; the creator becomes the accountant when the client accepts. A new GSTIN is always a new firm (R61), and one owner holds at most 3 firms on Free.", e: [judge, wide:W073, "walk:F013", "walk:X027", "walk:X048"]}
+  edit: {d: now, how: "Owner only. GSTIN, state and tax scheme are frozen once a document is issued, except the unregistered-to-registered switch with an effective date. A bank block or UPI ID change needs the password and the second step, takes effect after 24 hours and any owner can cancel it from the mail (R62). The lock date may be set only up to the last day of the previous month, never in the future.", e: [wide:W070, wide:A132, wide:W070, "walk:F036", "walk:X030", "walk:X047"]}
+  draft: {d: no, how: "A firm is not drafted. A missing profile field blocks issuing with a checklist that links to each field.", e: [judge]}
+  search: {d: now, how: "The firm switcher finds by firm name and GSTIN and lists the last 5 firms used first.", e: ["judge"]}
+  filter: {d: later, how: "Not needed until a login holds far more than 30 firms.", e: [judge]}
+  import: {d: no, how: "The profile is typed once at sign-up. Opening data comes through import_job, not through this object.", e: ["judge"]}
+  export: {d: no, how: "Firm data leaves through export_job (full export, month-end pack); the profile has no export of its own.", e: [judge]}
+  delete: {d: now, how: "Owner only, typed firm name, 30-day cooling period and a final export link. Books are kept at least 8 years (72 months after the annual return), then may be removed.", e: [wide:A256, wide:A068]}
+  archive: {d: no, how: "A firm is not archived. Lapsed plans make it read only and a closing request starts the 30-day cooling period.", e: [judge, wide:A256]}
+  restore: {d: now, how: "An owner cancels closing at any time inside the 30 days; a paid plan restores a read-only firm at once.", e: [judge, wide:A256]}
+  duplicate: {d: no, how: "Copying a firm would copy its GSTIN and number series; a new firm starts from sign-up.", e: [wide:W019]}
+  merge: {d: no, how: "Two firms are never merged; GSTIN, series and books belong to each firm.", e: ["judge"]}
+  comment: {d: no, how: "Profile changes are read in history; there is no thread on a firm.", e: ["judge"]}
+  attach: {d: no, how: "The logo lives in the template; no other file is kept on the profile.", e: [judge]}
+  tag: {d: no, how: "A firm is one tenant, not a thing to label.", e: [judge]}
+  custom_fields: {d: no, how: "The brief has no custom objects or fields.", e: [judge]}
+  notify: {d: now, how: "Every owner is emailed on bank or UPI change, lock date change, support access, large exports and closing.", e: [wide:W070, judge]}
+  webhook: {d: later, how: "Firm events go out with the API later.", e: ["judge"]}
+answers:
+  identity: {a: "Same GSTIN means the same firm in the product, and a GSTIN already held by another firm is refused, and a GSTIN of a sealed firm may be used again; a changed GSTIN is a new firm (R61). A firm with no GSTIN has no such test, so duplicates are possible and are told apart by owner email.", e: [wide:W070, judge, "walk:X027"]}
+  snapshot: {a: "Legal name, address, GSTIN, bank block and logo are copied onto each invoice at issue; later profile edits never change a reprint.", e: [judge]}
+  remove: {a: "Deleting is blocked while the firm holds issued documents inside the 8-year keep window; closing runs 30 days, then the firm is sealed and its books are kept at least 8 years.", e: [wide:A256, wide:A068]}
+  owner: {a: "Owners own the firm. The other roles see the profile read only, except viewers who do not see bank details.", e: ["judge"]}
+  contacts: {a: "One legal address, one bank block and one UPI ID in wave 1, with room in the schema for more.", e: [wide:W072, judge]}
+  code: {a: "No human code; the GSTIN and legal name identify it, and the id is internal.", e: [judge]}
+  inactive: {a: "Read only after a lapsed paid plan: nothing new is issued, existing documents, share links and exports keep working. Trial end moves to Free, never to read only.", e: [judge, wide:D271]}
+  scope: {a: "Every setting applies to the whole firm. A client or user setting never overrides it.", e: ["judge"]}
+  used: {a: "Issued documents keep what they were issued with. Defaults and bank block changes affect new drafts only.", e: [judge, wide:W072]}
+  default: {a: "Payment terms default 15 days, 0 to 90; a default customer note up to 500 characters; only an owner changes them.", e: [wide:W072]}
+  effective: {a: "Profile changes apply at once. Registration, the lock date and e-invoice turnover carry their own dates. An unregistered firm issues a plain Invoice with no tax; from its registration date documents are tax invoices and older ones stay plain invoices. Bill of Supply is only for composition or exempt supplies.", e: [wide:A132, judge, wide:A104]}
+  order: {a: "Order does not matter on the profile. The firm switcher orders by last used.", e: ["judge"]}
+  who: {a: "Owner edits the profile. Owner or accountant may set the lock date; only an owner moves it back, with a reason.", e: [wide:W070, judge]}
+  limit: {a: "Name 120 letters, note 500, bank block 300; seats and invoices per month come from the plan.", e: [wide:W070, wide:W072, wide:B123]}
+tracks:
+  lifecycle:
+    states: [{id: active, start: true}, {id: read_only}, {id: closing}, {id: deleted, end: true}]
+    moves:
+      - {do: go_read_only, from: active, to: read_only, who: [system], guard: "a paid period lapsed after the 7-day grace; a trial end never does this", effect: "no new issued documents or master edits; payments, voids, credit notes, views, share links and exports stay open", reverse: restore_paid, notify: [firm_read_only], e: [judge, wide:D275]}
+      - {do: restore_paid, from: read_only, to: active, who: [owner, system], guard: "paid plan active again", effect: "full use at once", reverse: go_read_only, notify: none, e: [judge]}
+      - {do: start_closing, from: [active, read_only], to: closing, who: [owner], guard: "typed firm name matches; final export link made; password entered again. when the firm has two or more owners a second owner must confirm by mail within 24 hours", effect: "30-day cooling period; the firm acts read only; renewal charges stop", reverse: cancel_closing, notify: [firm_closing_started], e: [wide:A256, "walk:F038"]}
+      - {do: cancel_closing, from: closing, to: active, who: [owner], guard: "inside 30 days", effect: "back to active; if the plan has lapsed it goes read only again", reverse: start_closing, notify: [firm_closing_cancelled], e: ["judge"]}
+      - {do: finish_closing, from: closing, to: deleted, who: [system], guard: "30 days passed and the final export link was sent", effect: "personal data not needed by law is removed; books stay sealed at least 8 years", reverse: "none: the firm is sealed; the former owner may ask for an export of the kept books", notify: [firm_deleted_final], e: [wide:A256, wide:A068]}
+fields:
+  - {id: legal_name, type: text, required: true, limit: 120, edit: "owner; before issue freely, after issue new documents only", msg: "Enter the firm's legal name, 1 to 120 letters."}
+  - {id: gstin, type: text, required: false, limit: 15, edit: "owner; frozen after first issue except the registration switch", msg: "A GSTIN has 15 characters and starts with the state's code."}
+  - {id: pan, type: text, required: false, limit: 10, edit: "owner; follows the GSTIN", msg: "The PAN must match characters 3 to 12 of the GSTIN."}
+  - {id: state, type: choice, required: true, edit: "owner; frozen after first issue", msg: "Choose the state from the GST list. It decides the tax."}
+  - {id: address, type: long_text, required: true, limit: 300, edit: "owner", msg: "Enter the firm's address, up to 300 letters."}
+  - {id: tax_scheme, type: choice, required: true, default: "regular", edit: "owner; frozen after first issue except unregistered to registered", msg: "Choose regular, composition or unregistered. Unregistered firms issue a plain Invoice with no tax."}
+  - {id: gst_effective_date, type: date, required: false, edit: "owner; once, when an unregistered firm registers", msg: "Give the date the GST registration started."}
+  - {id: udyam, type: text, required: false, limit: 19, edit: "owner", msg: "A Udyam number looks like UDYAM-XX-00-0000000."}
+  - {id: turnover_band, type: choice, required: true, default: "under_5cr", edit: "owner; a change is logged", msg: "Choose the turnover band: under 5 crore, 5 to 10 crore, 10 crore or more."}
+  - {id: einvoice_on, type: flag, required: false, default: false, edit: "owner", msg: "Turn e-invoice on only when the firm must use it."}
+  - {id: filing_mode, type: choice, required: true, default: "monthly", edit: "owner", msg: "Choose monthly or quarterly (QRMP) filing."}
+  - {id: bank_name, type: text, required: false, limit: 80, edit: "owner only; every owner is emailed", msg: "Enter the bank's name, up to 80 letters."}
+  - {id: bank_account, type: text, required: false, limit: 18, edit: "owner only; every owner is emailed", msg: "A bank account number has 9 to 18 digits."}
+  - {id: ifsc, type: text, required: false, limit: 11, edit: "owner only; every owner is emailed", msg: "An IFSC has four letters, a zero, then six letters or digits."}
+  - {id: swift, type: text, required: false, limit: 11, edit: "owner only", msg: "A SWIFT code has 8 or 11 characters."}
+  - {id: upi_id, type: text, required: false, limit: 100, edit: "owner only; every owner is emailed", msg: "Enter a UPI ID such as name@bank."}
+  - {id: default_terms_days, type: number, required: false, limit: 90, default: 15, edit: "owner", msg: "Payment terms are 0 to 90 days."}
+  - {id: default_customer_note, type: long_text, required: false, limit: 500, edit: "owner", msg: "The default note holds up to 500 letters."}
+  - {id: lock_date, type: date, required: false, edit: "owner or accountant forward, up to the last day of the previous month; only an owner moves it back, with a reason", msg: "Moving the lock date back needs an owner and a reason of 5 to 200 letters."}
+  - {id: annual_return_filed_on, type: date, required: false, edit: "owner or accountant; when set, it caps the date a credit note may carry", msg: "Give the date the annual return was filed, not a future date."}
+  - {id: reply_to_email, type: text, required: false, limit: 254, edit: "owner; used only after the address is confirmed by email", msg: "This email does not look right."}
+  - {id: mfa_required, type: flag, required: false, default: false, edit: "owner; users without a second step must enrol at next sign-in", msg: "Turn on two-step sign-in for everyone or leave it off."}
+  - {id: support_access_until, type: date, required: false, edit: "owner grants; system ends it; max 7 days", msg: "Support access can last 1 to 7 days."}
+  - {id: support_ticket, type: text, required: false, limit: 40, edit: "owner when granting", msg: "Give the support ticket number."}
+  - {id: closing_started_at, type: date, required: false, auto: true, edit: "system", msg: "Set by the system."}
+fields_e: [wide:W070, wide:D186, wide:W072, wide:W072, judge, judge, judge, wide:W065]
+list:
+  search: [legal_name, gstin]
+  sorts: [last_used, legal_name]
+  default_sort: last_used
+  columns: [legal_name, gstin, role, plan]
+  page: 50
+  e: ["judge"]
+volume: {y1: 1, y3: 1}
+queries: []

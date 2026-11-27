@@ -1,0 +1,1016 @@
+# Journeys by role and moment, written by g8. Steps press only actions that exist.
+# taps is our own target on a phone. budget.steps counts the steps below.
+journeys:
+  # ================= OWNER =================
+  - id: J01
+    role: owner
+    moment: first_hour
+    goal: sign up and send the first real invoice from a phone in five minutes
+    steps:
+      - screen: sign_up
+        do: user.create
+        sees: "Email and a password of 10 or more characters, nothing else. After Create account: Check your inbox, we sent a link."
+        prefilled: "Nothing to prefill. The email field opens the email keyboard."
+        fails: "Message at the field. An email that already has a login says Sign in instead and links to it. Wrong or lost link: Send the link again."
+        undo: "My account, Close account, until the first invoice is issued."
+      - screen: setup_guide
+        do: firm.create
+        sees: "Three questions: firm name, state, GSTIN (optional). A fourth line asks the last invoice number used, so numbering carries on. Done lands on a new invoice screen, not on an empty home."
+        prefilled: "State fills from the first two digits of a GSTIN if one is typed. Payment terms 15 days, GST 18 percent, series INV/26-27/00001, today's date."
+        fails: "A GSTIN that fails the 15-character check says which part is wrong and lets the owner continue without it (plain Invoice, no tax lines)."
+        undo: "Firm profile stays editable. After the first issue the GSTIN, state and tax scheme are frozen except the unregistered-to-registered switch."
+      - screen: invoice_form
+        do: customer.create
+        sees: "A small sheet inside the invoice: name only. Type is business, state is the firm's state."
+        prefilled: "Business type, firm's state, 15 days terms, currency INR."
+        fails: "Message at the field. A GSTIN already used by another customer names that customer."
+        undo: "Customer can be edited or put away later; nothing is issued yet."
+      - screen: invoice_form
+        do: invoice.issue
+        sees: "One line (description, quantity, rate), the tax split and total with round-off, then a preview and a check list: GSTIN, SAC, place of supply, tax split. Issue takes the number. A Practice invoice button shows the PDF with a PRACTICE watermark and takes no number."
+        prefilled: "Date today, due date, place of supply from the customer's state, 18 percent, SAC suggestion. Number is shown only after Issue."
+        fails: "A list of what is missing with a link to each field. A lost connection says Not saved, retrying, and a retry never takes a second number."
+        undo: "Only the owner can void it, with a reason. The number stays used."
+      - screen: invoice
+        do: share_link.create
+        sees: "Send on WhatsApp first, then Send by email, Copy link, Download PDF. The link opens a page with the invoice and a UPI button."
+        prefilled: "WhatsApp message holds the firm name, amount, due date and the link. Email recipient is the customer's email."
+        fails: "A customer with no phone or email: Copy link and Download PDF still work, and the screen says which is missing."
+        undo: "Revoke the link from the invoice. The invoice itself stays."
+    budget: {steps: 5, taps: 12, fields: 9, ref: "Stripe create and send, about 6 steps; our wide line A039 sets 12 taps on a phone", ref_steps: 6, e: ["wide:A039", "wide:C019"]}
+    done: the customer has the link on WhatsApp, the invoice shows Sent and the setup guide ticks first customer and first invoice
+
+  - id: J02
+    role: owner
+    moment: first_hour
+    goal: finish setup so the invoice shows UPI, logo and bank details and the accountant is invited
+    steps:
+      - screen: setup_guide
+        do: firm.edit
+        sees: "A checklist: firm profile, bank account, first customer, first invoice, invite accountant. Each line opens its own form and ticks when done."
+        prefilled: "Bank block asks account holder, account number, IFSC and UPI ID; the IFSC and UPI shapes are checked on save, nothing is sent anywhere."
+        fails: "Message at the field with the shape expected (IFSC is four letters, a zero, six letters or digits)."
+        undo: "Editable any time. Before the first issue a bank or UPI change is at once; after it, it takes effect in 24 hours and any owner can cancel it from the mail (R62)."
+      - screen: templates
+        do: template.customise
+        sees: "The standard look with a live preview. Logo (PNG or JPG, 1 MB, 2000 px), one colour, footer and terms."
+        prefilled: "Standard look, firm name as header, default terms."
+        fails: "A file too big or the wrong type says the limit; the old look stays."
+        undo: "Reset to the standard look. Edits apply to new documents only, so issued ones never change."
+      - screen: team
+        do: invite.create
+        sees: "Email and role (accountant, staff, viewer or owner). One accountant seat is free."
+        prefilled: "Role accountant, because the checklist asked for it."
+        fails: "A bad email says so at the field. A person who is already in the firm is told, not invited twice."
+        undo: "Revoke or Send again from the same list. The link works 7 days and only for that email."
+    budget: {steps: 3, taps: 14, fields: 10, ref: "setup checklist, wide line D301", e: ["wide:D301"]}
+    done: the checklist is all ticked and the next invoice prints the logo, bank details and UPI QR
+
+  - id: J03
+    role: owner
+    moment: first_hour
+    goal: bring the old customer list in from Excel without typing it again
+    steps:
+      - screen: customers
+        do: customer.import
+        sees: "An Import button next to New customer opens a four-step page: file, check, confirm, result. A sample file to download."
+        prefilled: "Match on GSTIN, else email, else name plus pincode."
+        fails: "A file that is not .csv or .xlsx, or over 5 MB, says which limit it broke."
+        undo: "Nothing is written until the check is confirmed."
+      - screen: import_wizard
+        do: import_job.create
+        sees: "Columns mapped by their headings, with a dry run: rows to create, update and skip, and bad rows with row number, field and reason."
+        prefilled: "Mapping guessed from headings; Windows-1252 and UTF-8 both read; amounts with commas and a rupee sign cleaned."
+        fails: "Bad rows download as a CSV and are skipped; good rows are still importable. Old state spellings map to the GST list, an unmapped one stops its row."
+        undo: "Cancel before confirming. The same file again creates nothing the second time."
+      - screen: import_wizard
+        do: import_job.start
+        sees: "Rows done of total. The page can be closed; an email follows."
+        prefilled: "The choice made in the check step (update or skip matches)."
+        fails: "If the system fails half way the whole run rolls back, so there is never a half-imported list, and Try again is one button."
+        undo: "Undo this run from the Imports list; rows that were only created by it go away, edited ones are listed."
+    budget: {steps: 3, taps: 6, fields: 2, ref: "Twenty import, 7 steps", ref_steps: 7, e: ["wide:D311", "wide:A246"]}
+    done: the customer list shows the new rows with counts of created, updated, skipped and failed
+
+  - id: J04
+    role: owner
+    moment: daily
+    goal: send an invoice to a repeat customer from a phone
+    steps:
+      - screen: home
+        do: invoice.create
+        sees: "The big New invoice button. The customer picker opens first, last-used customers on top."
+        prefilled: "Terms, place of supply, tax treatment and currency fill from the customer once picked; lines can start from a saved service."
+        fails: "Opens again with the draft kept. A draft also saves every 30 seconds and shows Saved 10:42."
+        undo: "Delete the draft (owner or accountant) with one confirm."
+      - screen: invoice_form
+        do: invoice.issue
+        sees: "Preview and the final check list, then the number. If a tax rate changed since the draft was saved, old and new tax are shown and need one tap."
+        prefilled: "Date today, due date, last-used line for this customer."
+        fails: "Says what is missing and where. The 30 November, locked-period and free-plan limits say the exact date or count."
+        undo: "Void (owner) or a credit note."
+      - screen: invoice
+        do: share_link.create
+        sees: "Send on WhatsApp first; email, copy link and PDF below. The invoice shows Sent after the first send and Opened when the customer opens the page."
+        prefilled: "Message with amount, due date and link."
+        fails: "WhatsApp not installed: Copy link. Email bounced: the outbox row shows why and the invoice page says so."
+        undo: "Revoke the link; send again any time."
+    budget: {steps: 3, taps: 8, fields: 3, ref: "Stripe create and send, about 6 steps", ref_steps: 6, e: ["wide:A039", "wide:C019", "wide:D353"]}
+    done: the customer has the link and the invoice shows Sent
+
+  - id: J05
+    role: owner
+    moment: daily
+    goal: mark an invoice paid when the money lands in the bank
+    steps:
+      - screen: invoices
+        do: invoice.search
+        sees: "Type the customer name or the last digits; the unpaid view is one tap. The row shows balance due."
+        prefilled: "The Unpaid view is the default for this journey from the Home tile."
+        fails: "No match text names what to try (part of the name, the last digits)."
+        undo: "Nothing is changed."
+      - screen: invoice
+        do: invoice.record_full
+        sees: "Record payment sheet with balance due on top and a Full amount chip, then Save. The invoice turns Paid and reminders stop."
+        prefilled: "Full balance, today, last-used mode and the customer's usual TDS percent."
+        fails: "An amount over the balance is refused with the balance written out. A locked period or an invoice already paid says so."
+        undo: "Undo for 10 seconds with no reason. After that the owner reverses with a reason. The receipt number stays used."
+      - screen: payment
+        do: message.create
+        sees: "Send receipt on WhatsApp is offered as the next action. The receipt says it is not a tax document."
+        prefilled: "Receipt text with number, amount, TDS and balance left."
+        fails: "A customer with no phone or email: Download PDF, and the screen says which is missing."
+        undo: "Nothing to undo; a receipt can be sent again."
+    budget: {steps: 3, taps: 3, fields: 1, ref: "wide line C034, at most 3 taps: open invoice, Record payment, Save", e: ["wide:C034", "wide:C037", "wide:W059"]}
+    done: the invoice shows Paid with the receipt number and the customer holds the receipt
+
+  - id: J06
+    role: owner
+    moment: daily
+    goal: record one bank credit that pays two invoices with TDS cut
+    steps:
+      - screen: invoice
+        do: payment.create
+        sees: "Record payment sheet for this invoice. Switch to More options for part payment, TDS and several invoices."
+        prefilled: "Full balance, today, last-used mode, TDS section and percent from the customer."
+        fails: "A payment plus TDS over the balance is refused in words; advances are not in this version, and the message says so."
+        undo: "Close the sheet; nothing is saved."
+      - screen: payment_form
+        do: payment.record
+        sees: "Amount received, TDS, mode, reference and a list of that customer's open invoices, oldest due first, that must add up to the amount."
+        prefilled: "Allocation fills oldest due first. Foreign payments ask INR credited and bank charge."
+        fails: "The sum that does not match the amount shows the difference at the list. A cash receipt that would reach Rs 2,00,000 in a day is blocked with the section named."
+        undo: "Undo for 10 seconds, then owner reversal with a reason. The row stays listed as reversed."
+      - screen: payment
+        do: message.create
+        sees: "One receipt per payment, listing both invoices."
+        prefilled: "Receipt with allocations and balances left."
+        fails: "As in J05."
+        undo: "Receipt can be sent again."
+    budget: {steps: 3, taps: 7, fields: 6, ref: "judge: one payment split over invoices, wide line A029", e: ["wide:A029", "wide:W048"]}
+    done: both invoices show the new balance and the TDS shows in the customer's receivable ledger
+
+  - id: J07
+    role: owner
+    moment: daily
+    goal: chase what is overdue in a minute
+    steps:
+      - screen: home
+        do: nav
+        sees: "Four tiles: outstanding, overdue, collected this month, drafts. The Overdue tile opens the overdue list."
+        prefilled: "Nothing."
+        fails: "A failed load shows a plain error with Retry, never a blank page."
+        undo: "Nothing is changed."
+      - screen: invoices
+        do: invoice.bulk
+        sees: "Select the rows (or the whole Overdue view), Send reminder. One message per customer listing all their overdue invoices; WhatsApp is one tap per customer."
+        prefilled: "Reminder text with balance due and pay link; the window is 9 am to 7 pm IST."
+        fails: "A customer with no email is skipped and listed for a call. Failed rows come back with the reason and a Retry."
+        undo: "A promise-to-pay date or the per-invoice switch pauses reminders. A sent message cannot be recalled."
+    budget: {steps: 2, taps: 4, fields: 0, ref: "wide lines W088 and C039", e: ["wide:W088", "wide:C039", "wide:D248"]}
+    done: every overdue customer has one reminder and the invoice rows show Reminded
+
+  - id: J08
+    role: owner
+    moment: busy
+    goal: check and send the month's repeat invoices in one sitting
+    steps:
+      - screen: recurring_plans
+        do: recurring_plan.skip_next
+        sees: "Each plan with its next run and last month's amount. Skip next run is one tap on a client who is on break."
+        prefilled: "Plans run on their day and only make review drafts."
+        fails: "A plan that failed shows why and Redo this period."
+        undo: "Skip is undone by Redo this period."
+      - screen: invoices
+        do: invoice.filter
+        sees: "The Needs review view: drafts made by plans and imports, newest first, changed amounts marked."
+        prefilled: "Needs review view."
+        fails: "No match text: Nothing to review."
+        undo: "Nothing is changed."
+      - screen: invoices
+        do: invoice.bulk
+        sees: "Issue the reviewed drafts, then Send. Numbers are taken in date order. Failed rows come back listed with a reason."
+        prefilled: "All selected rows are the reviewed drafts."
+        fails: "Stops at the free-plan limit and lists the rest; a row with a missing field is listed, the others still issue."
+        undo: "Void (owner) or credit note per invoice."
+    budget: {steps: 3, taps: 8, fields: 0, ref: "wide lines D054 and C052", e: ["wide:D054", "wide:C052"]}
+    done: all repeat invoices are issued and sent, and the skipped ones are listed
+
+  - id: J09
+    role: owner
+    moment: mistake
+    goal: an invoice went out with the wrong amount and nothing is paid, so cancel and re-issue it
+    steps:
+      - screen: invoice
+        do: invoice.void
+        sees: "One button, Correct this invoice, picks Void or credit note plus a new draft from the state and says which and why before the first press. Void asks a reason of 5 to 200 characters. The PDF gets CANCELLED, the number stays used and the customer's link says cancelled."
+        prefilled: "Nothing; the reason is typed."
+        fails: "Refused if a payment or credit note counts against it or an IRN is live, and says which one."
+        undo: "A void cannot be undone; the next step makes a corrected copy."
+      - screen: invoice
+        do: invoice.create
+        sees: "Make a corrected copy: a new draft with the same customer and lines, linked both ways to the void one."
+        prefilled: "Customer, lines, place of supply, notes. Today's date, no number."
+        fails: "Same as a new invoice."
+        undo: "Delete the draft."
+      - screen: invoice_form
+        do: invoice.issue
+        sees: "The usual preview and check list; a banner says it replaces the voided number."
+        prefilled: "Everything from the voided invoice."
+        fails: "As in J04."
+        undo: "Void or credit note."
+      - screen: invoice
+        do: share_link.create
+        sees: "Send again: an email and a WhatsApp text are pre-filled with the cancelled and the new number and both PDFs, and the old link shows Replaced by the new invoice with a link."
+        prefilled: "Message."
+        fails: "As in J04."
+        undo: "Revoke the link."
+    budget: {steps: 4, taps: 9, fields: 2, ref: "wide lines W038, B191", e: ["wide:W038", "wide:B191", "wide:W060"]}
+    done: the old invoice is void and readable, the new one is issued and linked, and the customer has the new link
+
+  - id: J10
+    role: owner
+    moment: mistake
+    goal: correct an invoice that is paid, or old, with a credit note and a new invoice
+    steps:
+      - screen: invoice
+        do: credit_note.create
+        sees: "A credit note draft with the invoice's lines, one reason (sales return, post-sale discount, invoice correction, deficiency in service) and an optional note."
+        prefilled: "Lines and amounts from the invoice; reason empty."
+        fails: "A date after 30 November following the year end is refused with the exact date; only an owner can record a non-GST commercial credit. An amount over the balance is refused in words."
+        undo: "Delete the draft."
+      - screen: credit_note_form
+        do: credit_note.issue
+        sees: "Preview, then the number. The invoice shows Credited or the balance it lowered; excess becomes customer credit."
+        prefilled: "Today's date, series CN/26-27/NNNNN."
+        fails: "Says what is missing and where."
+        undo: "Only the owner can void a credit note."
+      - screen: credit_note
+        do: message.create
+        sees: "Send credit note by email or WhatsApp; the page reminds, for a post-sale discount, that the customer must reverse the input tax."
+        prefilled: "Message with number and amount."
+        fails: "As in J05."
+        undo: "Send again."
+    budget: {steps: 3, taps: 8, fields: 2, ref: "Stripe credit note, about 3 steps", ref_steps: 3, e: ["wide:W060", "wide:W065", "wide:W061"]}
+    done: a credit note is linked and both papers are readable; the customer holds the credit note
+
+  - id: J11
+    role: owner
+    moment: mistake
+    goal: a payment was saved with the wrong amount, so reverse it and record it again
+    steps:
+      - screen: payment
+        do: payment.reverse
+        sees: "Reverse asks a reason of 5 to 200 characters. The row stays listed as reversed; invoice balance and state are recalculated and reminders restart from the due date."
+        prefilled: "The invoice, amount and receipt number are read-only."
+        fails: "A reversal that would leave other credit uncounted says what changes; the receipt number stays used."
+        undo: "Record the payment again."
+      - screen: payment_form
+        do: payment.record
+        sees: "The same form as a new payment, with the right amount."
+        prefilled: "Customer, invoice and mode from the reversed row."
+        fails: "As in J06."
+        undo: "Undo for 10 seconds, then reverse again."
+    budget: {steps: 2, taps: 6, fields: 3, ref: "wide line W059", e: ["wide:W059"]}
+    done: the wrong payment is listed as reversed and the new one is active with its own receipt number
+
+  - id: J12
+    role: owner
+    moment: month_end
+    goal: hand the month to the accountant in one pack
+    steps:
+      - screen: month_end
+        do: nav
+        sees: "The month before, with a list of invoices that block the return (missing SAC, no state) and a link to fix each; below, counts that must match: documents issued, outward summary, HSN summary."
+        prefilled: "Previous month in IST; filing mode from the firm profile."
+        fails: "A mismatch of even one rupee between the summaries lists the invoices that differ."
+        undo: "Nothing is changed."
+      - screen: month_end
+        do: export_job.create
+        sees: "Build pack: invoices, lines, credit notes, payments and TDS, HSN and outward summaries, aging and Tally XML. Progress shows rows done of total; the page may be closed."
+        prefilled: "The accountant's email on file; the link works 7 days."
+        fails: "A file that fails half way is dropped whole; the run shows failed with the reason and Retry builds it again."
+        undo: "Cancel while queued. A new pack is a new file."
+      - screen: month_end
+        do: firm.edit
+        sees: "Lock this month: nothing dated on or before the lock date can be created, edited, voided or reversed."
+        prefilled: "Last day of the month."
+        fails: "Moving the date back later needs the owner and a reason."
+        undo: "Owner moves the date back with a reason; it is written in history."
+    budget: {steps: 3, taps: 6, fields: 1, ref: "wide lines D228, W083, B156, B152", e: ["wide:D228", "wide:W083", "wide:B156"]}
+    done: the accountant has the pack by email and the month is locked
+
+  - id: J13
+    role: owner
+    moment: handover
+    goal: give the accountant access to the books
+    steps:
+      - screen: team
+        do: invite.create
+        sees: "Email and role. The accountant gets one link that works only for that email, for 7 days."
+        prefilled: "Role accountant. The first accountant seat is free."
+        fails: "An email that already has a login is invited the same way and never shown other firms."
+        undo: "Revoke from the same list."
+      - screen: team
+        do: invite.resend
+        sees: "Pending invites with Resend and Revoke. The old link then says replaced."
+        prefilled: "Same role."
+        fails: "A seat limit is tested when the person accepts, and says how many to remove."
+        undo: "Revoke."
+    budget: {steps: 2, taps: 4, fields: 2, ref: "wide lines W073, A011", e: ["wide:W073", "wide:A011"]}
+    done: the accountant is in the list as Active and can open the firm
+
+  - id: J14
+    role: owner
+    moment: handover
+    goal: pass the firm to a new owner
+    steps:
+      - screen: team
+        do: membership.offer_ownership
+        sees: "Pick another active person, confirm. They get a link for 7 days; nothing changes until they accept."
+        prefilled: "Nothing."
+        fails: "Offered to someone who is no longer active: the offer is void and says so."
+        undo: "The offer lapses after 7 days or when they decline."
+    budget: {steps: 1, taps: 3, fields: 0, ref: "wide line A004", e: ["wide:A004"]}
+    done: after acceptance the new owner is Owner and the old one becomes Accountant
+
+  - id: J15
+    role: owner
+    moment: leaving
+    goal: leave with every record and close the firm
+    steps:
+      - screen: exports
+        do: export_job.create
+        sees: "Full copy of your books: invoices with lines, payments, credit notes, customers, services, history, PDFs and Tally XML. Every owner is emailed."
+        prefilled: "Everything, all years. Plan and unpaid dues never block it."
+        fails: "A file that fails half way is dropped whole; Retry builds it again."
+        undo: "Make another any time; each run is a new file."
+      - screen: exports
+        do: export_job.view
+        sees: "The run with Ready, rows, size and the 7-day link; Download."
+        prefilled: "Nothing."
+        fails: "An expired link says so and offers a new export."
+        undo: "Nothing is changed."
+      - screen: settings_security
+        do: firm.start_closing
+        sees: "Type the firm name and the password again. A 30-day cooling period starts, the firm turns read only, renewal stops and a final export link is made."
+        prefilled: "The final export is already running."
+        fails: "A wrong name or password says which."
+        undo: "Cancel closing inside the 30 days. Books are kept at least 8 years after sealing."
+    budget: {steps: 3, taps: 8, fields: 2, ref: "Zoho backup, request then wait then download", e: ["mk-008", "wide:A256", "wide:A254"]}
+    done: the owner holds a full export and the firm shows Closing with the date it will be sealed
+
+  # ================= ACCOUNTANT =================
+  - id: J16
+    role: accountant
+    moment: first_hour
+    goal: join a client's firm from an invite and see the books
+    steps:
+      - screen: accept_invite
+        do: invite.accept
+        sees: "Firm name, role and who invited. Sign in or create a login with that same email. The link never names other firms."
+        prefilled: "Invited email is fixed; opening the link counts as proof of the email."
+        fails: "A different signed-in email is refused and says which email the invite is for. An expired link says so and names the owner to ask."
+        undo: "Leave the firm later from Your firms."
+      - screen: firm_switcher
+        do: firm.search
+        sees: "A list of your firms with role, newest first. Typing finds a firm by name or GSTIN."
+        prefilled: "The last firm opened is on top."
+        fails: "No match text; a firm you left is gone from the list."
+        undo: "Nothing is changed."
+    budget: {steps: 2, taps: 4, fields: 1, ref: "wide lines W073, A001", e: ["wide:W073", "wide:A001"]}
+    done: the header shows the firm name and the role Accountant and Home opens
+
+  - id: J17
+    role: accountant
+    moment: daily
+    goal: issue the drafts staff made for a client firm
+    steps:
+      - screen: firm_switcher
+        do: firm.search
+        sees: "The last five firms first; type to find another."
+        prefilled: "Last firm on top."
+        fails: "No match text."
+        undo: "Nothing is changed."
+      - screen: invoices
+        do: invoice.filter
+        sees: "Drafts and Needs review views with who made each draft."
+        prefilled: "Drafts view."
+        fails: "No match text: No drafts waiting."
+        undo: "Nothing is changed."
+      - screen: invoices
+        do: invoice.bulk
+        sees: "Tick the drafts and press Issue selected: each row runs its own check list and the rows that fail are listed with the field. One draft still opens in the form; if a second person changed it, the save is refused and the newer version shows."
+        prefilled: "Everything the staff entered."
+        fails: "As in J04."
+        undo: "Credit note; an accountant asks the owners with Request void."
+    budget: {steps: 3, taps: 6, fields: 0, ref: "wide lines A001, K107", e: ["wide:A001", "wide:K107"]}
+    done: the staff drafts are issued with numbers and the staff member sees them as Issued
+
+  - id: J18
+    role: accountant
+    moment: busy
+    goal: build the month-end pack for each of thirty client firms
+    steps:
+      - screen: firm_switcher
+        do: firm.search
+        sees: "Thirty firms, the next one by name or GSTIN; the active firm name is always in the header."
+        prefilled: "Last five firms on top."
+        fails: "A firm the owner closed is listed as Closing."
+        undo: "Nothing is changed."
+      - screen: month_end
+        do: export_job.create
+        sees: "The blockers list for that firm first, then Build pack. The file is the same shape for every firm."
+        prefilled: "Previous month, this firm's filing mode, the accountant's own email."
+        fails: "As in J12."
+        undo: "Cancel while queued."
+    budget: {steps: 2, taps: 5, fields: 0, ref: "wide lines A001, D228", e: ["wide:A001", "wide:D228"]}
+    done: a pack is queued per firm and the accountant gets one email per firm
+
+  - id: J19
+    role: accountant
+    moment: mistake
+    goal: correct a sent invoice with a credit note
+    steps:
+      - screen: invoice
+        do: credit_note.create
+        sees: "As in J10."
+        prefilled: "Lines from the invoice."
+        fails: "As in J10."
+        undo: "Delete the draft."
+      - screen: credit_note_form
+        do: credit_note.issue
+        sees: "Preview, then the number."
+        prefilled: "Today's date and series."
+        fails: "Says what is missing and where. Void is not offered; the owner does that."
+        undo: "Owner voids the credit note."
+      - screen: credit_note
+        do: message.create
+        sees: "Send credit note."
+        prefilled: "Message."
+        fails: "As in J05."
+        undo: "Send again."
+    budget: {steps: 3, taps: 8, fields: 2, ref: "Stripe credit note, about 3 steps", ref_steps: 3, e: ["judge"]}
+    done: a credit note is linked and the invoice shows the lower balance; large ones email the owners
+
+  - id: J20
+    role: accountant
+    moment: month_end
+    goal: check the returns data and take the registers
+    steps:
+      - screen: report
+        do: export_job.create
+        sees: "The documents-issued summary, the outward summary and the HSN summary for the period; each carries the same taxable total, any rupee mismatch is listed with the invoices that differ, and voided invoices show only through a switch."
+        prefilled: "Previous month, all customers; the file has exactly what is shown."
+        fails: "An invoice with no SAC blocks the data and the list links to it."
+        undo: "Make another file."
+      - screen: month_end
+        do: firm.edit
+        sees: "Lock the month with the date; the owner is emailed."
+        prefilled: "Last day of the month."
+        fails: "Moving it back is the owner's with a reason."
+        undo: "Owner moves the date back."
+    budget: {steps: 2, taps: 6, fields: 1, ref: "wide lines A124, A125, A126, B152, B156", e: ["wide:A124", "wide:A125", "wide:B152"]}
+    done: the registers are in the accountant's inbox and the month is locked
+
+  - id: J21
+    role: accountant
+    moment: handover
+    goal: leave a client firm that stopped working with them
+    steps:
+      - screen: firm_switcher
+        do: membership.leave
+        sees: "First the screen lists the drafts waiting, the unlocked months and any failed pack for this firm, and the same list goes into the owner's notice. Leave this firm with one confirm. Drafts stay with the firm for the owner to reassign; your name stays on history."
+        prefilled: "Nothing."
+        fails: "An owner cannot leave until another owner exists, and the message says so."
+        undo: "An owner sends a new invite."
+    budget: {steps: 1, taps: 3, fields: 0, ref: "wide lines A008, A257", e: ["wide:A257"]}
+    done: the firm drops out of the switcher and the owner is told
+
+  - id: J22
+    role: accountant
+    moment: leaving
+    goal: take the books and go
+    steps:
+      - screen: exports
+        do: export_job.create
+        sees: "Registers, payments with TDS and Tally XML for the last month; files last 7 days."
+        prefilled: "Filters as chosen."
+        fails: "As in J15."
+        undo: "Make another."
+      - screen: firm_switcher
+        do: membership.leave
+        sees: "As in J21."
+        prefilled: "Nothing."
+        fails: "As in J21."
+        undo: "An owner sends a new invite."
+    budget: {steps: 2, taps: 6, fields: 0, ref: "wide lines A257, A254", e: ["judge"]}
+    done: the accountant has the files and the firm is gone from their list
+
+  # ================= STAFF =================
+  - id: J23
+    role: staff
+    moment: first_hour
+    goal: join the firm and save a first draft invoice
+    steps:
+      - screen: accept_invite
+        do: invite.accept
+        sees: "As in J16."
+        prefilled: "Invited email."
+        fails: "As in J16."
+        undo: "Leave from Your firms."
+      - screen: home
+        do: nav
+        sees: "A home with New invoice, Customers and Quotes. No revenue totals, and the page never fetches them. Reports and Settings are not in the menu."
+        prefilled: "Nothing."
+        fails: "A typed address for a hidden page returns a denied page that names the owner."
+        undo: "Nothing is changed."
+      - screen: invoice_form
+        do: invoice.draft
+        sees: "Save draft is the main button. The draft says Saved 10:42 and shows who will issue."
+        prefilled: "Terms and tax from the customer."
+        fails: "A lost connection says Not saved, retrying."
+        undo: "Edit again; the owner or accountant can delete it."
+    budget: {steps: 3, taps: 8, fields: 4, ref: "wide lines A002, D346", e: ["wide:A002", "wide:D346"]}
+    done: a draft sits in the owner's and accountant's Drafts view
+
+  - id: J24
+    role: staff
+    moment: daily
+    goal: copy last month's invoice into a new draft
+    steps:
+      - screen: invoices
+        do: invoice.search
+        sees: "Find the customer's last invoice by name or number."
+        prefilled: "Nothing."
+        fails: "No match text."
+        undo: "Nothing is changed."
+      - screen: invoice
+        do: invoice.duplicate
+        sees: "A new draft with the same customer, lines and notes; today's date, no number, no payments."
+        prefilled: "Everything except date and number."
+        fails: "A customer put away says so and asks the owner."
+        undo: "Delete is not for staff; edit the draft, or ask the owner."
+      - screen: invoice_form
+        do: invoice.edit
+        sees: "Change the amount or the period on the draft."
+        prefilled: "Everything copied."
+        fails: "As in J23."
+        undo: "Edit again."
+      - screen: invoice_form
+        do: invoice.draft
+        sees: "Saved 10:42 and the draft is waiting for the owner or accountant."
+        prefilled: "Nothing."
+        fails: "As in J23."
+        undo: "Edit again."
+    budget: {steps: 4, taps: 8, fields: 2, ref: "wide line W040", e: ["wide:W040", "wide:A002"]}
+    done: the new draft is in the Drafts view
+
+  - id: J25
+    role: staff
+    moment: mistake
+    goal: fix a wrong draft before anyone issues it
+    steps:
+      - screen: invoices
+        do: invoice.filter
+        sees: "The Drafts view, mine first."
+        prefilled: "Drafts view."
+        fails: "No match text."
+        undo: "Nothing is changed."
+      - screen: invoice_form
+        do: invoice.edit
+        sees: "Every field of a draft can change. If another person saved first, this save is refused and the newer version shows."
+        prefilled: "The draft."
+        fails: "Refused with the newer version side by side; nothing typed is lost."
+        undo: "Edit again."
+    budget: {steps: 2, taps: 5, fields: 1, ref: "wide line K107", e: ["judge"]}
+    done: the draft is correct and waiting
+
+  - id: J26
+    role: staff
+    moment: mistake
+    goal: tell the owner that an issued invoice is wrong
+    steps:
+      - screen: invoice
+        do: invoice.comment
+        sees: "An internal comment on the invoice, shown to owner and accountant only, never printed or shared. Staff cannot void or edit an issued invoice."
+        prefilled: "Nothing."
+        fails: "A comment that is too long shows the count."
+        undo: "Comments stay; add another."
+    budget: {steps: 1, taps: 3, fields: 1, ref: "judge: staff cannot change an issued invoice, so the comment is the only way to flag it", e: ["judge"]}
+    done: the owners see the comment on the invoice and as Needs a look on Home with the invoice link, and can void it or issue a credit note
+
+  - id: J27
+    role: staff
+    moment: handover
+    goal: leave the firm
+    steps:
+      - screen: firm_switcher
+        do: membership.leave
+        sees: "As in J21."
+        prefilled: "Nothing."
+        fails: "As in J21."
+        undo: "An owner sends a new invite."
+    budget: {steps: 1, taps: 3, fields: 0, ref: "wide line A257", e: ["judge"]}
+    done: the firm drops from the switcher; the owner reassigns any drafts in one step
+
+  - id: J28
+    role: staff
+    moment: leaving
+    goal: close my own login
+    steps:
+      - screen: account
+        do: user.close_account
+        sees: "Close account asks the password again. Sessions end at once; the name stays on history."
+        prefilled: "Nothing."
+        fails: "A person who is the only owner of any firm is refused and the message names the firm."
+        undo: "Support reopens it when the person asks and proves the email."
+    budget: {steps: 1, taps: 3, fields: 1, ref: "wide lines A255, A257", e: ["wide:A257"]}
+    done: the person cannot sign in and the firm's history still shows the name
+
+  # ================= VIEWER =================
+  - id: J29
+    role: viewer
+    moment: first_hour
+    goal: join the firm and see how the business is doing
+    steps:
+      - screen: accept_invite
+        do: invite.accept
+        sees: "As in J16."
+        prefilled: "Invited email."
+        fails: "As in J16."
+        undo: "Leave from Your firms."
+      - screen: home
+        do: nav
+        sees: "A read-only strip: unpaid total, overdue total and issued this month, each linking to its view."
+        prefilled: "Nothing."
+        fails: "A denied page names the owner."
+        undo: "Nothing is changed."
+      - screen: invoices
+        do: invoice.filter
+        sees: "Invoices open read-only; New invoice is not shown. The Unpaid and Overdue views are one tap."
+        prefilled: "Unpaid view."
+        fails: "A denied page names the owner."
+        undo: "Nothing is changed."
+    budget: {steps: 3, taps: 5, fields: 0, ref: "wide line W073", e: ["wide:W073", "walk:F025"]}
+    done: the viewer sees the unpaid list
+
+  - id: J30
+    role: viewer
+    moment: daily
+    goal: check whether one customer has paid
+    steps:
+      - screen: invoices
+        do: invoice.search
+        sees: "The customer's invoices with state and balance."
+        prefilled: "Nothing."
+        fails: "No match text."
+        undo: "Nothing is changed."
+      - screen: invoice
+        do: invoice.view
+        sees: "State, balance, payments listed with date, mode and amount and never TDS or reference, the share link's first and last open, never the link text."
+        prefilled: "Nothing."
+        fails: "A gone invoice says so with a link to the list."
+        undo: "Nothing is changed."
+    budget: {steps: 2, taps: 3, fields: 0, ref: "wide line D341", e: ["wide:D341"]}
+    done: the viewer knows whether and when it was paid
+
+  - id: J31
+    role: viewer
+    moment: month_end
+    goal: read the month's figures
+    steps:
+      - screen: report
+        do: nav
+        sees: "Aging, customer balance and sales for the month, with a date range and a customer filter. No export button; the accountant gets the files."
+        prefilled: "Previous month."
+        fails: "A denied export says who can make it."
+        undo: "Nothing is changed."
+      - screen: invoices
+        do: invoice.filter
+        sees: "Tapping a figure opens the invoices behind it."
+        prefilled: "The same filters as the figure."
+        fails: "No match text."
+        undo: "Nothing is changed."
+    budget: {steps: 2, taps: 3, fields: 0, ref: "wide lines B060, B068", e: ["wide:B060", "wide:B068"]}
+    done: the viewer has read the figures and found the invoices behind them
+
+  - id: J32
+    role: viewer
+    moment: handover
+    goal: leave the firm
+    steps:
+      - screen: firm_switcher
+        do: membership.leave
+        sees: "As in J21."
+        prefilled: "Nothing."
+        fails: "As in J21."
+        undo: "An owner sends a new invite."
+    budget: {steps: 1, taps: 3, fields: 0, ref: "wide line A257", e: ["judge"]}
+    done: the firm drops from the switcher
+
+  - id: J33
+    role: viewer
+    moment: leaving
+    goal: close my own login
+    steps:
+      - screen: account
+        do: user.close_account
+        sees: "As in J28."
+        prefilled: "Nothing."
+        fails: "As in J28."
+        undo: "Support reopens it on request."
+    budget: {steps: 1, taps: 3, fields: 1, ref: "wide line A257", e: ["judge"]}
+    done: the person cannot sign in
+
+  # ================= CLIENT (a person with a link) =================
+  - id: J34
+    role: client
+    moment: first_hour
+    goal: open the link from WhatsApp and read the invoice
+    steps:
+      - screen: shared_document
+        do: share_link.view
+        sees: "Firm name, invoice number, amount, due date, state (Due, Paid, Cancelled) and a large Pay with UPI button with a QR below it while a balance is left. Download PDF."
+        prefilled: "Amount and note for the UPI app come from the invoice."
+        fails: "An expired link says so and gives the firm's contact. A wrong link looks exactly like a missing page. A PDF still being made says Preparing and retries by itself."
+        undo: "A visit cannot be undone; nothing is changed by it."
+    budget: {steps: 1, taps: 1, fields: 0, ref: "wide lines W044, C022", e: ["wide:W044", "wide:C022", "wide:D073"]}
+    done: the client has read the invoice and the firm sees Opened with the time
+
+  - id: J35
+    role: client
+    moment: daily
+    goal: pay by UPI and tell the firm
+    steps:
+      - screen: shared_document
+        do: share_link.view
+        sees: "The page with Pay with UPI and the QR."
+        prefilled: "UPI ID, amount and the invoice number as the payment note."
+        fails: "Link expired or cancelled: plain page with the firm's contact."
+        undo: "Nothing is changed."
+      - screen: shared_document
+        do: nav
+        sees: "Pay with UPI opens the client's own UPI app with amount and note filled. The page cannot know if the money moved, so it does not claim Paid."
+        prefilled: "Everything in the UPI app."
+        fails: "No UPI app on the phone: the QR can be scanned from another phone, or the bank details can be copied."
+        undo: "Cancel inside the UPI app."
+      - screen: shared_document
+        do: payment.create
+        sees: "Back on the page, I have paid asks the amount and the UPI reference (optional). It then reads Pending check: the firm will confirm."
+        prefilled: "Amount is the balance due."
+        fails: "A claim over the balance is refused in words. A claim lapses after 14 days and the page says not confirmed and allows another."
+        undo: "A wrong claim can be sent again; the firm declines it with a reason."
+    budget: {steps: 3, taps: 4, fields: 2, ref: "wide lines D073, C030, C031", e: ["wide:D073", "wide:C030", "wide:C031"]}
+    done: the client sees Pending check, the owner is told at once, and after one tap by the owner the page shows Paid
+
+  - id: J36
+    role: client
+    moment: mistake
+    goal: the firm did not confirm the claim, so file it again or reach the firm
+    steps:
+      - screen: shared_document
+        do: share_link.view
+        sees: "The page says the last claim was not confirmed and gives the reason, with the firm's phone and email."
+        prefilled: "Nothing."
+        fails: "As in J34."
+        undo: "Nothing is changed."
+      - screen: shared_document
+        do: payment.create
+        sees: "I have paid again, with the right amount and reference."
+        prefilled: "Amount is the balance due."
+        fails: "As in J35."
+        undo: "The firm can decline again with a reason."
+    budget: {steps: 2, taps: 3, fields: 2, ref: "wide line C031", e: ["wide:C031"]}
+    done: the new claim is Pending check and the firm is told
+
+  - id: J37
+    role: client
+    moment: leaving
+    goal: keep a copy of the invoice
+    steps:
+      - screen: shared_document
+        do: invoice.print_pdf
+        sees: "Download PDF gives the stored copy, file name is the number with hyphens, marked Original for Recipient. A cancelled invoice still downloads with its CANCELLED mark."
+        prefilled: "Nothing."
+        fails: "Preparing: retry by itself."
+        undo: "Nothing is changed."
+    budget: {steps: 1, taps: 1, fields: 0, ref: "wide lines W042, C022", e: ["judge"]}
+    done: the client has the PDF on the phone
+
+  # ================= SUPPORT =================
+  - id: J38
+    role: support
+    moment: first_hour
+    goal: sign in to the console and open a firm that granted access
+    steps:
+      - screen: sign_in
+        do: nav
+        sees: "The same sign-in page. Support always needs the second step."
+        prefilled: "Email."
+        fails: "Five wrong tries lock the login for 15 minutes."
+        undo: "Nothing is changed."
+      - screen: second_step
+        do: nav
+        sees: "A code box that stays open when tapped outside."
+        prefilled: "Nothing."
+        fails: "A wrong code says so; five tries."
+        undo: "Nothing is changed."
+      - screen: support_console
+        do: firm.search
+        sees: "Search by firm name, GSTIN or ticket number. A firm with no grant shows denied and says to ask the owner; a firm with a grant shows a banner with the end date."
+        prefilled: "Nothing."
+        fails: "No match text names the ticket and owner email to check."
+        undo: "Nothing is changed."
+    budget: {steps: 3, taps: 5, fields: 3, ref: "wide lines A013, D282", e: ["wide:A013", "wide:D282"]}
+    done: support sees the firm read-only under the banner and every read is written to the owner's history
+
+  - id: J39
+    role: support
+    moment: daily
+    goal: find why a customer did not get an invoice and tell the owner what to press
+    steps:
+      - screen: history
+        do: history_entry.search
+        sees: "Entries for the firm by invoice number, with the support label and ticket."
+        prefilled: "The firm and ticket from the console."
+        fails: "No grant: denied with the owner's name."
+        undo: "Nothing is changed."
+      - screen: outbox
+        do: message.search
+        sees: "The failed row with the provider's reason (bounced, spam complaint, no address). Support only reads: Retry is the owner's or accountant's button, and the ticket note says which row and why."
+        prefilled: "Search starts with the invoice number."
+        fails: "A firm with no grant shows denied and names the owner to ask."
+        undo: "Nothing is changed."
+    budget: {steps: 2, taps: 4, fields: 1, ref: "wide lines W087, A013", e: ["wide:W087", "wide:A013"]}
+    done: the ticket names the reason and the owner knows which row to retry
+
+  - id: J40
+    role: support
+    moment: busy
+    goal: publish a tax rate change before it takes effect
+    steps:
+      - screen: tax_tables
+        do: rate_master.create
+        sees: "A dated row: table, code, name, old alias, rate, threshold, effective date and source note."
+        prefilled: "Table and alias from the previous version."
+        fails: "A row for the same table, code and date is refused. The source note is required."
+        undo: "Edit while draft."
+      - screen: tax_tables
+        do: rate_master.publish
+        sees: "Firms that use the code are told before the date; drafts saved earlier show old and new tax at issue."
+        prefilled: "Nothing."
+        fails: "A date in the past is refused unless the row corrects an earlier one."
+        undo: "Withdraw before the effective date."
+    budget: {steps: 2, taps: 8, fields: 8, ref: "wide lines A060, A098, A113", e: ["wide:A060", "wide:A113"]}
+    done: the row is Scheduled and firms see the warning
+
+  - id: J41
+    role: support
+    moment: mistake
+    goal: an owner closed their own login by mistake, so open it again
+    steps:
+      - screen: support_console
+        do: user.reopen
+        sees: "The person asked and proved the email. The login opens; no firm membership comes back by itself, so the owner is asked to check the firm list."
+        prefilled: "The ticket and the email from the search."
+        fails: "A login that was never closed says so. An email that does not match is refused."
+        undo: "Deactivate again with a reason."
+    budget: {steps: 1, taps: 3, fields: 1, ref: "judge: support reopens only what the person asked for", e: ["judge"]}
+    done: the owner can sign in and the history has a support row
+
+  - id: J42
+    role: support
+    moment: leaving
+    goal: give a former owner a copy of the books of a sealed firm
+    steps:
+      - screen: support_console
+        do: firm.search
+        sees: "Find the sealed firm by GSTIN. Its books are open only to the proofs below: the former owner's email, the GSTIN or PAN, a signed request and a 7-day wait with a mail to the last known phone (R65)."
+        prefilled: "The ticket number."
+        fails: "A firm that is not sealed shows no export button; a missing proof says which one."
+        undo: "Nothing is changed."
+      - screen: support_console
+        do: export_job.create
+        sees: "The full-firm export is built under the support label and the ticket. The link goes only to the proved email, opens after a code sent to the same address and works 24 hours."
+        prefilled: "All years, everything."
+        fails: "An email that is not the proved one is refused and nothing is made."
+        undo: "Make another; each run is a new file and each download is in history."
+    budget: {steps: 2, taps: 6, fields: 3, ref: "wide lines A068, A256", e: ["wide:A256", "wide:A254", "walk:F049"]}
+    done: the former owner holds the export and the sealed firm's history has a support row
+
+  # ================= CLIENT PAGE (Q9, password protected, per customer) =================
+  - id: J43
+    role: client
+    moment: month_end
+    goal: see the month's statement and pay six invoices with one transfer
+    steps:
+      - screen: client_sign_in
+        do: customer.sign_in
+        sees: "One field, Password, and Open my page. The firm's name and phone sit at the top."
+        prefilled: "Nothing; the password is what the firm told or mailed."
+        fails: "Wrong password, 3 tries left. After five: Too many tries, try again after the time shown or ask the firm for a new password."
+        undo: "Sign out at the top, or the page signs out after 2 idle hours."
+      - screen: client_page
+        do: payment.create
+        sees: "Waiting for you: six open invoices with tick boxes and one total. Pay selected opens one UPI payment of that total, then I have paid asks the amount and an optional reference. It reads Pending check on all six."
+        prefilled: "All open invoices ticked, oldest first; the total is the sum of the ticked balances."
+        fails: "A claim above the ticked total is refused in words. A claim that is not confirmed lapses after 14 days and the page says so."
+        undo: "The firm declines a wrong claim with a reason and the client files it again."
+      - screen: client_statement
+        do: customer.print_pdf
+        sees: "This month by default: opening balance, every invoice, payment, credit note and cancellation with a running balance, the closing balance and the open invoices."
+        prefilled: "This month; last month, this financial year or two dates can be picked."
+        fails: "A period with nothing in it says No document in this period."
+        undo: "Nothing is changed by looking or downloading."
+    budget: {steps: 3, taps: 8, fields: 3, ref: "wide lines W209, D326, B080", e: ["wide:W209", "wide:D326", "wide:B080"]}
+    done: the client paid once, the firm sees one Pending check claim to split, and the client holds the statement PDF
+
+  - id: J44
+    role: client
+    moment: busy
+    goal: accept a quote the firm sent
+    steps:
+      - screen: client_sign_in
+        do: customer.sign_in
+        sees: "Password and Open my page."
+        prefilled: "Nothing."
+        fails: "As in J43."
+        undo: "Sign out."
+      - screen: client_quote
+        do: quote.accept
+        sees: "Lines, total, terms and the last day to answer. Accept quote asks for your name; Decline asks for an optional reason."
+        prefilled: "The name of the contact if the firm has one; it can be changed."
+        fails: "After the validity date: This quote expired on 30 Nov, with the firm's phone and email. A quote already answered shows its answer and no buttons."
+        undo: "An accepted quote is changed only by the firm, who can cancel it; the client asks by phone."
+    budget: {steps: 2, taps: 4, fields: 2, ref: "wide lines D003, W207", e: ["wide:D003", "wide:W207"]}
+    done: the quote shows Accepted with the name and time, and the owner and accountant are mailed
+
+  - id: J45
+    role: client
+    moment: mistake
+    goal: forget the password and get back in
+    steps:
+      - screen: client_sign_in
+        do: customer.wrong_password
+        sees: "Wrong password, 3 tries left, with Forgot password beside the field."
+        prefilled: "Nothing."
+        fails: "After the fifth wrong try: Too many tries. Try again after 14:35 or ask the firm for a new password, with the firm's phone and email."
+        undo: "Wait for the lock to end, or ask the firm to set a new password, which unlocks the page at once."
+      - screen: client_sign_in
+        do: customer.reset_password
+        sees: "Type the email on file. The page always says We sent a link. The mail link works once for 60 minutes and asks for a new password of 10 to 64 characters."
+        prefilled: "Nothing."
+        fails: "An expired or used link says so and offers Forgot password again. The page never says whether an email is on file."
+        undo: "Choose another password the same way."
+    budget: {steps: 2, taps: 4, fields: 3, ref: "wide lines W203, W204", e: ["wide:W203", "wide:W204"]}
+    done: the client signs in with a new password and every older session has ended
+
+  - id: J46
+    role: owner
+    moment: daily
+    goal: turn on the client page for a customer and send the link
+    steps:
+      - screen: customer
+        do: customer.open_portal
+        sees: "A Client page panel showing Off. Turn on asks for a password or Make one for me, which shows 12 letters and digits once."
+        prefilled: "Nothing; the password is never shown again."
+        fails: "A password under 10 characters says so. A customer with no email or phone cannot be sent a link and the panel says which one to add."
+        undo: "Turn off at any time; it ends every session at once."
+      - screen: customer
+        do: customer.send_portal_link
+        sees: "Send link by email or WhatsApp with no password in it. Email the password sends it separately."
+        prefilled: "The customer's email and phone."
+        fails: "No email or phone: the panel says Add one first."
+        undo: "Set password makes a new one and ends every session."
+    budget: {steps: 2, taps: 6, fields: 1, ref: "wide lines W201, W202, B081", e: ["wide:W201", "wide:W202", "wide:B081"]}
+    done: the panel reads On, the client has the link and the owner knows the password to tell
+
+skip:
+  - {role: client, moment: handover, why: "a client holds no work and no account, and the link belongs to the firm"}
+  - {role: staff, moment: busy, why: "a busy day for staff is the same copy and draft flow repeated, see J24, with the customer and last line kept"}
+  - {role: staff, moment: month_end, why: "staff cannot open Reports, Settings or exports, and the menu hides them"}
+  - {role: viewer, moment: busy, why: "a viewer only reads, and a busy day is the same lists with more rows"}
+  - {role: viewer, moment: mistake, why: "a viewer cannot change or comment; the denied page names the owner to call"}
+  - {role: support, moment: month_end, why: "support has no month end of its own; the tax table check is a busy-day journey, see J40"}
+  - {role: support, moment: handover, why: "a grant is tied to a ticket number that the next agent reads in history, so there is no hand-off action"}

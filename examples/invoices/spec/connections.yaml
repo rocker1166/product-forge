@@ -1,0 +1,7 @@
+- {id: signin, area: signin, d: now, what: "phone code or email link; owner can require a second step", setup: "asked at sign up", test: "code arrives in a minute", broken: "email link instead of phone", off: "last owner cannot lose both", e: [judge]}
+- {id: pay, area: payments, d: room, what: "pay link by UPI and card; amounts recorded by hand until then", e: ["S:stripe/invoice.hosted_invoice_url"]}
+- {id: mail, area: messaging, d: now, what: "email from the firm's name; WhatsApp after approval", setup: "verify the sender", test: "send to yourself", broken: "the invoice shows not delivered with the reason", off: "copy the link by hand", e: [ninja-002]}
+- {id: portal, area: accounting, d: now, what: "e-invoice portal through a registered provider", setup: "GSTIN, user and password of the portal", test: "dry run on the portal's test site", broken: "invoice waits in failed, accountant is told", off: "invoices go without IRN, with a warning", e: [ic-001]}
+- {id: move_in, area: move_in, d: now, what: "customers and open invoices from Excel or Tally export", e: [twenty-001]}
+- {id: move_out, area: move_out, d: now, what: "all data as CSV plus every PDF, asked from settings, sent by email", e: [shop-001]}
+- {id: api, area: api, d: later, what: "read and write API with keys; events for issued and paid", e: ["S:stripe/invoice.id"]}

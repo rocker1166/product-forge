@@ -1,0 +1,80 @@
+id: recurring_plan
+name: Recurring Plan
+module: sales
+kinds: [job, setting]
+why: a monthly, quarterly or yearly schedule that makes a review draft once per period and never issues it
+links:
+  - {to: customer, on_delete: "an archived customer makes a run fail with a reason and pauses the plan; the plan is kept"}
+  - {to: invoice, on_delete: "drafts and invoices it made stay untouched when the plan changes, stops or is deleted; a hard-deleted draft frees its period for one redo"}
+abilities:
+  create: {d: now, how: "From scratch, or from an issued invoice by Repeat this invoice; needs customer, lines, frequency, start date and optionally an end date or a run count.", e: ["wide:D052", "wide:W047"]}
+  edit: {d: now, how: "Lines, frequency, notes, end date and run count change future runs only; the customer cannot change after the first run; invoices already made stay as they are.", e: ["wide:D057"]}
+  draft: {d: no, how: "A plan is active from its first save; nothing is made before its start date.", e: ["wide:D052"]}
+  delete: {d: now, how: "Only a plan that has never run; otherwise Stop ends it and keeps its history.", e: ["wide:D061"]}
+  archive: {d: no, how: "A plan is stopped, not archived; ended plans stay listed with their run history.", e: ["wide:D061"]}
+  restore: {d: no, how: "An ended plan does not restart; copy it into a new plan.", e: ["judge"]}
+  reverse: {d: now, how: "A wrong run is undone by deleting its draft and pressing Create draft for period; a wrongly issued invoice is fixed like any invoice.", e: ["judge"]}
+  merge: {d: no, how: "Plans are never joined.", e: [judge]}
+  import: {d: no, how: "Plans are not imported; they are made from existing invoices.", e: ["judge"]}
+  search: {d: now, how: "Customer name and plan name.", e: ["judge"]}
+  filter: {d: now, how: "Run state, customer, frequency and next run date.", e: ["judge"]}
+  sort: {d: now, how: "Next run date, customer; soonest first by default.", e: ["judge"]}
+  bulk: {d: later, how: "Pause or stop many plans at once waits until firms have many plans.", e: [judge]}
+  schedule: {d: now, how: "Next run date is shown; pause and resume; Skip next run is one click.", e: ["wide:D054"]}
+  history: {d: now, how: "Run history lists each run date, result and generated invoice link, with who created, edited, stopped or restarted the plan.", e: ["wide:D055", "wide:W089"]}
+  api: {d: later, how: "Plans are not opened to other software in wave 1.", e: ["judge"]}
+  webhook: {d: later, how: "Run events go out with the API, later.", e: ["judge"]}
+answers:
+  size: {a: "One plan makes one draft per period, never more than 50 lines each; a firm has at most 200 active plans, and a run covers each plan alone so one failure never stops the others.", e: ["judge"]}
+  fail: {a: "A cause only a person can fix (archived customer, invalid GSTIN, firm read-only, two drafts still waiting) stops that run, shows its reason and pauses the plan as failed; a passing fault retries once next day without a duplicate. The owner is told either way.", e: ["wide:D056", "wide:A159", "wide:A137"]}
+  again: {a: "Every run has a unique key of plan and period, so rerunning or restarting never makes a second draft for the same period; after a hard delete of that draft the owner may redo the period once.", e: ["wide:A160", "wide:A226"]}
+  progress: {a: "Next run date, last run result and the run history are shown; a run takes seconds and is not stopped midway.", e: ["judge"]}
+  who: {a: "Owner and accountant create, change, pause and stop plans; staff cannot; viewers only read. A run sees only its own firm's customer and lines.", e: ["wide:W047", "wide:W075"]}
+  result: {a: "The result is a draft invoice marked Needs review, linked from the run history; it stays until a person issues or deletes it.", e: ["wide:D052", "wide:A148"]}
+  limit: {a: "At most 200 active plans per firm and 50 lines per draft; drafts never count toward the free-plan limit, only issuing does.", e: ["wide:W021", "wide:A162"]}
+  timing: {a: "A daily job at 06:00 IST makes due drafts; it takes a lock so two runners never overlap. A plan saved with today as start date makes its first draft at save. The run day is 1 to 28 so short months never skip it.", e: ["wide:W047", "wide:A224"]}
+  scope: {a: "One plan belongs to one firm and one customer.", e: ["judge"]}
+  used: {a: "Drafts and invoices already made never change when a plan changes; they carry their plan and period.", e: ["wide:D057"]}
+  default: {a: "A new plan takes the customer's terms, currency and tax treatment at each run, not at the day it was made.", e: ["wide:B209", "wide:B202"]}
+  effective: {a: "A change applies from the next run; tax rates in force on the run date apply to that run's draft.", e: ["wide:D057", "wide:A113"]}
+  order: {a: "Plans are ordered by next run date; nothing needs manual order.", e: [judge]}
+tracks:
+  run:
+    states: [{id: active, start: true}, {id: paused}, {id: failed}, {id: ended, end: true}]
+    moves:
+      - {do: run_due, from: active, to: active, who: [system], guard: "run date reached, no draft exists for this plan and period, fewer than 2 earlier drafts from this plan still unissued", effect: "a draft invoice marked Needs review is made with the service period text, owner told it is ready. with the owner's opt-in 'Issue and send automatically' the invoice is issued and sent and the owner is mailed the list (R56)", reverse: "redo_period", notify: [recurring_drafts_ready], e: ["wide:D052", "wide:A160", "wide:A148", "walk:F043"]}
+      - {do: fail_run, from: active, to: failed, who: [system], guard: "customer archived, invalid GSTIN, firm read-only or two drafts still waiting", effect: "reason logged, no draft made, plan waits for a person", reverse: "resume", notify: [recurring_failed_alert], e: ["wide:D055", "wide:A159", "wide:A137"]}
+      - {do: pause, from: active, to: paused, who: [owner, accountant], guard: "none", effect: "no runs while paused", reverse: "resume", notify: none, e: ["judge"]}
+      - {do: resume, from: [paused, failed], to: active, who: [owner, accountant], guard: "the cause is fixed; asks to skip the missed periods or create each once", effect: "next run date set", reverse: "pause", notify: none, e: ["wide:D054"]}
+      - {do: skip_next, from: active, to: active, who: [owner, accountant], guard: "a next run exists", effect: "next run moves one period; the skipped period is written in the history", reverse: "redo_period", notify: none, e: ["wide:D054"]}
+      - {do: redo_period, from: active, to: active, who: [owner, accountant], guard: "the period has no draft because it was deleted or skipped, and has not been redone before", effect: "one draft is made for that period", reverse: "delete the draft", notify: none, e: ["judge"]}
+      - {do: end_plan, from: [active, paused, failed], to: ended, who: [owner, accountant], guard: "none", effect: "no more runs; history stays", reverse: "none: copy it into a new plan", notify: none, e: ["wide:D061"]}
+      - {do: complete, from: active, to: ended, who: [system], guard: "the end date or the run count is reached", effect: "no more runs; history stays", reverse: "none: copy it into a new plan", notify: none, e: ["judge"]}
+fields:
+  - {id: name, type: text, required: true, limit: 100, edit: "owner and accountant", msg: "Give the plan a name, up to 100 letters."}
+  - {id: customer, type: link, required: true, edit: "owner and accountant until the first run", msg: "Choose a customer."}
+  - {id: auto_issue, type: choice, required: true, default: no, edit: "owner", msg: "Automatic issue needs a fixed amount, unchanged lines and a customer email."}
+  - {id: frequency, type: choice, required: true, default: monthly, edit: "owner and accountant; future runs", msg: "Choose monthly, quarterly or yearly."}
+  - {id: start_on, type: date, required: true, edit: "until the first run; the day must be 1 to 28", msg: "Pick a start date on the 1st to the 28th."}
+  - {id: end_on, type: date, required: false, edit: "owner and accountant", msg: "The end date must be after the start date."}
+  - {id: max_runs, type: number, required: false, limit: 999, edit: "owner and accountant", msg: "Run count is 1 to 999."}
+  - {id: lines, type: list, required: true, limit: 50, edit: "owner and accountant; future runs", msg: "Add 1 to 50 lines."}
+  - {id: service_period_label, type: text, required: false, limit: 60, default: "month and year of the run", edit: "owner and accountant", msg: "The service period text is longer than 60 letters."}
+  - {id: next_run_on, type: date, required: false, edit: "nobody; set by the schedule", auto: true}
+  - {id: runs_done, type: number, required: true, limit: 999, edit: "nobody", auto: true}
+  - {id: last_error, type: text, required: false, limit: 300, edit: "nobody; last failure reason", auto: true}
+fields_e: ["wide:D052", "wide:W047", "wide:A026"]
+list:
+  search: [name, customer]
+  filters: [run, customer, frequency, next_run_on]
+  sorts: [next_run_on, customer]
+  default_sort: next_run_on
+  columns: [name, customer, frequency, next_run_on, runs_done, run]
+  page: 25
+  e: ["judge"]
+volume: {y1: 20000, y3: 250000}
+queries:
+  - {id: due, filters: [run], sort: [next_run_on], index: [tenant, run, next_run_on], p95: 100 ms}
+  - {id: one_customer, filters: [customer], sort: [next_run_on], index: [tenant, customer, next_run_on], p95: 100 ms}
+  - {id: by_frequency, filters: [frequency], sort: [next_run_on], index: [tenant, frequency, next_run_on], p95: 100 ms}
+  - {id: by_customer_name, filters: [], sort: [customer], index: [tenant, customer], p95: 150 ms}

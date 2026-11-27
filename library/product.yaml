@@ -1,0 +1,39 @@
+# What the whole product must answer, beyond its objects. Added 2026-11-26 after the first test:
+# our map tied on the objects it had and lost on areas nobody opened. Answer each in running.yaml under product:
+# "now: how", "room: how", "later: how" or "no: why".
+home:            {ask: "Home or dashboard: what does each role see first, and can they change it?", src: [Frappe, Odoo, Directus]}
+views:           {ask: "Other ways to see the main records: board, calendar, timeline, map, sheet?", src: [Frappe, Odoo, Plane, Twenty]}
+quick_entry:     {ask: "Fastest way to add the most common record: one line, drag on a calendar, copy the last one, start and stop?", src: [Linear, Frappe]}
+modes:           {ask: "Which ways of working does one firm choose between (strict or free entry, future dates, required fields)?", src: [judge]}
+favourites:      {ask: "Recent and favourite records, reused in one press?", src: [Twenty, Linear]}
+search_all:      {ask: "One search over everything, with jump by number or id?", src: [Stripe, Linear]}
+keyboard:        {ask: "Keys and command menu for daily users?", src: [Linear, Twenty]}
+planning:        {ask: "Planning ahead: capacity, targets, budgets, forecasts?", src: [Salesforce, Frappe]}
+time_off:        {ask: "Working days, holidays, absence: do they change any number or date here?", src: [Frappe, Cal.com]}
+teams:           {ask: "Teams or groups: who leads, who sees whose records?", src: [Chatwoot, Cal.com, Salesforce]}
+custom_roles:    {ask: "Can a customer make roles and switch each permission?", src: [Chatwoot, Salesforce, Shopify]}
+signin_company:  {ask: "Company sign-in (SAML, OpenID, LDAP), forced second step, sign-out of other devices?", src: [Plane, Invoice Ninja]}
+preferences:     {ask: "Each person's language, theme, time zone, date and number format, first day of week, landing page?", src: [Frappe, Linear]}
+branding:        {ask: "Logo, colours, own domain, own sender address, templates they can edit?", src: [Shopify, Invoice Ninja]}
+templates:       {ask: "Which papers, emails and records have templates a customer edits?", src: [Invoice Ninja, Odoo, Linear]}
+automation:      {ask: "Rules a customer sets: when this, then that?", src: [Shopify, Salesforce, Chatwoot]}
+recurring:       {ask: "What repeats by itself, and who is told when it fails?", src: [Invoice Ninja, Stripe]}
+reports:         {ask: "Which questions do people ask each week, month and year? One report each, with its filters.", src: [ERPNext, Invoice Ninja]}
+scheduled_report: {ask: "Reports sent by email on a schedule?", src: [Frappe, judge]}
+public_page:     {ask: "What may an outsider see or do without an account?", src: [Plane, Stripe, Cal.com]}
+portal:          {ask: "A place for the customer's customer?", src: [Invoice Ninja, Shopify]}
+phone_app:       {ask: "Phone: web page, installed app, offline, camera, scan?", src: [Shopify, Frappe]}
+desktop:         {ask: "Browser extension, desktop app, email add-in, calendar link?", src: [judge]}
+external_sync:   {ask: "Which outside records are kept in step both ways (calendar, contacts, files, chat)?", src: [Twenty, Cal.com]}
+ai:              {ask: "Help by AI: draft, summarise, suggest, answer; who pays and who approves?", src: [Chatwoot, Twenty, Lago]}
+languages:       {ask: "Languages and right-to-left of the product and of its papers?", src: [Frappe, Odoo, Medusa]}
+many_companies:  {ask: "One person in several firms, one firm with several brands or branches?", src: [Lago, Shopify, Medusa]}
+audit_all:       {ask: "One log of everything, searchable, exportable, how long kept?", src: [Cal.com, Directus]}
+trash_all:       {ask: "One trash for everything: how long, who restores?", src: [Notion, Frappe]}
+import_all:      {ask: "Moving in from each rival: which files, which fields are lost?", src: [Invoice Ninja, Twenty]}
+demo:            {ask: "Sample data a new user can try and remove?", src: [judge]}
+help:            {ask: "Help inside the product, contact, status page, what is new?", src: [GOV.UK, Linear]}
+plans:           {ask: "Plans, limits, trial end, upgrade, downgrade, unpaid: what still works?", src: [Shopify, Notion]}
+self_host:       {ask: "Is it also installed by customers: install, update, backup, restore?", src: [Chatwoot, Twenty, Cal.com]}
+admin_settings:  {ask: "Every switch a firm's admin can set, in groups?", src: [Invoice Ninja, India Compliance]}
+privacy:         {ask: "A person asks for their data or its deletion: who does what, what must stay?", src: [Shopify, Chatwoot]}

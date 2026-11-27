@@ -1,0 +1,10 @@
+name: Small invoices
+idea: Invoices and payments for small Indian service firms. A sample map, kept small on purpose.
+who: the owner of a 2 to 20 person service firm, who pays monthly
+job: send a correct GST invoice, get paid, hand clean books to the accountant
+country: India (GST, e-invoice, DPDP)
+money: monthly plan per firm, 14 days free
+tenants: true
+custom_objects: false
+must_never: [change an issued invoice, show one firm's data to another, reuse an invoice number]
+size: M

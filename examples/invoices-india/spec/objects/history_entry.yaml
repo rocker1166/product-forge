@@ -1,0 +1,86 @@
+id: history_entry
+name: History Entry
+module: core
+kinds: [other]
+why: the append-only record of every create, edit, issue, void, payment, reversal, sign-in and export
+links:
+  - {to: firm, on_delete: "history stays at least 8 years after the firm is closed"}
+  - {to: user, on_delete: "the actor's name stays as written when the login is closed"}
+  - {to: membership, on_delete: "role changes stay as written"}
+abilities:
+  create: {d: now, how: "Only the system writes a row, in the same transaction as the change it records; no screen or API creates one.", e: ["judge"]}
+  edit: {d: no, how: "Nobody edits a row, owner and product staff included; a wrong entry is answered by a new row.", e: ["judge"]}
+  draft: {d: no, how: "A row is written once, whole.", e: ["judge"]}
+  view: {d: now, how: "Each document page shows its own rows; a firm log shows time, actor, action, record number and summary, newest first.", e: [wide:D262, wide:W089]}
+  search: {d: now, how: "Find by record number such as INV/26-27/00012, which returns every row touching it, and by words in the summary.", e: [wide:D262]}
+  filter: {d: now, how: "Narrow by actor, object type, action and date range.", e: [wide:D262]}
+  sort: {d: now, how: "By time, newest first by default; oldest first on request.", e: ["judge"]}
+  group: {d: no, how: "The log is read as a time line, not in groups.", e: ["judge"]}
+  saved_view: {d: no, how: "One log with four filters needs no saved views.", e: ["judge"]}
+  columns: {d: no, how: "The columns are fixed and short.", e: ["judge"]}
+  bulk: {d: no, how: "Nothing is done to many rows.", e: ["judge"]}
+  import: {d: no, how: "History cannot be brought in; migrated documents start a fresh trail.", e: ["judge"]}
+  export: {d: now, how: "Owner and accountant export the filtered log as CSV up to 50,000 rows and it is part of the full-firm export; the export writes its own row.", e: [wide:B104, wide:A256]}
+  delete: {d: no, how: "No role or path removes a row, and no plan, closure or inactivity rule purges one inside 8 years.", e: ["judge"]}
+  archive: {d: no, how: "Rows are not put away; they stay as written.", e: ["judge"]}
+  restore: {d: no, how: "Nothing is removed, so nothing is restored.", e: ["judge"]}
+  duplicate: {d: no, how: "A copied row would forge a record.", e: ["judge"]}
+  version: {d: no, how: "A row is never changed, so it has no versions.", e: ["judge"]}
+  reverse: {d: no, how: "A mistake is answered by a new row that points to the old one.", e: [wide:W089]}
+  print_pdf: {d: no, how: "The CSV export and the document page serve auditors.", e: ["judge"]}
+  share_link: {d: no, how: "Outsiders never see history; support sees it only inside an owner grant.", e: ["judge"]}
+  preview: {d: no, how: "There is nothing to preview.", e: ["judge"]}
+  assign: {d: no, how: "Rows belong to the firm, not to a person.", e: ["judge"]}
+  approve: {d: no, how: "Nobody approves a record of what happened.", e: ["judge"]}
+  comment: {d: no, how: "Talk about a change on the document, not on the log.", e: ["judge"]}
+  attach: {d: no, how: "No files on a row.", e: ["judge"]}
+  tag: {d: no, how: "Rows are not labelled.", e: [judge]}
+  follow: {d: no, how: "Owners are told of key rows by email instead.", e: [judge]}
+  remind: {d: no, how: "Nothing is due on a row.", e: [judge]}
+  schedule: {d: no, how: "Rows are written when things happen, never later.", e: ["judge"]}
+  history: {d: no, how: "It is the history; it has no history of its own.", e: ["judge"]}
+  custom_fields: {d: no, how: "The brief has no custom fields.", e: [judge]}
+  merge: {d: no, how: "Rows are never joined.", e: ["judge"]}
+  notify: {d: no, how: "A row does not notify; the move that wrote it does.", e: ["judge"]}
+  webhook: {d: no, how: "Events go out with the API later, from the same moves.", e: ["judge"]}
+  link_related: {d: now, how: "Each row links to the record it touched and to the actor.", e: ["judge"]}
+  api: {d: later, how: "Read-only history through an API comes with the API wave.", e: ["judge"]}
+answers:
+  what: {a: "A row of who did what to which record and when, with old and new values, IP, device and a support label. Owners and accountants read it; it proves a record was never quietly changed.", e: ["judge"]}
+  states: {a: "One state: written. It never changes, so it has no way out and none is needed.", e: ["judge"]}
+  remove: {a: "Nothing removes a row. Deleting a draft leaves a row; closing a firm keeps rows at least 8 years. Personal values are stored masked so erasure does not need an edit.", e: [wide:W089, wide:A068, wide:A255]}
+  who: {a: "Owner and accountant read the whole log. Staff read rows of the documents they may open. Viewers see a document's rows without sign-in, role or export rows. Support sees it only inside an owner grant.", e: [wide:W075, wide:D262, wide:B104]}
+  kind: {a: "Closest to a ledger: append-only with a clock and an actor. It differs because no row, move or role can change it.", e: ["judge"]}
+fields:
+  - {id: ts, type: date, required: true, auto: true, edit: "never; set by the system", msg: "Set by the system."}
+  - {id: actor, type: link, required: false, auto: true, edit: "never; empty for system jobs", msg: "Set by the system."}
+  - {id: actor_label, type: text, required: true, limit: 120, auto: true, edit: "never; the name as it was when written", msg: "Set by the system."}
+  - {id: support_label, type: text, required: false, limit: 60, auto: true, edit: "never; shows 'Support' and the ticket", msg: "Set by the system."}
+  - {id: action, type: choice, required: true, auto: true, edit: "never", msg: "Set by the system."}
+  - {id: object_type, type: text, required: true, limit: 40, auto: true, edit: "never", msg: "Set by the system."}
+  - {id: object_id, type: text, required: true, limit: 40, auto: true, edit: "never", msg: "Set by the system."}
+  - {id: record_number, type: text, required: false, limit: 20, auto: true, edit: "never; a number such as INV/26-27/00012", msg: "Set by the system."}
+  - {id: summary, type: text, required: true, limit: 300, auto: true, edit: "never", msg: "Set by the system."}
+  - {id: old_values, type: long_text, required: false, limit: 20000, auto: true, edit: "never; personal and bank values stored masked", msg: "Set by the system."}
+  - {id: new_values, type: long_text, required: false, limit: 20000, auto: true, edit: "never; personal and bank values stored masked", msg: "Set by the system."}
+  - {id: reason, type: text, required: false, limit: 200, auto: true, edit: "never", msg: "Set by the system."}
+  - {id: ip, type: text, required: false, limit: 45, auto: true, edit: "never", msg: "Set by the system."}
+  - {id: device, type: text, required: false, limit: 200, auto: true, edit: "never", msg: "Set by the system."}
+fields_e: [wide:W089, wide:D262, wide:A068]
+list:
+  search: [record_number, summary]
+  filters: [actor, object_type, action, ts]
+  sorts: [ts]
+  default_sort: -ts
+  columns: [ts, actor_label, action, record_number, summary]
+  export: {rows: [filtered, all], what: [history], formats: [CSV], big: "over 5,000 rows runs as a background job and the link is emailed; it dies after 7 days"}
+  page: 50
+  e: [wide:D262]
+volume: {y1: 8000, y3: 60000}
+queries:
+  - {id: newest, filters: [], sort: [-ts], index: [tenant, ts], p95: 150 ms}
+  - {id: by_actor, filters: [actor], sort: [-ts], index: [tenant, actor, ts], p95: 150 ms}
+  - {id: by_type, filters: [object_type], sort: [-ts], index: [tenant, object_type, ts], p95: 150 ms}
+  - {id: by_action, filters: [action], sort: [-ts], index: [tenant, action, ts], p95: 150 ms}
+  - {id: by_record, filters: [record_number], sort: [-ts], index: [tenant, record_number, ts], p95: 100 ms}
+  - {id: one_document, filters: [object_type, object_id], sort: [-ts], index: [tenant, object_type, object_id, ts], p95: 100 ms}

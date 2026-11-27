@@ -1,0 +1,101 @@
+id: credit_note
+name: Credit Note
+module: billing
+kinds: [document, money]
+why: the only way to lower an issued invoice; linked to one invoice, numbered in its own gapless series, and any excess becomes customer credit
+links:
+  - {to: invoice, on_delete: "an invoice with a credit note cannot be voided until that credit note is voided; the link never breaks"}
+  - {to: credit_ledger, on_delete: "ledger rows made from it stay; voiding the note is refused while any of its credit is spent or refunded"}
+  - {to: einvoice, on_delete: "the record stays for good"}
+  - {to: customer, on_delete: "keeps its own snapshot; the customer is archived, not deleted"}
+abilities:
+  create: {d: now, how: "Only from an issued, part-paid, paid, credited or written-off invoice (R27); the page offers Create credit note beside Void and re-create. One invoice may have many credit notes.", e: ["wide:W060", "wide:C045", "walk:X050"]}
+  edit: {d: now, how: "A draft allows reason, note and lowering each line; an issued credit note cannot be edited by anyone.", e: ["wide:W069", "wide:W062"]}
+  delete: {d: now, how: "Drafts only, after a confirm; issued ones are voided by the owner, never deleted.", e: ["wide:D382"]}
+  archive: {d: no, how: "Credit notes are tax records and stay in lists; views narrow them.", e: ["judge"]}
+  restore: {d: no, how: "Nothing is archived and a deleted draft does not come back.", e: ["wide:D382"]}
+  duplicate: {d: no, how: "A second credit is made from the invoice again so the remaining creditable value is checked.", e: ["wide:W062"]}
+  reverse: {d: now, how: "Void by the owner with a reason of 5 to 200 characters, only while none of its credit is applied or refunded and, for an e-invoiced note, within 24 hours of its IRN.", e: ["wide:W069", "wide:A106"]}
+  search: {d: now, how: "Number, original invoice number and customer name.", e: ["wide:D377"]}
+  filter: {d: now, how: "Status, e-invoice state, credit use, date and customer.", e: ["wide:D377"]}
+  sort: {d: now, how: "Issue date and total, both ways; newest issue date first.", e: ["wide:D377"]}
+  bulk: {d: no, how: "Each credit note is a separate tax act; none are done in bulk.", e: [judge]}
+  print_pdf: {d: now, how: "Titled Credit Note with number and date, original invoice number and date, reason, lines, tax split, total and each application to other invoices; stored at issue like an invoice.", e: ["wide:W068"]}
+  share_link: {d: now, how: "The email carries the PDF and a read-only link for this credit note only, with the same expiry rules as an invoice link.", e: ["wide:D379", "wide:A193"]}
+  preview: {d: now, how: "Before issue it shows the resulting invoice balance and the new customer credit.", e: ["wide:D380"]}
+  approve: {d: no, how: "Accountants issue credit notes; owners get an email on large ones instead of a sign-off.", e: ["wide:C139"]}
+  remind: {d: no, how: "A credit note has no due date.", e: [judge]}
+  schedule: {d: no, how: "A credit note is issued when the person issues it.", e: [judge]}
+  tag: {d: no, how: "No free tags in wave 1.", e: [judge]}
+  custom_fields: {d: no, how: "Fixed fields only.", e: [judge]}
+  api: {d: later, how: "Credit notes are read by other software only after the API ships.", e: ["judge"]}
+  webhook: {d: later, how: "Credit note events go out only with the API, later.", e: ["judge"]}
+answers:
+  freeze: {a: "At issue the lines, tax, reason, original invoice link, customer snapshot and date are frozen; nothing changes after, not even a note. Only void reverses it.", e: ["wide:W069", "wide:W063"]}
+  number: {a: "CN/YY-YY/NNNNN from its own gapless counter per firm and year, taken at issue and read from the credit note's own issue date; a voided number stays used. A commercial non-GST credit takes no number from this series and is shown as Commercial credit.", e: ["wide:W064", "wide:A117"]}
+  fix: {a: "A wrong credit note is voided by the owner while nothing of it is spent and, if it has an IRN, within 24 hours; then a new one is issued. After that, a correcting invoice is raised for the difference.", e: ["wide:W069", "wide:A106"]}
+  money: {a: "Whole paise. Each line uses the original line's rate, SAC and place of supply with the same rounding; the credit that takes the remaining taxable value of a line to 0 carries the rest of its tax, so the notes add up to the invoice to the paisa; the total is rounded to the rupee with a round-off line, and the last credit note takes the rupee residue.", e: ["wide:W063", "wide:W062", "wide:A121"]}
+  paid: {a: "Its payment track says where the credit went: not counted, counted on the invoice, held as customer credit, or spent. The invoice takes the credit first; only the part above the invoice balance becomes customer credit.", e: ["wide:W066", "wide:B212"]}
+  late: {a: "The limit is 30 November following the original invoice's financial year, or the annual return date if the firm records an earlier one; a later date is refused with the exact date.", e: ["wide:W065", "wide:A117"]}
+  law: {a: "Needs one reason (sales return, post-sale discount, invoice correction, deficiency in service); a post-sale discount asks whether it was agreed before the supply and reminds that the customer must reverse matching input tax; against an e-invoiced invoice it asks for its own IRN.", e: ["wide:W061", "wide:A115", "wide:A107"]}
+  send: {a: "Issuing and sending are separate: the email goes through the outbox with the PDF and a share link, and can be repeated.", e: ["wide:D379", "wide:W086"]}
+  amount: {a: "Each line is lowered from the original, never above its remaining creditable taxable value; the credit note total must be above 0.", e: ["wide:W062"]}
+  settles: {a: "One credit note settles one invoice first, then any excess sits as customer credit which can be applied to another invoice of the same customer or refunded.", e: ["wide:W066", "wide:W067", "wide:B212"]}
+  undo: {a: "Void by the owner restores the invoice balance, only if none of its credit is applied elsewhere or refunded; the owner first unapplies the credit or reverses the refund.", e: ["wide:W069", "wide:D300"]}
+  fail: {a: "If the portal refuses the IRN the credit note stays issued and retryable; credit on the invoice already counts. A credit note never blocks on plan limits.", e: ["wide:A107", "wide:A162"]}
+  fee: {a: "No fee. Foreign-currency credit uses the invoice's own rate.", e: ["judge"]}
+  dispute: {a: "A dispute is closed by a credit note for the agreed amount, or no credit note and a write-off on the invoice; the reason is recorded on the document.", e: [judge]}
+  proof: {a: "The credit note PDF is the proof; it prints each application to other invoices.", e: ["wide:W068"]}
+  match: {a: "Matched to its invoice by link, and to the customer credit ledger by row; nothing to match to a bank.", e: ["wide:D298"]}
+tracks:
+  document:
+    states: [{id: draft, start: true}, {id: issued}, {id: void, end: true}]
+    moves:
+      - {do: issue, from: draft, to: issued, who: [owner, accountant], guard: "original invoice is issued and not void; date not before the original, not in the future and not after the limit; one reason chosen; every line within its remaining creditable value; total above 0; outside any locked period", effect: "number taken, PDF stored, invoice balance lowered, excess goes to customer credit, e-invoice track started when the original has an IRN. the excess goes to customer credit less the TDS recorded on the part credited (R29); credits are added up per invoice and per customer per day and month for the large-credit alert", reverse: "void", notify: [credit_note_large_alert], e: ["wide:W060", "wide:W065", "wide:W066", "wide:A117", "walk:X001", "walk:X013"]}
+      - {do: void, from: issued, to: void, who: [owner], guard: "reason of 5 to 200 characters, none of its credit applied or refunded, and no IRN older than 24 hours", effect: "invoice balance restored, number stays used, shown as cancelled in the documents-issued summary", reverse: "none: issue a new credit note", notify: none, e: ["wide:W069", "wide:A106"]}
+  payment:
+    states: [{id: not_counted, start: true}, {id: on_invoice}, {id: credit_held}, {id: credit_spent}]
+    moves:
+      - {do: count_on_invoice, from: not_counted, to: on_invoice, who: [system], guard: "the whole credit fits inside the invoice balance due", effect: "invoice balance lowered by the full amount", reverse: "release", notify: none, e: ["wide:W066"]}
+      - {do: hold_excess, from: not_counted, to: credit_held, who: [system], guard: "the credit is above the invoice balance; the part up to the balance lowers the invoice", effect: "a customer credit row is made for the excess", reverse: "release", notify: none, e: ["wide:W066", "wide:B212"]}
+      - {do: spend_credit, from: credit_held, to: credit_spent, who: [owner, accountant], guard: "the held credit is applied to another invoice of the same customer or refunded in full", effect: "ledger shows applied or refunded", reverse: "restore_credit", notify: none, e: ["wide:W067", "wide:D093"]}
+      - {do: restore_credit, from: credit_spent, to: credit_held, who: [owner], guard: "credit unapplied or the refund reversed, with a reason", effect: "credit is back in the ledger", reverse: "spend_credit", notify: none, e: ["wide:D300"]}
+      - {do: release, from: [on_invoice, credit_held], to: not_counted, who: [system], guard: "the credit note is voided and none of its credit is spent", effect: "invoice balance restored, held credit removed", reverse: "none: issue a new credit note", notify: none, e: ["wide:W069"]}
+  tax:
+    states: [{id: not_needed, start: true}, {id: due}, {id: pending}, {id: generated}, {id: failed}, {id: cancelled, end: true}]
+    moves:
+      - {do: require_irn, from: not_needed, to: due, who: [system], guard: "the firm is liable for e-invoice on the credit note date; the original IRN is referenced when it has one", effect: "e-invoice record created", reverse: "none: follows the firm flag at issue", notify: none, e: ["wide:A107", "wide:A104"]}
+      - {do: start_portal_call, from: [due, failed], to: pending, who: [owner, accountant, system], guard: "credit note is issued", effect: "queued portal call", reverse: "none: wait for the answer", notify: none, e: ["wide:A107", "wide:A239"]}
+      - {do: portal_ok, from: pending, to: generated, who: [system], guard: "portal returned an IRN", effect: "IRN and QR stored, PDF version added", reverse: "cancel_irn", notify: none, e: ["judge"]}
+      - {do: portal_refused, from: pending, to: failed, who: [system], guard: "portal refused or automatic tries ended", effect: "error shown; the credit note stays issued and its credit counts", reverse: "start_portal_call", notify: [einvoice_failed_alert], e: ["wide:A107", "wide:A215"]}
+      - {do: cancel_irn, from: generated, to: cancelled, who: [owner, accountant], guard: "within 24 hours, coded reason", effect: "the credit note can then be voided", reverse: "none: a cancelled IRN cannot come back", notify: none, e: ["judge"]}
+      - {do: close_tax, from: [due, failed], to: cancelled, who: [system], guard: "credit note voided before any IRN", effect: "record closed", reverse: "none: the credit note is void", notify: none, e: ["wide:A147"]}
+fields:
+  - {id: number, type: text, required: true, limit: 16, edit: "nobody; given at issue", auto: true}
+  - {id: invoice, type: link, required: true, edit: "nobody after it is created", msg: "A credit note belongs to one issued invoice."}
+  - {id: nature, type: choice, required: true, default: gst, edit: "while draft; commercial only by the owner", msg: "Choose GST credit note or commercial credit."}
+  - {id: issued_at, type: date, required: true, default: today, edit: "while draft", msg: "The date cannot be before the invoice, in the future or after the limit."}
+  - {id: reason, type: choice, required: true, edit: "while draft", msg: "Choose one reason."}
+  - {id: agreed_before_supply, type: flag, required: false, edit: "while draft; asked for a post-sale discount", auto: true}
+  - {id: note, type: long_text, required: false, limit: 300, edit: "while draft", msg: "The note is longer than 300 letters."}
+  - {id: lines, type: list, required: true, limit: 50, edit: "while draft", msg: "Each line can be lowered but never above what is left to credit."}
+  - {id: round_off, type: money, required: true, limit: 1, edit: "nobody", auto: true}
+  - {id: total, type: money, required: true, limit: 9999999999, edit: "nobody", auto: true}
+  - {id: void_reason, type: text, required: false, limit: 200, edit: "when the owner voids", msg: "Give a reason of 5 to 200 letters."}
+fields_e: ["wide:W061", "wide:W062", "wide:W064", "wide:W065"]
+list:
+  search: [number, invoice_number, customer]
+  filters: [document, payment, tax, customer, issued_at]
+  sorts: [issued_at, total]
+  default_sort: -issued_at
+  columns: [number, issued_at, customer, invoice_number, reason, total, document]
+  views: [All, Drafts, Issued, Void, Credit held, Tax failed]
+  export: {rows: [selected, filtered, date range], what: [credit notes, lines], formats: [CSV, month zip, Tally XML], big: "Over 5,000 rows runs as an export job and the link comes by email and lives 7 days."}
+  page: 25
+  e: ["judge"]
+volume: {y1: 40000, y3: 500000}
+queries:
+  - {id: newest, filters: [document, payment], sort: [-issued_at], index: [tenant, document, payment, issued_at], p95: 150 ms}
+  - {id: one_customer, filters: [customer], sort: [-issued_at], index: [tenant, customer, issued_at], p95: 100 ms}
+  - {id: tax_state, filters: [tax], sort: [-issued_at], index: [tenant, tax, issued_at], p95: 100 ms}
+  - {id: by_total, filters: [], sort: [total], index: [tenant, total], p95: 200 ms}

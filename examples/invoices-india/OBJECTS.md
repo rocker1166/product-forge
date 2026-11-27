@@ -1,0 +1,31 @@
+# Wave 1 objects (27: 25 sure, plus time_entry and expense that join only if the owner says yes to Q5)
+
+Line items live inside their document (invoice, quote, credit note); they are not objects of their own.
+
+- firm | Firm | master, setting | core | The tenant root: legal name, GSTIN, state, PAN, Udyam, tax scheme (regular, composition, unregistered), e-invoice flag and turnover band, filing mode, bank block and UPI ID, defaults, period lock date, branding choice | active, read_only, closing, deleted | user, subscription, number_series, template, lut
+- user | User | person | access | One login per email, system-wide; belongs to many firms (a CA to dozens) | active, deactivated | membership, invite
+- membership | Membership | person, setting | access | Role (owner, accountant, staff, viewer) of one login inside one firm; the unit every 403 test runs against | invited, active, deactivated | firm, user
+- invite | Invite | person | access | Pending offer to join a firm; works only for the invited email | pending, accepted, expired, revoked | firm, user, message
+- customer | Customer | master, person | masters | Name, type, tax type, GSTIN, state, address, contact, terms, default tax treatment and TDS section, currency; snapshotted onto every document | active, archived | invoice, quote, payment, credit_ledger
+- item | Service Item | master | masters | Saved service with SAC, unit, rate and tax rate; values are copied into lines | active, archived | invoice, quote, rate_master
+- rate_master | Tax Master | master, setting | tax | Effective-dated GST rates, SAC codes, TDS sections with rates and thresholds, state codes; product-owned, never edited by a firm | versioned by effective date | invoice, payment, item
+- number_series | Number Series | setting | tax | Gapless counter per firm, GSTIN, document type, prefix and financial year; the database enforces uniqueness | open, closed for year | invoice, credit_note, payment, quote
+- quote | Quote | document | sales | Quote and proforma invoice with their own series; neither is a tax document and neither reaches the registers | draft, sent, accepted, declined, expired, converted, cancelled | customer, invoice, share_link
+- invoice | Invoice | document, money | billing | Tax invoice, bill of supply, export and SEZ invoice, with lines, tax split, round-off, TDS, snapshot, stored PDF and hash; immutable after issue except due date and notes | draft, issued, partially_paid, paid, void (overdue is a label) | customer, payment, credit_note, einvoice, share_link, message
+- credit_note | Credit Note | document, money | billing | Linked to one invoice, with reason, lines and the 30 November rule; excess becomes customer credit | draft, issued, void | invoice, credit_ledger, einvoice
+- payment | Payment | money | collections | Money received by hand or UPI claim, with TDS (income tax or GST TDS), receipt number, reference and foreign-currency fields | active, reversed (pending check for I-have-paid claims) | invoice, allocation, customer
+- allocation | Allocation | money | collections | One row per payment-to-invoice split; sum never exceeds the payment, enforced in the database | active, reversed | payment, invoice
+- credit_ledger | Customer Credit | money | collections | Ledger of credit in (credit notes), applied and refunded; balance is always the sum of its rows | open, exhausted | customer, credit_note, refund, invoice
+- refund | Refund | money | collections | Cash returned from customer credit, numbered REF, never above the balance | recorded, reversed | credit_ledger, customer
+- recurring_plan | Recurring Plan | job, setting | sales | Monthly, quarterly or yearly schedule that creates review drafts, once per period, with a unique schedule-period key | active, paused, ended, failed run | customer, invoice
+- message | Outbox Message | conversation | comms | Every email (invoice, receipt, reminder, invite, credit note) with body, attachments, provider id, delivery and bounce state | queued, sent, failed, bounced, skipped | invoice, customer, invite
+- share_link | Share Link | connection | comms | Tokened public page for one document with UPI button and QR, view times and expiry | active, expired, revoked | invoice, quote
+- einvoice | E-invoice Record | document, connection | tax | IRN, acknowledgement, signed QR and every portal attempt, behind one provider adapter | none, generated, failed, cancelled | invoice, credit_note
+- lut | LUT | setting | tax | Letter of Undertaking per firm and financial year with number, validity and ARN; export invoices under LUT read it | valid, expired | firm, invoice
+- template | Template | content | comms | Invoice, credit note, receipt and email templates plus branding (logo, colour, footer, terms); versioned, edits apply to new documents only | default, custom | firm, invoice, message
+- subscription | Subscription | money, setting | billing | Plan, trial end, period end, limits and the monthly issued-invoice count; our own GST invoices to the firm hang here | trial, free, active, past_due, grace, read_only, cancelled | firm
+- import_job | Import Job | job, file | migration | Customer, item, opening-invoice and later payment imports with dry run, row errors and no half-imported rows | uploaded, validated, importing, done, failed | customer, item, invoice
+- export_job | Export Job | job, file, report | migration | Registers, month-end accountant pack, Tally XML, full-firm export; links die after 7 days, the record stays | queued, ready, expired | firm, invoice, payment
+- history_entry | History Entry | other | core | Append-only audit of every create, edit, issue, void, payment, reversal, sign-in and export, with old and new values, actor, IP and support label | append-only | every object
+- time_entry | Time Entry | master | billing | MAYBE WAVE 1 (Q5): hours a person logged for a customer; staff enter, owner or accountant approve, the bill step turns groups into invoice lines | open, approved, billed | customer, invoice, item, user
+- expense | Expense | master | billing | MAYBE WAVE 1 (Q5): money paid for a customer with receipt, markup and pure-agent ticks; re-billed lines are taxable unless pure agent (R68) | recorded, billable, billed | customer, invoice

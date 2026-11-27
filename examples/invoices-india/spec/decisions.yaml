@@ -1,0 +1,60 @@
+- id: Q1
+  q: "Take payments through a gateway (Razorpay link) in wave 1, or only a UPI QR and button with hand-recorded payments?"
+  recommend: QR and button plus I-have-paid claims; gateway in wave 2
+  why: "a gateway adds KYC, webhooks, refunds, fees and reconciliation, about 60 lines, and the QR already gets a firm paid"
+  answer: "Yes for wave 1 (UPI QR, pay button, I-have-paid). Build payments behind one gateway adapter so the code for a chosen gateway can be added when wanted; keys and a live gateway in wave 2."
+- id: Q2
+  q: "Connect a real e-invoice provider in wave 1, or build the flow against the fake adapter and connect later?"
+  recommend: "build the full flow, connect one real provider before launch only if a design-partner firm is above Rs 5 crore"
+  why: most 1 to 20 person firms are below the limit and a provider contract costs time and money
+  answer: "Yes: build the full flow on the fake adapter, connect a real provider later."
+- id: Q3
+  q: Include advance receipts (receipt vouchers with GST on advances) in wave 1?
+  recommend: "the voucher and its tax computation in wave 2; wave 1 already keeps money that arrives before an invoice on account of the customer with its real receipt date and a 'tax due in the receipt month' flag, and never refuses it"
+  why: "GST on advances for services is real for coaching and agencies, but it is its own document, series and returns table; the walk of a firm taking 50 percent up front (F004) found nowhere to put the money, so on-account money is in wave 1 (R60), and only the numbered voucher series and the advance tax tables wait"
+  answer: Yes as recommended.
+- id: Q4
+  q: "Produce the GSTR-1 JSON file in wave 1, or only registers, summaries and an error list?"
+  recommend: "registers and error list now, JSON in wave 2"
+  why: "a wrong portal schema costs trust; accountants can use the registers meanwhile; the walk of an accountant with 30 firms (F011) calls the missing portal file blocking, so if the owner answers wave 1, move gstr1_json to now and build B2B, B2CL, B2CS, CDNR, HSN and documents-issued from the same register; K4 tests this with accountants"
+  answer: "Yes as recommended: registers and error list now, JSON in wave 2."
+- id: Q5
+  q: Time billing and expense re-billing in wave 1?
+  recommend: wave 2; recurring drafts and manual lines serve a month of billing
+  why: "they are two modules, about 30 lines, and pull in staff entry and approval rules"
+  answer: Maybe in wave 1. Plan time billing and expense re-billing so they can join wave 1; decide before the build starts.
+- id: Q6
+  q: "Free plan limit, paid price, users per plan and trial length?"
+  recommend: "10 issued invoices a month free, one paid plan at Rs 499 a month or Rs 4,999 a year including GST, 5 users, one free accountant seat on every plan, a 14-day trial that ends on Free"
+  why: "it fixes the limit counter, trial copy and our own GST invoices (Rs 422.88 plus Rs 76.12 GST for the month); change the numbers if your market data says otherwise"
+  answer: Yes as recommended.
+- id: Q7
+  q: "Does one accountant login work across firms free of charge, and may the accountant invite themselves?"
+  recommend: "free, one seat per firm, invited by the firm only"
+  why: it is the main growth path and it sets the multi-firm login design
+  answer: Yes as recommended.
+- id: Q8
+  q: Sign-in by phone OTP in wave 1?
+  recommend: "no: email and password with optional TOTP"
+  why: "SMS needs a registered sender and template, and SIM-swap rules follow"
+  answer: Yes as recommended.
+- id: Q9
+  q: Customer portal and accept-quote link in wave 1?
+  recommend: "no: a share link per document with UPI button and viewed times only"
+  why: "a portal needs customer logins, a second tenancy view and dispute flows; the walk found the same gap three times: a customer cannot accept or decline a quote on the page (F034), cannot pay six invoices with one transfer (F030, a statement link) and cannot download a receipt; Something is wrong, the receipt and the fresh link on an expired page are in wave 1, Accept and Decline and the statement link stay with this question"
+  answer: "Yes: a public client page per customer, protected by a password, holding their documents, statement, quote accept or decline and pay."
+- id: Q10
+  q: May the product send WhatsApp itself (Business API) in wave 1?
+  recommend: "no: click-to-chat with a prefilled message and the share link"
+  why: "the API needs approved templates, opt-in storage and per-message cost"
+  answer: Yes as recommended.
+- id: CA1
+  q: "Chartered accountant, please confirm or correct each fact: (1) foreign place-of-supply code 96 and its name on invoices and e-invoices; (2) GSTR-1 due on the 11th monthly and the 13th quarterly, and which states get the 22nd or the 24th for GSTR-3B; (3) PAN fourth-letter list A B C F G H J L P T and the bank account and mobile formats; (4) whether TDS on fees is rounded to the whole rupee and how the Rs 50,000 and Rs 30,000 or Rs 1,00,000 thresholds apply to the invoice that crosses them; (5) GST TDS 2% and the Rs 2.5 lakh contract test; (6) exchange rate source for exports under Rule 34 (RBI reference rate on the time-of-supply date) against our 'firm's policy' line; (7) where a supplier's own reverse-charge outward supplies appear in GSTR-3B; (8) the e-invoice 30-day count (30 or 31 days) and the Rs 10 crore test; (9) the credit note 30 November limit after the Finance Act 2026 change and the 1 November 2026 post-supply discount change; (10) Section 393(1) serial numbers, Form 131 and Form 168 names; (11) whether the 8-year book keeping and the 72-month GST rule are enough; (12) whether a cash receipt undone later still counts toward the Rs 2,00,000 limit. (13) whether section 13(8)(b) of the IGST Act still makes intermediary services supplied at the supplier's location, and from which date, since R8 now holds it as a dated row; (14) the union territories without a legislature that bill CGST plus UTGST (Andaman and Nicobar Islands, Chandigarh, Dadra and Nagar Haveli and Daman and Diu, Ladakh, Lakshadweep) and the UTGST column in the registers."
+  recommend: confirm item by item; every item has a default written in rules.yaml (R1 to R59)
+  why: none of these could be confirmed on an official page when the facts were checked on 26 November 2026; a wrong one prints a wrong tax or a wrong date
+  answer: "Yes: give the list to a chartered accountant."
+- id: Q11
+  q: "Check GSTINs against the GST portal through a paid lookup provider in wave 1, for the firm's own GSTIN at sign-up and for a customer's GSTIN before an e-invoice firm issues?"
+  recommend: "yes for the firm's own GSTIN (name, state and status, then a proof step before it may e-invoice or send more than 20 mails a day) and for a customer's GSTIN on e-invoice firms only; every other firm keeps the format check and a 'checked on the portal on <date>' tick typed by hand"
+  why: "today only the checksum is verified, so anyone can sign up with a real company's public GSTIN (X028), an invoice can go to a cancelled GSTIN (X049, F047) and a client's name and address must be typed (F003); a lookup provider costs money per call and a contract, so it is the owner's call"
+  answer: Yes as recommended.

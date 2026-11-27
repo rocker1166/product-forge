@@ -1,0 +1,31 @@
+# Production list (research/11). A map answers each in running.yaml.
+P1: {"group":"Security","ask":"Target ASVS level chosen (L1 minimum) and requirement IDs tracked as v5.0.0-x.y.z","src":"ASVS"}
+P2: {"group":"Security","ask":"Config and secrets come from environment, none in repo","src":"12-factor"}
+P3: {"group":"Security","ask":"Tenant isolation tested: user A cannot read B's records by ID","src":"AWS SaaS Lens (topic), J"}
+P4: {"group":"Security","ask":"Server-side validation on every input","src":"GOV validation"}
+P5: {"group":"Security","ask":"Every action checked against role on the server, not only hidden in UI","src":"J"}
+P6: {"group":"Data safety","ask":"Automated backups exist","src":"Heroku"}
+P7: {"group":"Data safety","ask":"A restore was performed into a clean environment and timed this quarter","src":"SRE (\"recovery matters\"), J"}
+P8: {"group":"Data safety","ask":"Deleted records recoverable for a stated period","src":"Notion 30+30 days (B)"}
+P9: {"group":"Data safety","ask":"Migrations run forward and are tested on a copy of production data","src":"J"}
+P10: {"group":"Release","ask":"One-command rollback, tried once","src":"Heroku, SRE"}
+P11: {"group":"Release","ask":"Deploy does not need downtime or manual DB steps","src":"J"}
+P12: {"group":"Release","ask":"Admin tasks run as one-off scripts, not by hand in prod","src":"12-factor"}
+P13: {"group":"Monitoring","ask":"Alert on errors and latency, with an owner","src":"Heroku, SRE"}
+P14: {"group":"Monitoring","ask":"End-to-end synthetic check of the main journey","src":"SRE launch checklist"}
+P15: {"group":"Monitoring","ask":"Logs go to a searchable store","src":"12-factor, Heroku"}
+P16: {"group":"Limits","ask":"Load test at expected peak","src":"SRE launch checklist"}
+P17: {"group":"Limits","ask":"Rate limits and timeouts on public endpoints","src":"SRE launch checklist"}
+P18: {"group":"Limits","ask":"Upload, export and page-size caps documented (e.g. 15 MB, 20,000)","src":"B"}
+P19: {"group":"Limits","ask":"At least two instances for anything mission-critical","src":"Heroku"}
+P20: {"group":"Jobs","ask":"Background jobs are retryable and idempotent","src":"J"}
+P21: {"group":"Jobs","ask":"Failed jobs are visible and replayable by support","src":"J"}
+P22: {"group":"Jobs","ask":"Long exports run async and notify (email)","src":"B (Shopify)"}
+P23: {"group":"Privacy","ask":"User can export their data","src":"B (Notion, Twenty)"}
+P24: {"group":"Privacy","ask":"User can delete account and its data; effects stated before confirm","src":"Notion (B)"}
+P25: {"group":"Privacy","ask":"Personal data inventory and retention period written","src":"J"}
+P26: {"group":"Privacy","ask":"India DPDP: rights handling and breach duties start staged over about 18 months from Nov 2025; exact dates and erasure timelines UNVERIFIED","src":"news search, not official text"}
+P27: {"group":"Support","ask":"Staff can find a user, see their activity log, and impersonate with audit","src":"Invoice Ninja activity panel (B), J"}
+P28: {"group":"Support","ask":"Status/problem page and contact route exist","src":"GOV problem page"}
+P29: {"group":"Cost","ask":"Per-tenant or per-job cost is measured and a monthly budget alert exists","src":"J"}
+P30: {"group":"Cost","ask":"Free-tier or abuse path is capped","src":"SRE (abuse), J"}

@@ -1,0 +1,90 @@
+id: import_job
+name: Import Job
+module: migration
+kinds: [job, file]
+why: brings a firm's customers, services and old unpaid invoices in from a CSV or Excel file, checked first and imported whole or not at all
+links:
+  - {to: customer, on_delete: "rows made by a run belong to the customer; archiving a customer never removes the run's record"}
+  - {to: item, on_delete: "same as customers; the run record keeps its counts"}
+  - {to: invoice, on_delete: "opening invoices are never deleted once touched; the run keeps its counts and the history row"}
+refs: []
+abilities:
+  create: {d: now, how: "Owner or accountant starts one from the Customers, Services or Invoices list or Settings, picking what is imported. Opening-invoice runs need an owner to confirm. Staff and viewers cannot.", e: [judge]}
+  edit: {d: no, how: "A run is not edited; a corrected file is a new upload and a new run.", e: [judge]}
+  draft: {d: now, how: "After upload a dry run shows what will be created, updated or skipped, with row errors; nothing is written until the owner or accountant confirms.", e: [judge]}
+  search: {d: later, how: "Runs are a few dozen per firm; filters are enough.", e: [judge]}
+  group: {d: no, how: "A flat history, newest first.", e: [judge]}
+  import: {d: no, how: "This object is the import; a file of runs is never imported.", e: ["judge"]}
+  export: {d: later, how: "A run log CSV for support waits; each run already carries its rejected-rows CSV.", e: [judge]}
+  delete: {d: now, how: "The uploaded file and its error CSV are deleted 30 days after the run ends, or at once by the owner; the run record with counts stays.", e: ["judge"]}
+  restore: {d: no, how: "A deleted file does not come back; upload it again.", e: [judge]}
+  archive: {d: no, how: "Old runs stay in the list, found by date.", e: [judge]}
+  duplicate: {d: now, how: "Run again with the same kind and column mapping and a fresh upload; rows already added are skipped, not doubled.", e: [judge]}
+  reverse: {d: now, how: "Cancel before it ends and nothing is kept. After done, the owner may undo within 7 days only if the run created new rows and none has a payment, credit note, email or edit since; otherwise the touched rows are listed and undo is refused.", e: [judge]}
+  share_link: {d: no, how: "The error file downloads for the person who started it and owners; no outsider link.", e: [judge]}
+  preview: {d: now, how: "The dry run lists rows to create, update and skip before anything starts, with the mapping used.", e: [judge]}
+  approve: {d: no, how: "An opening-invoice run is confirmed by an owner as part of starting it; no second approver.", e: [judge]}
+  schedule: {d: no, how: "Imports are one-off by hand; nothing repeats.", e: [judge]}
+  notify: {d: now, how: "The person who started it is told in the app and by email when it finishes or fails.", e: [judge]}
+  api: {d: later, how: "Starting imports by API waits with the API.", e: ["judge"]}
+  webhook: {d: later, how: "Finished and failed events for other software wait with the API.", e: ["judge"]}
+answers:
+  size: {a: "CSV or XLSX up to 5 MB and 5,000 rows. A larger file is refused before anything is read, with a message to split it.", e: [judge]}
+  fail: {a: "Bad rows are listed with row number, field and reason in an error CSV and skipped on confirm; good rows are written in one step. If the system fails mid-way, the whole run rolls back and no half-imported row remains. State names with old spellings map to the GST list; an unmapped value stops its row.", e: [judge]}
+  again: {a: "Safe. Customers match on GSTIN, or name and phone when there is none; services on name; opening invoices on customer and original number. The same file twice creates nothing the second time, and the same file bytes show a warning with the earlier run.", e: [judge]}
+  progress: {a: "Shows uploaded, validated, importing with rows done of total, then done. It can be cancelled until it ends and the page may be closed; the starter is mailed at the end.", e: [judge]}
+  who: {a: "Owner and accountant start and see every run of the firm; staff, viewers and support cannot unless the owner grants support access. The file is opened only by them through a 15 minute signed link.", e: [judge]}
+  result: {a: "Counts of rows created, updated, skipped and failed stay on the run for good; the error CSV and source file stay 30 days and are then deleted.", e: [judge]}
+  limit: {a: "One run importing at a time per firm; a second waits at validated. A job lock stops two app instances taking the same run.", e: [judge]}
+  timing: {a: "Work in the firm goes on. A row that meets a customer added meanwhile is skipped with that reason. Opening invoices keep their own numbers up to 16 characters, never touch the counters, and a clash in the same series refuses the row.", e: [judge]}
+  limits: {a: "Only .csv and .xlsx, 5 MB. UTF-8 and Windows-1252 are read, Excel dates and amounts with commas, rupee sign or spaces are cleaned, and leading zeros in pincode, phone and HSN are kept. Anything else says which limit it broke.", e: [judge]}
+  store: {a: "The original bytes sit under the firm's own path and are read only by the import worker; the rows made from them live in their own tables. The file is deleted 30 days after the run ends.", e: [judge]}
+  remove: {a: "Deleting a run's file never removes the rows it made. A customer's DPDP erasure leaves the run counts alone and the file is gone by then; firm deletion removes everything after the final export.", e: [wide:A255, wide:A256]}
+  safe: {a: "Type is checked by content, not name, so a renamed program is refused. Cells starting with = + - or @ are saved as text and formulas are never run.", e: [judge]}
+  dupe: {a: "Same bytes uploaded twice are noticed by hash and the owner is told which run took them; the rows are skipped by the match rules, so nothing doubles.", e: [judge]}
+  meta: {a: "Only the header row, row count and cell values are read; author and other hidden file details are ignored, and the file name is shown only to the firm.", e: ["judge"]}
+tracks:
+  run:
+    states: [{id: uploaded, start: true}, {id: validated}, {id: importing}, {id: done}, {id: failed}, {id: cancelled, end: true}, {id: undone, end: true}]
+    moves:
+      - {do: validate, from: uploaded, to: validated, who: [system], guard: "file readable, at most 5,000 rows, columns matched", effect: "dry run counts and row errors made", reverse: "cancel", notify: none, e: [judge]}
+      - {do: refuse_file, from: uploaded, to: failed, who: [system], guard: "file unreadable, over 5 MB or over 5,000 rows", effect: "nothing is read; the message names the limit", reverse: "retry", notify: [import_failed], e: [judge]}
+      - {do: start, from: validated, to: importing, who: [owner, accountant], guard: "at least one good row, no other run importing in this firm, an owner for opening invoices", effect: "good rows written in one step; bad rows skipped and listed", reverse: "cancel", notify: none, e: [judge]}
+      - {do: finish, from: importing, to: done, who: [system], guard: "all good rows written", effect: "counts stored; rows made are marked migrated and read-only if opening invoices", reverse: "undo", notify: [import_done], e: [judge]}
+      - {do: fail, from: importing, to: failed, who: [system], guard: "the system fails before the last row", effect: "whole batch rolled back; no row remains", reverse: "retry", notify: [import_failed], e: [judge]}
+      - {do: retry, from: failed, to: validated, who: [owner, accountant], guard: "the stored file still exists", effect: "the same file is checked again", reverse: "cancel", notify: none, e: [judge]}
+      - {do: cancel, from: [uploaded, validated, importing, failed], to: cancelled, who: [owner, accountant], guard: "none", effect: "nothing is kept; a running batch rolls back", reverse: "none: upload the file again as a new run", notify: none, e: [judge]}
+      - {do: undo, from: done, to: undone, who: [owner], guard: "within 7 days, the run only created rows, and none has a payment, credit note, email or edit", effect: "the created rows are removed and a history row names the run", reverse: "none: upload the file again", notify: none, e: [judge]}
+  upload:
+    states: [{id: receiving, start: true}, {id: stored}, {id: refused, end: true}, {id: deleted, end: true}]
+    moves:
+      - {do: store, from: receiving, to: stored, who: [system], guard: "type by content is csv or xlsx and size is 5 MB or less", effect: "bytes kept under the firm's path with a hash", reverse: "delete_file", notify: none, e: [judge]}
+      - {do: refuse, from: receiving, to: refused, who: [system], guard: "wrong type by content or over 5 MB", effect: "message states the allowed types and size", reverse: "none: upload a proper file", notify: none, e: [judge]}
+      - {do: delete_file, from: stored, to: deleted, who: [system, owner], guard: "30 days after the run ends, or the owner asks", effect: "bytes and error CSV removed; the run record stays", reverse: "none: upload the same file again", notify: none, e: ["judge"]}
+fields:
+  - {id: kind, type: choice, required: true, edit: "while uploaded", msg: "Choose what you are importing: customers, services or opening invoices."}
+  - {id: file, type: file, required: true, limit: "5 MB, csv or xlsx", edit: "nobody after upload", msg: "Choose a CSV or XLSX file up to 5 MB."}
+  - {id: encoding, type: choice, required: true, default: auto, edit: "while uploaded", msg: "Choose UTF-8 or Windows-1252, or leave it on auto."}
+  - {id: mapping, type: list, required: true, edit: "while uploaded or validated", msg: "Match every required column before you continue."}
+  - {id: mode, type: choice, required: true, default: skip_duplicates, edit: "while validated", msg: "Choose whether matching rows are skipped or updated."}
+  - {id: rows_total, type: number, required: true, limit: 5000, edit: "nobody", auto: true}
+  - {id: rows_created, type: number, required: true, limit: 5000, edit: "nobody", auto: true}
+  - {id: rows_updated, type: number, required: true, limit: 5000, edit: "nobody", auto: true}
+  - {id: rows_skipped, type: number, required: true, limit: 5000, edit: "nobody", auto: true}
+  - {id: rows_failed, type: number, required: true, limit: 5000, edit: "nobody", auto: true}
+  - {id: file_hash, type: text, required: true, limit: 64, edit: "nobody", auto: true}
+  - {id: error_file, type: file, required: false, limit: "2 MB, csv", edit: "nobody", auto: true}
+fields_e: [wide:B108, wide:B108, mk-023, mk-023]
+list:
+  filters: [run, upload, kind, started_by, created_at]
+  sorts: [-created_at]
+  default_sort: -created_at
+  columns: [created_at, kind, started_by, rows_total, rows_failed, run]
+  views: [All, Failed, Done]
+  page: 50
+  e: [judge]
+volume: {y1: 300, y3: 3000}
+queries:
+  - {id: newest, filters: [], sort: [-created_at], index: [tenant, created_at], p95: 100 ms}
+  - {id: by_state, filters: [run], sort: [-created_at], index: [tenant, run, created_at], p95: 100 ms}
+  - {id: same_file, filters: [file_hash], sort: [-created_at], index: [tenant, file_hash, created_at], p95: 50 ms}

@@ -1,0 +1,13 @@
+# Decisions that are cheap now and costly later. A map answers each in running.yaml.
+D1:  {ask: "Where is the tenant key, including child tables?", paid: "Lago added it to child tables in 2025"}
+D2:  {ask: "ID type, and is the human number separate?", paid: "Saleor moved order ids to UUID, about 18 changes"}
+D3:  {ask: "Are taxes rows, not one column?", paid: "Lago: 7 releases in 8 weeks"}
+D4:  {ask: "Is price per list or channel, not on the product?", paid: "Saleor multichannel"}
+D5:  {ask: "Which state tracks run side by side (payment, delivery, return)?", paid: "Lago renamed a public field; Shopify keeps three"}
+D6:  {ask: "Which documents are never edited after issue, and what reverses them?", paid: "Stripe, ERPNext"}
+D7:  {ask: "Number series: per entity, per year, any gaps allowed?", paid: "Lago backfilled it six times"}
+D8:  {ask: "Can an owner be a person, a team or a bot?", paid: "Chatwoot changed assignee three times"}
+D9:  {ask: "View settings: per user, per place, shared?", paid: "Plane changed the scope twice"}
+D10: {ask: "Which limits live in settings, not in the schema?", paid: "Shopify 100 variants until October 2025"}
+D11: {ask: "Where is space for custom fields, and will customers make their own objects?", paid: "Shopify orders got custom fields in 2022; Twenty rebuilt after 5 months"}
+D12: {ask: "Idempotency keys, outbox, UTC time, money in minor units, API version: decided?", paid: "Stripe"}

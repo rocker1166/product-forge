@@ -1,0 +1,30 @@
+- {id: W001, p: "right", pn: "Field errors for name, type, state, address; limits 100/101 checked", q: "right", qn: "Same; summary plus field errors"}
+- {id: W002, p: "right", pn: "Invalid GSTIN exact; 126 generated checksum cases all correct", q: "right", qn: "Same; 126 cases correct"}
+- {id: W003, p: "right", pn: "State prefix mismatch rejected on create and edit", q: "right", qn: "Same, names the state"}
+- {id: W004, p: "right", pn: "Duplicate blocked in firm, other firm and archived allowed, restore blocked", q: "right", qn: "Same"}
+- {id: W005, p: "right", pn: "Line1 150/151, city 60/61, pincode rules correct", q: "right", qn: "Same"}
+- {id: W006, p: "right", pn: "Email 120/121 and phone 6-9 start, 10 digits correct", q: "right", qn: "Same"}
+- {id: W007, p: "right", pn: "0, 90 ok, 91 rejected; blank uses firm default, tracks firm change", q: "right", qn: "Same"}
+- {id: W008, p: "right", pn: "Edit changes drafts only; issued copy kept on detail and print", q: "right", qn: "Same"}
+- {id: W009, p: "right", pn: "Archive and restore in UI; hidden from list and picker; viewer blocked", q: "right", qn: "Same"}
+- {id: W010, p: "right", pn: "Refused with archive message; free customer deleted after confirm", q: "right", qn: "Same"}
+- {id: W011, p: "right", pn: "Outstanding paisa-exact with TDS, void, draft excluded; credit separate", q: "right", qn: "Same"}
+- {id: W012, p: "right", pn: "Three tabs, newest first by number, 25 per page, page 2 correct", q: "wrong", qn: "Same-day rows unordered (00090 before 00092; receipts and credit notes too)"}
+- {id: W013, p: "right", pn: "Draft with customer only, zero lines, shows Draft in list and detail", q: "right", qn: "Same"}
+- {id: W014, p: "right", pn: "Default today IST even in LA browser; future date refused in UI", q: "right", qn: "Same"}
+- {id: W015, p: "right", pn: "Per-FY series: equal date ok, earlier refused, prior FY still issuable", q: "wrong", qn: "Series spans FYs: 31-03 draft refused once a 01-04 invoice exists; FY 25-26 empty"}
+- {id: W016, p: "right", pn: "Terms 0, 30, firm default; follows issue date; due before issue refused", q: "right", qn: "Same"}
+- {id: W017, p: "right", pn: "31-03 gives 25-26 and 01-04 gives 26-27", q: "right", qn: "Same (tested by editing own db dates)"}
+- {id: W018, p: "right", pn: "PREFIX/YY-YY/NNNNN; 4-char prefix gives 16 chars; 5 refused", q: "right", qn: "Same"}
+- {id: W019, p: "right", pn: "Counter per prefix and FY restarts at 00001", q: "right", qn: "Same"}
+- {id: W020, p: "right", pn: "31 concurrent issues unique, no gaps; failed and deleted drafts use none", q: "right", qn: "Same"}
+- {id: W021, p: "right", pn: "Zero lines refused on issue; 50 ok, 51 refused; UI caps at 50", q: "right", qn: "Same"}
+- {id: W022, p: "right", pn: "All limits at and over: desc, qty, rate, decimals; errors in UI", q: "right", qn: "Same"}
+- {id: W023, p: "right", pn: "0, 100 ok; 100.01 and 3 decimals refused", q: "right", qn: "Same"}
+- {id: W024, p: "right", pn: "4/6/8 digits only when firm has GSTIN; none needed without", q: "right", qn: "Same, checked at issue"}
+- {id: W025, p: "right", pn: "Only 0, 0.25, 3, 5, 18, 40; default 18", q: "right", qn: "Same"}
+- {id: W026, p: "right", pn: "Half-up exact on 120 random cases vs rational maths", q: "right", qn: "Same"}
+- {id: W027, p: "right", pn: "Defaults to customer state, editable in draft, locked after issue", q: "right", qn: "Same"}
+- {id: W028, p: "right", pn: "CGST and SGST each T*r/200 half up; shown per line and total", q: "right", qn: "Same"}
+- {id: W029, p: "right", pn: "IGST T*r/100 half up, no CGST or SGST", q: "right", qn: "Same"}
+- {id: W030, p: "right", pn: "Whole-rupee total; signed round-off on own line in form and detail", q: "right", qn: "Same"}

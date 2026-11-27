@@ -1,0 +1,68 @@
+id: invoice
+name: Invoice
+module: billing
+kinds: [document]
+why: the legal paper that asks for money
+links: [{to: customer, on_delete: "the issued copy keeps its own name and address"}]
+refs: [stripe/invoice, "erpnext/Sales Invoice"]
+abilities:
+  approve: {d: later, how: "Firms this small have one person who issues. Space is left between draft and issued.", e: [judge]}
+  print_pdf: {d: now, how: "GST layout, the same bytes as sent, file name pattern set by the firm.", e: [ninja-001, stripe-003]}
+answers:
+  freeze: {a: "Everything except note, contact and tags is frozen when issued.", e: [stripe-001, erp-001]}
+  number: {a: "Given at issue, per firm and financial year, no gaps; a voided number stays used.", e: [erp-001, ic-001]}
+  fix: {a: "Within 24 hours the e-invoice may be cancelled. Later only a credit note.", e: [ic-001, stripe-002]}
+  money: {a: "Rupees in paise. Tax per line, rounded per invoice, shown as CGST and SGST or IGST.", e: [ic-001, erp-001]}
+  paid: {a: "Payment is its own track beside the document track.", e: ["S:stripe/invoice.status", erp-001]}
+  late: {a: "Reminders 3 days before, on the day, and 7 days after. It stops once paid.", e: [ninja-002, "S:stripe/invoice.due_date"]}
+  law: {a: "GSTIN, place of supply, HSN or SAC, IRN and QR when the firm must e-invoice.", e: [ic-001]}
+  send: {a: "Issued means numbered and frozen. Sending is a separate act and can be repeated.", e: [stripe-001, stripe-004]}
+tracks:
+  document:
+    states: [{id: draft, start: true}, {id: issued}, {id: void, end: true}]
+    moves:
+      - {do: issue, from: draft, to: issued, who: [owner, accountant], guard: "customer has a state, at least one line", effect: "number given, fields frozen, tax record started", reverse: "void or credit_note", notify: [invoice_sent], e: [stripe-001, erp-001]}
+      - {do: void, from: issued, to: void, who: [owner, accountant], guard: "nothing paid, and within 24 hours if an e-invoice exists", effect: "link stays open and says voided", reverse: "none: make a new invoice", notify: [invoice_voided], e: [stripe-003, ic-001]}
+  payment:
+    states: [{id: unpaid, start: true}, {id: part_paid}, {id: paid}, {id: written_off, end: true}]
+    moves:
+      - {do: record_part, from: unpaid, to: part_paid, who: [owner, accountant], reverse: "remove_payment", notify: none, e: ["S:stripe/invoice.amount_remaining", erp-001]}
+      - {do: record_full, from: [unpaid, part_paid], to: paid, who: [owner, accountant, system], reverse: "remove_payment", notify: [invoice_paid], e: ["S:stripe/invoice.amount_paid", erp-001]}
+      - {do: remove_payment, from: [part_paid, paid], to: unpaid, who: [owner], guard: "reason written", reverse: "record the payment again", notify: none, e: [stripe-002, erp-002]}
+      - {do: write_off, from: [unpaid, part_paid], to: written_off, who: [owner], reverse: "none: make a new invoice", notify: none, e: ["S:stripe/invoice.status", erp-001]}
+  tax:
+    states: [{id: not_needed, start: true}, {id: pending}, {id: generated}, {id: failed}, {id: cancelled, end: true}]
+    moves:
+      - {do: send_to_portal, from: [not_needed, failed], to: pending, who: [owner, accountant, system], guard: "firm must e-invoice", reverse: "none: wait for the answer", notify: none, e: [ic-001]}
+      - {do: portal_ok, from: pending, to: generated, who: [system], reverse: "cancel_irn", notify: none, e: [ic-001]}
+      - {do: portal_refused, from: pending, to: failed, who: [system], reverse: "send_to_portal", notify: [tax_failed], e: [ic-001]}
+      - {do: cancel_irn, from: generated, to: cancelled, who: [owner, accountant], guard: "within 24 hours", reverse: "none: only a credit note can correct it now", notify: none, e: [ic-001]}
+      - {do: close_tax, from: not_needed, to: cancelled, who: [system], guard: "invoice voided before any portal call", reverse: "none: invoice is void", notify: none, e: [ic-001]}
+fields:
+  - {id: number, type: text, required: true, limit: 16, edit: "nobody", auto: true}
+  - {id: customer, type: link, required: true, edit: "while draft", msg: "Choose a customer."}
+  - {id: issued_at, type: date, required: true, default: today, edit: "while draft", msg: "The date cannot be before the last issued invoice."}
+  - {id: due_at, type: date, required: true, default: "issue date plus customer terms", edit: "while draft", msg: "Due date is before the issue date."}
+  - {id: lines, type: list, required: true, edit: "while draft", msg: "Add at least one line."}
+  - {id: total, type: money, required: true, limit: "0 to 10 crore", edit: "nobody", auto: true}
+  - {id: note, type: long_text, required: false, limit: 1000, edit: "any time", msg: "The note is longer than 1,000 letters."}
+fields_e: ["S:stripe/invoice.total", "S:erpnext/Sales Invoice.due_date"]
+list:
+  search: [number, customer, amount]
+  filters: [document, payment, tax, customer, issued_at]
+  sorts: [-issued_at, due_at, total]
+  default_sort: -issued_at
+  columns: [number, issued_at, customer, total, balance, payment, tax]
+  views: [All, Drafts, Unpaid, Overdue, This month, Tax failed]
+  bulk: [send, remind, download, export]
+  bulk_fail: "The rest go through; failed rows are listed with the reason and Retry."
+  export: {rows: [selected, filtered, date range], what: [invoices, lines, tax summary], formats: [CSV, XLSX, PDF zip], big: "over 50 rows comes by email; failure is emailed too"}
+  page: 50
+  e: [shop-001, stripe-004]
+volume: {y1: 6000, y3: 40000}
+queries:
+  - {id: newest, filters: [document, payment], sort: [-issued_at], index: [tenant, document, payment, issued_at], p95: 150 ms}
+  - {id: overdue, filters: [payment], sort: [due_at], index: [tenant, payment, due_at], p95: 150 ms}
+  - {id: one_customer, filters: [customer], sort: [-issued_at], index: [tenant, customer, issued_at], p95: 100 ms}
+  - {id: by_total, filters: [], sort: [total], index: [tenant, total], p95: 200 ms}
+  - {id: tax_failed, filters: [tax], sort: [-issued_at], index: [tenant, tax, issued_at], p95: 100 ms}

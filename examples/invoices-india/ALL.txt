@@ -1,0 +1,1421 @@
+A001 [roles] A CA invited by several firms signs in once and switches firm from a header menu; the header always shows firm name and role.
+A002 [roles] A staff role creates and edits drafts only; issue, payment, credit note and settings actions are hidden and return 403.
+A003 [roles] One role-by-action table lives in settings; the 403 test suite is generated from that table so docs and code cannot drift.
+A004 [roles] Owner can transfer ownership to another active user; the new owner confirms by emailed link, then the old owner becomes accountant.
+A005 [roles] Deactivating a user ends all their sessions at once, not at next expiry; their next request returns 401.
+A006 [roles] A role change applies on the user's next request without logout; a page already open fails its next action with 403.
+A007 [roles] Any user can list their own active sessions with device and last-seen time and sign out any of them.
+A008 [roles] A user cannot change their own role, deactivate themselves, or remove the last owner through any other route such as account deletion.
+A009 [roles] Owner can set the next invoice number for a series, only upward and only before any document in that series exists this year.
+A010 [roles] Share link visitors see only the one document; a separate owner-enabled statement link shows that customer's own open invoices, never others'.
+A011 [roles] Owner can revoke a pending invite; its link then shows 'invite expired'. Resend issues a new link and kills the old one.
+A012 [roles] An invite link works only for the invited email; accepting it while signed in as another user is refused.
+A013 [roles] Product support staff enter a firm only through owner-approved, time-boxed access that is written to the firm's history with a support label.
+A014 [roles] Owner creates API tokens with read or read-write scope; the secret shows once, is stored hashed, and revoked tokens return 401.
+A015 [roles] Owner can require TOTP two-step login for all users; users without it are forced to enrol at next login.
+A016 [roles] Plan, billing details and cancellation are owner-only; accountants see the plan read-only and get 403 on changes.
+A017 [roles] Full firm data export is owner-only, and every owner gets an email notice when it runs.
+A018 [roles] Viewer cannot see internal notes, bank account numbers of the firm's own settings page, or the user list.
+A019 [roles] Accountant may edit a draft created by someone else; history records both the creator and the editor.
+A020 [roles] Every role check runs on the server per request; a test calls each write endpoint with each role and expects the table's answer.
+A021 [workflow] Quote flow: draft, sent, accepted or declined or expired, then Convert to invoice copies lines and customer into a draft and links both ways.
+A022 [workflow] A quote has a validity date; after it passes, the quote shows expired and cannot be accepted without extending the date.
+A023 [workflow] Proforma invoice converts to a tax invoice draft; it uses its own series, prints 'Proforma, not a tax invoice', and is left out of GST registers.
+A024 [workflow] Advance received: issue a receipt voucher with GST on the advance; the later invoice adjusts it and shows only the balance payable.
+A025 [workflow] Advance refunded because no supply happened: issue a refund voucher against the receipt voucher, reversing the tax shown on it.
+A026 [workflow] Retainer: a recurring schedule bills a fixed fee each period in arrears and fills the service period text, for example 'May 2026'.
+A027 [workflow] Time billing: staff log hours against a customer and rate; Bill selected entries builds invoice lines, marks entries billed, and voiding the invoice frees them.
+A028 [workflow] Expenses re-billed to a customer become invoice lines from stored expense entries with receipt attached; billed entries cannot be billed twice.
+A029 [workflow] One payment can be split across several invoices of the same customer; the allocation screen defaults to oldest-due first and must sum to the amount.
+A030 [workflow] Money received before any invoice exists is saved as on-account payment on the customer and can be allocated later.
+A031 [workflow] Cheque payment moves received, deposited, cleared or bounced; a bounce reverses the payment, restores balance, and can add a bank-charge debit.
+A032 [workflow] Customer pays through a payment link; the gateway webhook records the payment with its reference and emails a receipt without staff action.
+A033 [workflow] Customer can press Raise an issue on the share page; invoice gets a disputed flag, reminders pause, and owners get an email.
+A034 [workflow] Owner can record a promise-to-pay date on an invoice; reminders for that invoice pause until the day after that date.
+A035 [workflow] Owner can write off a small remaining balance with a reason; it reduces balance as write-off, not as a payment, and shows on reports.
+A036 [workflow] Debit note: added charges after issue go on a debit note linked to the invoice, in its own series, and raise the balance due.
+A037 [workflow] Owner can lock a period up to a date; no document with issue date on or before it can be created, edited or voided.
+A038 [workflow] Recurring drafts notify the owner and wait for review; an owner can mark a schedule auto-issue and auto-send once it has run clean three times.
+A039 [workflow] Onboarding takes signup, firm name, state and optional GSTIN, then lands on a new invoice screen; a first invoice is issuable within five minutes.
+A040 [workflow] Cancelling the subscription turns the firm read-only after the paid period; invoices, payments and exports stay reachable for the retention period.
+A041 [workflow] Customer statement: pick customer and period, see opening balance, invoices, payments, credit notes and closing balance, then print or send.
+A042 [workflow] Bounced invoice email shows a banner on the invoice and customer asking for a corrected address; the old address is not retried.
+A043 [data] At issue the firm's legal name, address, GSTIN, bank block and logo are copied onto the invoice; later profile edits never change a reprint.
+A044 [data] Each issued document stores the template version and a content hash; reprint matches the first print, and a mismatch raises an integrity alert.
+A045 [data] Totals stored at issue equal a fresh recomputation from stored lines; a nightly check lists any document where they differ.
+A046 [data] Timestamps are stored in UTC and shown in IST; FY, due-date and reminder logic all use the IST calendar date.
+A047 [data] Database enforces unique (firm, document type, series, FY, sequence); a second insert of the same number fails at the database, not only in code.
+A048 [data] Payments link to invoices through an allocation table; the sum of allocations never exceeds the payment amount, enforced by constraint or locked transaction.
+A049 [data] Counter table stores per firm, document type, prefix and FY the last number; a nightly job compares it to the highest issued number and lists gaps.
+A050 [data] Customer holds tax type: registered, composition, SEZ, unregistered, overseas or UIN holder; it drives tax split, invoice title and register section.
+A051 [data] A customer can have several billing and shipping addresses and several contacts with roles (billing, cc); each invoice picks one address and stores a copy.
+A052 [data] A customer may hold several GSTINs, one per state registration; the invoice picks one and place of supply follows it.
+A053 [data] Customer stores optional PAN, Udyam number and TAN; PAN pre-fills from GSTIN characters 3 to 12 and the pair is checked.
+A054 [data] Invoice carries optional customer PO number, PO date, project reference and service period from and to, all printed when filled.
+A055 [data] Invoice stores supply type: B2B, B2C, export with payment of IGST, export under LUT, SEZ with payment, SEZ without payment, or reverse charge.
+A056 [data] Each line stores tax nature: taxable, nil-rated, exempt, non-GST or zero-rated, so GST returns split them correctly.
+A057 [data] Firm can hold several GSTIN registrations, each with its own state, address and number series; every invoice belongs to exactly one.
+A058 [data] Firm holds several bank accounts and a UPI ID; each invoice picks one, and print shows its details and a UPI QR with amount.
+A059 [data] LUT record per firm per FY: LUT number, valid-from, valid-to and ARN; export invoices under LUT read it and print its number.
+A060 [data] GST rates and SAC master are effective-dated tables; an invoice uses the rate in force on its date of supply, never a hard-coded list.
+A061 [data] State list carries GST codes including 38 Ladakh, 96 Foreign Country and 97 Other Territory; 99 Centre Jurisdiction is not offered for customers.
+A062 [data] Foreign-currency invoices store currency, exchange rate to 4 decimals, rate source and date, and the INR equivalent of every amount.
+A063 [data] Saved services catalogue holds name, SAC, rate, tax rate and unit; lines copy values so later catalogue edits do not change issued invoices.
+A064 [data] Subscription record stores plan, status, trial end, period end, limits and per-month issued-invoice count used for plan limits.
+A065 [data] Message log stores channel, template id, provider message id, status history and timestamps for every email, WhatsApp and SMS.
+A066 [data] Deleting a draft hard-deletes it but leaves a history row with draft id, actor, customer and total; nothing else survives.
+A067 [data] Generated PDFs and exports live under firm-scoped paths and are served through signed URLs that expire in 15 minutes.
+A068 [data] Books and history are kept at least 8 years and never purged by plan, trial or closure rules.
+A069 [data] Audit history cannot be switched off by any role and has no edit or delete path in the interface or API.
+A070 [data] Timesheet entries store person, date, hours, rate, customer, billable flag and billed invoice id; billed entries are locked.
+A071 [tax] Invoice must show the firm's name, address, GSTIN, number, date, recipient details, SAC, taxable value, rate, tax amounts and place of supply.
+A072 [tax] Services invoice should be issued within 30 days of supply; issue date more than 30 days after the stated service date shows a warning.
+A073 [tax] Invoice for an unregistered recipient with taxable value of Rs 50,000 or more requires recipient name, address and state; below it, state only.
+A074 [tax] Invoice prints a line showing whether tax is payable on reverse charge, Yes or No, and a signature block for the authorised signatory.
+A075 [tax] Services invoice prints 'Original for recipient' and 'Duplicate for supplier' copies; printing both on one run is one action.
+A076 [tax] Invoice with both taxable and exempt lines is titled 'Invoice-cum-Bill of Supply'; an all-exempt firm issues 'Bill of Supply'.
+A077 [tax] Invoice number must start with a letter or digit 1 to 9 and use only letters, digits, slash and hyphen, or the e-invoice portal rejects it.
+A078 [tax] Default place of supply is the recipient's registered location; for an unregistered recipient it is address on record, else the supplier's location.
+A079 [tax] Place of supply can be overridden with a reason for immovable-property services (location of property) and for services physically performed (location of performance).
+A080 [tax] Intermediary services, common for agencies and recruiters, have place of supply at the supplier's location, so a foreign customer is not an export and tax applies.
+A081 [tax] Export of services requires recipient outside India, place of supply outside India and payment in foreign exchange; a failed check blocks zero-rating with the reason.
+A082 [tax] Export under LUT shows 'Supply meant for export under LUT without payment of IGST', the LUT number, and tax of zero on every line.
+A083 [tax] Export with IGST payment charges IGST at the normal rate with place of supply 'Other country' and flags the invoice for refund tracking.
+A084 [tax] Export under LUT is refused when no LUT is recorded for the FY of the invoice date or when the stored LUT has expired.
+A085 [tax] Supply to an SEZ unit or developer is zero-rated: with LUT no tax, or with IGST; the invoice marks SEZ and place of supply is the SEZ state.
+A086 [tax] Export and SEZ invoices of e-invoice firms carry the matching e-invoice supply type (export or SEZ, with or without payment) in the IRN request.
+A087 [tax] Reverse-charge supply: the supplier's invoice shows no tax and 'Tax payable on reverse charge: Yes'; a firm-level RCM category list pre-sets it.
+A088 [tax] Legal services by an advocate or firm of advocates to a business entity are on reverse charge, so such invoices default to no tax charged.
+A089 [tax] Composition firm issues a Bill of Supply reading 'Composition taxable person, not eligible to collect tax on supplies'; tax invoices are blocked.
+A090 [tax] Composition firm shows a tax-on-turnover report at 6 percent for services, with quarterly figures, and never shows GST on documents.
+A091 [tax] Registration threshold tracker warns the owner when an unregistered firm's year turnover nears Rs 20 lakh (Rs 10 lakh in special-category states).
+A092 [tax] Advance for services is taxable on receipt: a receipt voucher states advance amount, rate, tax and place of supply, with its own series.
+A093 [tax] Late payment charges are taxable consideration; a late fee billed on a debit note or invoice line carries the service's tax rate.
+A094 [tax] Interest on delayed payment to a micro or small enterprise follows the agreed terms; with none it is three times the RBI bank rate, compounded monthly.
+A095 [tax] Invoice prints the Udyam registration number when the firm has one; buyers use it to meet the 45-day payment rule.
+A096 [tax] TDS on professional fees is recorded with section: 194J at 10 percent for professional, 2 percent for technical services, 194C at 1 or 2 percent for contracts.
+A097 [tax] Suggested TDS amount is computed on the amount before GST when GST is shown separately on the invoice; the user can override it.
+A098 [tax] TDS section list is a table with rate and annual threshold, effective-dated; 194J threshold is Rs 50,000 from 1 April 2025.
+A099 [tax] A TDS rate of 20 percent applies to a payee without PAN; the TDS helper shows this when the firm has no PAN on file.
+A100 [tax] TDS recorded on a payment appears in a receivable ledger by customer, section and FY, with a flag for certificate (Form 16A) received.
+A101 [tax] A TDS-by-customer report for the FY lists deducted amounts by quarter so the owner can match them with Form 26AS or AIS.
+A102 [tax] GST TDS at 2 percent deducted by government customers is its own deduction type, separate from income-tax TDS, and settles the invoice.
+A103 [tax] An optional TCS line sits outside GST taxable value for firms that collect it; it never changes the tax split.
+A104 [tax] E-invoice applies when the firm's turnover crossed Rs 5 crore in any year since 2017-18; the firm profile stores that flag.
+A105 [tax] E-invoice must be reported within 30 days of invoice date for firms with turnover Rs 10 crore or more; generation after that is blocked with a reason.
+A106 [tax] IRN cancellation is allowed only within 24 hours of generation and only if the invoice is not yet in a filed return; reason is mandatory.
+A107 [tax] A credit or debit note against an e-invoiced invoice must itself get an IRN; the issue flow does this or blocks with the portal error.
+A108 [tax] B2C invoices need no IRN; the generate button appears only for B2B, export, SEZ and deemed export documents.
+A109 [tax] E-invoice documents print the IRN, acknowledgement number and date, and the signed QR code returned by the portal.
+A110 [tax] E-invoice data limits apply on save for e-invoice firms: legal name 100 characters, address line 100, city 3 to 50, item description 300.
+A111 [tax] HSN or SAC digits depend on turnover: 4 digits up to Rs 5 crore, 6 digits above; the firm's turnover band sets the minimum.
+A112 [tax] SAC field validates against the official code master and shows its description; unknown codes are refused, with a search-by-words picker.
+A113 [tax] Rate or SAC change by the Council takes effect by date of supply; drafts saved earlier are rechecked at issue and show a rate-changed warning.
+A114 [tax] Discount before supply may reduce taxable value only if shown on the invoice; post-supply discount needs a credit note with the buyer's ITC adjustment noted.
+A115 [tax] Credit note for post-sale discount asks 'Was this agreed before the supply?' and records the answer on the document.
+A116 [tax] Debit note carries its own number series DBN, links to the invoice, adds tax at the original rate, and has no 30 November limit.
+A117 [tax] Credit note after the 30 November cutoff is refused unless the owner records it as a commercial, non-GST credit with no tax effect.
+A118 [tax] Reimbursed expenses are added to taxable value at the main service's rate unless the firm marks them pure-agent and all conditions are ticked.
+A119 [tax] Reimbursed expense lines marked pure-agent need receipt, customer-authorised-payment and no-markup ticks; missing one turns the line taxable.
+A120 [tax] Cash payment of Rs 2 lakh or more in a day from one person or for one transaction is blocked with the Section 269ST warning.
+A121 [tax] Rounding follows one rule everywhere: line tax half-up to paise, document total to nearest rupee with a round-off line, GSTR figures use stored paise.
+A122 [tax] B2C inter-state invoices above Rs 1 lakh are reported invoice-wise (B2CL); smaller ones fall in state-wise summary; register tags each document.
+A123 [tax] Registers cut by tax period follow the firm's filing mode, monthly or QRMP quarterly, set in the profile.
+A124 [tax] A documents-issued summary per series lists first number, last number, total issued and cancelled for the period, as GSTR-1 table 13 needs.
+A125 [tax] HSN summary report groups taxable value and tax by SAC and rate for the period, matching GSTR-1 table 12.
+A126 [tax] Outward summary matches GSTR-3B table 3.1: taxable, zero-rated, nil-rated or exempt, non-GST, and reverse-charge, with tax per head.
+A127 [tax] Foreign-currency invoices convert at the rate of the date of time of supply per the firm's accounting policy; the rate source is stored.
+A128 [tax] Export payment reduced by bank charges or forex difference is closed through a bank-charge adjustment, not left as a small balance due.
+A129 [tax] Time of supply for a service defaults to the invoice date when issued within 30 days, else the date service was provided.
+A130 [tax] Continuous-supply contracts get an invoice on or before the payment due date set in the contract; the schedule uses that date.
+A131 [tax] Taxable value of a line excludes GST but includes incidental charges and late fee shown on the same invoice.
+A132 [tax] No tax line can appear on documents of an unregistered firm, and a firm that registers later switches title only for documents issued after the date.
+A133 [tax] GSTIN change or new registration of the firm starts a fresh series for that GSTIN; old series stay readable and untouched.
+A134 [states] Quote states are draft, sent, accepted, declined, expired and converted; converted and declined are final, expired can be reopened by extending the date.
+A135 [states] Subscription states are trial, active, past_due, grace, read_only and cancelled; each state names exactly which actions stay allowed.
+A136 [states] Cheque payments carry received, deposited, cleared or bounced; only cleared cheques count toward settled in strict mode, if the firm turns it on.
+A137 [states] Recurring schedule states are active, paused, ended and failed; a failed run shows its reason and does not retry blindly.
+A138 [states] Time entries are open, approved, billed; billed to open happens only when the linked invoice is voided.
+A139 [states] Payment link states are created, opened, paid, expired and cancelled; a paid link cannot be used again.
+A140 [states] Invoice carries a separate flag disputed on or off; it never changes status or balance, only reminders and list filters.
+A141 [states] Email delivery states are queued, sent, delivered, bounced, complained; opened is a flag set by the share link visit.
+A142 [states] Import job states are uploaded, validated, importing, done, failed; failed leaves no half-imported rows.
+A143 [states] Export job states are queued, ready, expired; a ready file link expires after 7 days and the file is then deleted.
+A144 [states] Receipt voucher states are issued, adjusted and refunded; adjusted ones cannot be refunded again.
+A145 [states] Every object has a table of allowed transitions; a test tries each disallowed pair through the API and expects a 409.
+A146 [states] Written-off balance sets invoice status paid-with-write-off in reports and can be undone by an owner within the same open period.
+A147 [states] E-invoice states add cancelled to none, generated, failed; cancelled IRN cannot be reused and the invoice then needs a credit note or void.
+A148 [states] Draft states include 'needs review' for recurring and imported drafts; only reviewed drafts can be issued in bulk.
+A149 [exception] Issuing at 00:30 IST on 1 April uses the new FY number even though UTC is still 31 March.
+A150 [exception] Gateway webhook arrives twice or out of order; the payment is recorded once and later events never undo a newer state.
+A151 [exception] Gateway webhook with an amount different from the link amount creates a flagged payment for review, not an auto-settled invoice.
+A152 [exception] Webhook with a bad signature is rejected with 401 and logged; the payment is not recorded.
+A153 [exception] E-invoice request times out after the portal accepted it; before retrying the app fetches the IRN by document details and reuses it.
+A154 [exception] Portal says duplicate IRN: the app stores the IRN it returns and marks the invoice generated instead of showing failure.
+A155 [exception] A customer's GSTIN shows cancelled or suspended on the portal at issue time; the user sees a warning and may continue with a reason.
+A156 [exception] Payment and credit note posted to the same invoice at the same moment cannot together exceed balance; the invoice row is locked.
+A157 [exception] Rate changes between draft save and issue; the issue screen shows the old and new tax and needs a click before issuing.
+A158 [exception] Customer archived while a draft for them is open; the draft can still be issued but a notice says the customer is archived.
+A159 [exception] Recurring run on a day when the customer is archived or firm is read-only skips with a logged reason and tells the owner.
+A160 [exception] Recurring job down for two days: on restart it creates each missed period once, never duplicates, using a unique key of schedule and period.
+A161 [exception] Plan limit reached mid-bulk action: documents already issued stay, the rest stay draft, and the result says how many of each.
+A162 [exception] Plan limit never blocks credit notes, payments, voids or exports; only creating new issued invoices counts toward it.
+A163 [exception] Trial or paid period ends while a user is typing: the save succeeds as a draft, then the firm turns read-only on next load.
+A164 [exception] Firm has no GSTIN, state or address yet; issuing is blocked with a checklist of what to fill and a link to each field.
+A165 [exception] PDF render fails or times out: the invoice stays issued, the share page shows 'preparing', and a retry runs automatically.
+A166 [exception] Share link opened after the invoice is voided shows a plain 'This invoice was cancelled' page with number and date only.
+A167 [exception] Recurring day 29 to 31 is not offered; a schedule imported with such a day is clamped to 28 and tells the owner.
+A168 [exception] Database failover mid-issue: the number is either committed with the invoice or not at all, and a retry cannot make a second invoice.
+A169 [exception] API requests carry an idempotency key; repeating the key with the same body returns the first result, a different body returns 422.
+A170 [exception] Too many requests from one user or token return 429 with a Retry-After header; the page shows a calm wait message.
+A171 [exception] Voiding an invoice that has draft credit notes is blocked until those drafts are deleted or issued.
+A172 [exception] Reversing a payment whose invoice already carries a later credit note recalculates both, and customer credit never goes negative.
+A173 [exception] Currency rate missing for the invoice date: save is blocked with a prompt to enter a rate, never a stale rate.
+A174 [exception] Pasting text with line breaks into one-line fields strips breaks; pasting beyond the limit shows the count, not silent cut-off.
+A175 [validation] PAN must match five letters, four digits, one letter; the 4th letter must be a valid holder-type code such as C, P, F, H or T.
+A176 [validation] TAN must match four letters, five digits, one letter.
+A177 [validation] IFSC must be four letters, a zero, then six letters or digits; bank account is 9 to 18 digits.
+A178 [validation] UPI ID must match handle@provider; it is checked for format only and never sent anywhere on save.
+A179 [validation] Udyam number must match UDYAM-XX-00-0000000, with a valid state code.
+A180 [validation] No field stores a 12-digit Aadhaar number; pasting one into a note or ID field is refused.
+A181 [validation] Pincode's first two digits are checked against the state; a mismatch is a warning, not a block.
+A182 [validation] Phone accepts +91, 91 or 0 prefixes and spaces, then stores 10 digits; landlines with STD code are allowed in a separate field.
+A183 [validation] Text fields are trimmed, inner whitespace is collapsed, and whitespace-only values count as empty; limits count characters, not bytes.
+A184 [validation] Exchange rate must be above 0 with up to 4 decimals; foreign amounts allow 2 decimals except for currencies with none.
+A185 [validation] Dates reject impossible days such as 29 February in non-leap years; date pickers and typed dates give the same result.
+A186 [validation] Possible duplicate customer, same name and state or same phone, shows a warning with a link to the existing one, not a block.
+A187 [validation] HSN or SAC with leading zeros is kept as text everywhere; codes never lose zeros through import, export or JSON.
+A188 [validation] TDS amount cannot exceed the invoice taxable value; payment mode, amount and TDS all show together in one error summary.
+A189 [validation] Customer note and PDF text strip control characters but keep Hindi, Bengali, Tamil and other Indian scripts.
+A190 [validation] Write-off amount must be above 0 and at most the balance due, with a reason of 5 to 200 characters.
+A191 [validation] Quote validity date must be on or after the quote date; a proforma needs at least one line with a rate.
+A192 [validation] Email and WhatsApp send checks recipient format and opt-out flag before queueing; blocked sends say which check failed.
+A193 [validation] Share link expiry chosen by the owner must be between 1 and 365 days; the default is 30.
+A194 [validation] Uploaded logo accepts PNG or JPG up to 1 MB and 2000 pixels wide; others are refused with the limits stated.
+A195 [message] Invoice email subject reads 'Invoice <number> from <firm> for Rs <amount>, due <date>'; the body gives balance due, pay link, PDF and firm contact.
+A196 [message] Attached PDF file name replaces slashes with hyphens, for example INV-26-27-00001.pdf; no slash reaches a file name or URL path.
+A197 [message] Email is sent from a product address with the firm's name as sender and the firm's email as Reply-To.
+A198 [message] Sending domain has SPF, DKIM and DMARC set; a monthly test shows pass for all three on a sample message.
+A199 [message] A hard bounce adds the address to a suppression list for that firm; later sends to it are blocked with the reason shown.
+A200 [message] A spam complaint stops all reminders to that address across the firm and tells the owner.
+A201 [message] Customer reply to the email goes to the firm, not to the product.
+A202 [message] WhatsApp invoice message uses a pre-approved template with named fields and a PDF; free text is not sent outside the 24-hour reply window.
+A203 [message] WhatsApp sends only to customers marked as opted in; the opt-in source and date are stored.
+A204 [message] Customer replying STOP to a WhatsApp or SMS message sets the opt-out flag and no further reminders go on that channel.
+A205 [message] Templates are shown in preview with sample values; a template with a missing field cannot be saved.
+A206 [message] SMS goes only through a registered sender ID and template with an entity ID; text not matching the template is not sent.
+A207 [message] SMS text uses 'Rs' instead of the rupee sign, and a message that would exceed one segment shows its segment count before send.
+A208 [message] Reminders send between 9 am and 7 pm IST only; ones queued outside the window wait until 9 am.
+A209 [message] One consolidated reminder per customer lists all overdue invoices; a customer with three overdue invoices gets one message, not three.
+A210 [message] Reminder wording has three tones for day 1, 7 and 15; each shows balance due, not original total, and the pay link.
+A211 [message] Reminders can be switched off per customer and per invoice; an off switch shows on the invoice header.
+A212 [message] Before-due reminder, 3 days ahead, is optional per firm and off by default.
+A213 [message] Payment receipt message goes automatically after a payment and states amount, TDS, balance left and receipt number.
+A214 [message] Owner gets a weekly email on Monday 9 am IST with total overdue, newly paid, and top 5 late customers.
+A215 [message] Owner gets alerts for e-invoice failure, trial ending in 7 and 1 days, plan limit at 80 and 100 percent, and LUT expiry 30 days ahead.
+A216 [message] Share page shows invoice, balance, pay button and download; it needs no login and carries no firm-private data such as internal notes.
+A217 [message] Amount in words follows the Indian system (lakh, crore) with paise, for example 'Twelve Lakh Rupees and Fifty Paise Only'.
+A218 [message] PDF embeds fonts with the rupee glyph and Indian scripts; a customer name in Devanagari prints correctly.
+A219 [message] A 50-line invoice paginates with repeated headers, no split rows, and the tax summary and totals on the last page.
+A220 [message] Every error message names the field, the limit and the fix; no message shows a code or stack trace.
+A221 [message] Void invoices print with a diagonal CANCELLED mark and the void date; their number stays visible.
+A222 [message] Pre-debit notice emails go to the owner at least 24 hours before our own subscription auto-debit.
+A223 [message] Our own subscription invoice to each firm is a GST invoice with the firm's GSTIN so the firm can claim input credit.
+A224 [job] Every job takes a lock so two app instances never run the same job at once; a test starts two runners and expects one set of results.
+A225 [job] Each job run stores start, end, counts and errors; the owner-facing page shows last run of reminders and recurring.
+A226 [job] Jobs use a unique key per unit of work, such as invoice and reminder step, so re-running a job sends nothing twice.
+A227 [job] A reminder job that missed its day sends at most one catch-up message per invoice, never the whole backlog.
+A228 [job] Nightly integrity job checks totals, balances, counters, allocations and hash of issued documents, and alerts engineers on any difference.
+A229 [job] Daily job checks e-invoice window: documents near 30 days without an IRN are listed to the owner.
+A230 [job] Month-end job on the 1st at 08:00 IST builds the accountant pack: sales register, credit and debit notes, receipts, TDS and ageing, emailed or linked.
+A231 [job] Filing calendar job sends owner reminders for GSTR-1 on the 11th, GSTR-3B on the 20th, and QRMP dates 13th and 22nd or 24th.
+A232 [job] Trial-end job moves firms to read-only after trial and grace; no job deletes any firm's books.
+A233 [job] Webhook delivery to outside systems retries with growing waits for 24 hours, then lands in a dead-letter list the owner can replay.
+A234 [job] Daily reconciliation job compares gateway settlements with recorded online payments and flags payments missing on either side.
+A235 [job] Export files are deleted 7 days after creation and their links die with them; the export record stays.
+A236 [job] Backup runs nightly, and a restore test into a clean database runs weekly and checks counts of invoices and payments.
+A237 [job] FY rollover job runs on 1 April 00:05 IST, creates new counters at 00001, and does not reset any pending draft.
+A238 [job] Job clock tests use a fixed IST clock, including 31 March to 1 April and month ends, so schedules are testable.
+A239 [job] PDF and e-invoice calls run as queued jobs with a retry limit of 5 and an owner-visible failed state, never inline in a user request.
+A240 [move] Onboarding lets the owner set the next number per series before first issue, so a firm moving from another tool continues its sequence.
+A241 [move] Opening-balance import adds unpaid old invoices with original number, date, customer and balance, marked migrated and read-only.
+A242 [move] Migrated invoices keep their original numbers even if longer or differently formatted, up to 16 characters, and never touch the counters.
+A243 [move] Customer CSV import maps columns, shows a dry run with row errors, and imports nothing until the user confirms.
+A244 [move] Import error report downloads as CSV with row number, field and reason; fixing and re-uploading the file does not duplicate rows already added.
+A245 [move] Import detects duplicates by GSTIN and, for unregistered customers, by name and phone, then skips or updates by user choice.
+A246 [move] Import reads UTF-8 and Windows-1252 files and Excel date formats; leading zeros in pincode, phone and HSN survive.
+A247 [move] Import caps at 5,000 rows per file and tells the user to split larger ones before it reads anything.
+A248 [move] Tally export produces vouchers in Tally's XML import format with party ledgers, sales ledger, tax ledgers and round-off per document.
+A249 [move] Sales register, credit notes and receipts export as a zip with one CSV per month for the accountant, in the same column order every time.
+A250 [move] GSTR-1 JSON export validates against the GST offline tool's schema and lists errors per document before download.
+A251 [move] Customer ledger and payment CSV exports exist with the same filter options as the screen they come from.
+A252 [move] CSV exports prefix cells starting with =, +, - or @ with a single quote, so customer names cannot run formulas in Excel.
+A253 [move] Full firm export is one zip with CSVs of every object, all PDFs, and a read-me with field meanings; it works in read-only state.
+A254 [move] Export is available after cancellation and during grace; requesting data export is never blocked by plan or unpaid dues.
+A255 [move] DPDP erasure request on a customer contact removes name, email and phone from the contact but keeps financial records the law requires.
+A256 [move] Firm deletion is owner-only with typed firm name, a 30-day cooling period and a final export link; books older than 8 years may then be removed.
+A257 [move] Departing user's access ends at once, their name stays on history, and drafts they own can be reassigned in one step.
+A258 [move] Merge two customers moves invoices, payments, credit notes and credit balance to the kept one and leaves old snapshots unchanged.
+A259 [move] Bulk upload of payments from a bank statement CSV matches rows to invoices by amount and reference and shows unmatched rows for manual choice.
+A260 [move] Bank statement matching suggests but never auto-records; the user confirms each batch.
+A261 [move] Moving a customer between states edits future invoices only; old invoices keep their place of supply and tax split.
+A262 [move] Switching a firm from unregistered to registered asks for GSTIN and effective date, and opening balances stay as Bill of Supply documents.
+A263 [move] A firm changing its legal name or address records an effective date; documents on or after it show the new details.
+B001 [home] Dashboard splits receivables into Current and Overdue; tapping either figure opens the aging report already filtered to that part.
+B002 [home] Dashboard shows total invoiced and total received for the current financial year; each figure opens its own report on tap.
+B003 [home] Dashboard period switch offers this month, last quarter, this financial year and custom range, and keeps the last choice per user.
+B004 [home] Dashboard lists expected receipts in buckets 0-15, 16-30, 31-45 and above 45 days from today, per customer.
+B005 [home] A staff user without report rights sees a dashboard with no revenue totals, and those figures are not fetched by the page at all.
+B006 [views] Invoice list has a quick filter for invoices the customer has opened, separate from sent, partially paid and overdue.
+B007 [views] A filtered and sorted invoice list can be saved as a named custom view and reopened in one tap.
+B008 [views] A report preview has a text box over each column that filters rows live, and the CSV button then exports only the visible rows.
+B009 [quick_entry] Keyboard shortcuts exist for new transaction, and for email, print and download of all selected rows in the list.
+B010 [quick_entry] The send-email dialog accepts extra To, Cc and Bcc addresses for that one send without editing the customer record.
+B011 [quick_entry] A dry-run preview of an invoice shows final PDF, totals and number format without consuming an invoice number.
+B012 [quick_entry] One bulk action sets TDS on only the ticked lines of an invoice, so the user need not untick each line.
+B013 [quick_entry] An issued invoice can be scheduled to email at an exact date and time chosen by the user, for example 9 am next morning.
+B014 [quick_entry] After saving an invoice the user can stay on a blank new invoice for the same customer, to enter several milestone invoices in a row.
+B015 [modes] Rivals offer lock invoice never, when sent or when paid; here the lock is fixed at issue and the settings page states that plainly.
+B016 [modes] Recurring setting chooses create as draft or create and send, at firm level, and each recurring profile may override it.
+B017 [favourites] Repeated CSV import column mappings can be saved as a named template and picked from a dropdown on the next import.
+B018 [search_all] One search key focuses the search box from any page; results group by module and an advanced search can narrow by field.
+B019 [keyboard] Shift plus question mark opens a popup listing every shortcut, and the same list opens from the help menu.
+B020 [keyboard] Go-to keys jump to the invoices, estimates and credit notes lists, and other keys open settings and the firm switcher.
+B021 [keyboard] Keys select all rows, and select a range between two rows, to feed bulk email or download.
+B022 [planning] An invoice has an expected payment date, separate from due date, that drives reminders and the expected-receipts bucket.
+B023 [time_off] Due dates and reminder offsets count calendar days; the product never shifts them for Sundays or bank holidays.
+B024 [teams] A sales-by-user report totals invoice count, amount and tax per creating user; invoices with no assigned user count for nobody and say so.
+B025 [custom_roles] Custom roles are not offered in v1; the Users page says roles are fixed and lists exactly what each of the three can do.
+B026 [custom_roles] Request pattern: a permissions grid with View, Create, Edit per category appears when the administrator switch is off.
+B027 [custom_roles] A staff user cannot open Reports or Settings; the menu hides them and a typed URL returns 403.
+B028 [custom_roles] The user who created the firm is marked super owner; only that user can delete the firm, and transfer needs another active owner.
+B029 [signin_company] The portal sign-in for a firm's customers can require a one-time code as a second step, switched by the firm.
+B030 [signin_company] Users can sign in with a passkey or a second factor, and the owner can require it for every user of the firm.
+B031 [signin_company] Users can sign in with a Google or Microsoft account, and the owner can turn password sign-in off for the firm.
+B032 [signin_company] Two-factor setup scans a QR code with any authenticator app and saves only after the user types one valid code.
+B033 [preferences] Each user picks own language, date format and number format; the invoice PDF follows the firm setting, not the viewer's.
+B034 [preferences] Firm setting for first month of the year anchors annual reports; India default is April and the setting shows the resulting financial year.
+B035 [preferences] Company number format decides how imported amounts parse, comma or full stop as decimal, and the import preview shows the parsed result.
+B036 [branding] Logo upload accepts JPG or PNG up to 1 MB and appears on PDFs and emails; deleting it never changes PDFs already sent.
+B037 [branding] Two logo variants, one for white backgrounds and one for the coloured header bar, can be uploaded.
+B038 [branding] Brand colour and accent colour settings apply across emails, hosted invoice page and PDFs, and a table states where each applies.
+B039 [branding] The downloaded invoice file name follows a pattern the firm sets, such as number plus customer name.
+B040 [branding] MSME Udyam number prints under the firm address on every PDF; the format UDYAM-XX-00-0000000 is validated on save.
+B041 [branding] The customer portal can run on the firm's own domain, with the firm's own sender address on invoice emails.
+B042 [templates] The template gallery offers several style families; editing a template changes every invoice using it, and the editor says so before save.
+B043 [templates] Invoice, credit note, payment receipt and email each have their own template, each editable, with one marked default.
+B044 [templates] Templates include multi-logo and multi-address variants for firms invoicing from more than one branch.
+B045 [templates] Email subject and body for invoice, receipt and three reminders accept merge tags for number, amount and view link, with a live preview.
+B046 [templates] A QR code on the invoice PDF carries a UPI payment string or custom text up to 250 characters, switched on per document type.
+B047 [templates] Line items can be grouped under a titled group that shows only the group subtotal on the PDF.
+B048 [automation] Reminders can run before due date, after due date or after invoice date, in up to three tiers plus an endless repeat with its own frequency.
+B049 [automation] Reminders can key off the expected payment date as well as the due date, with three preloaded reminder rules.
+B050 [automation] A late fee added by a reminder appears as its own invoice line or note, never silently inside the balance, with consent text.
+B051 [automation] A thank-you note with the receipt is sent automatically when a customer pays online, and the owner gets a notice.
+B052 [automation] Manual reminders exist separately from automatic ones, with their own editable text for overdue and for sent-not-yet-due invoices.
+B053 [automation] Recurring invoices can auto-apply excess payments and open credit notes of the same customer when they are created.
+B054 [recurring] A recurring profile shows next send date, frequency, remaining cycles and status on one summary tab, and a schedule tab lists upcoming dates with due dates.
+B055 [recurring] A recurring profile has states draft, pending and stopped; nothing is generated until Start is pressed on a draft.
+B056 [recurring] A recurring profile can name the service period each invoice covers, for example Feb to Apr, and prints it.
+B057 [recurring] One customer's several monthly profiles can merge into a single invoice on the same day.
+B058 [recurring] Each recurring profile keeps its own activity trail: who created, edited, stopped or restarted it, and when.
+B059 [recurring] An invoice can be scheduled to be created and sent on a future date as a one-off, separate from repeating profiles.
+B060 [reports] Aging summary groups unpaid balances per customer into buckets, switchable between invoice date and due date, with bucket size set by user.
+B061 [reports] Aging detail lists each unpaid invoice and open credit note with customer and balance, sorted by days overdue.
+B062 [reports] Sales by customer shows invoiced total per customer for a date range, switchable between invoices only, credit notes only or both.
+B063 [reports] Sales by item or service shows quantity and amount per saved service or SAC code for any range.
+B064 [reports] A payments-received report lists date, customer, invoice, mode, amount and TDS for a range, with refunds in a separate report.
+B065 [reports] A refund history report lists each refund by customer, date, amount and mode, apart from the payments received report.
+B066 [reports] A tax summary report totals tax collected per tax name and rate for any range, with CGST, SGST and IGST shown apart.
+B067 [reports] A customer balance report shows per customer invoices, credits, payments and balance right now.
+B068 [reports] Every report has a date-range preset, a status filter, a customer filter and a column picker, and exports exactly what is shown.
+B069 [reports] A report option includes deleted or voided records so history reconciles; voided rows are marked, never silently dropped.
+B070 [reports] TDS receivable report lists TDS deducted by customer per quarter and financial year, to match Form 26AS.
+B071 [reports] System mail report lists every email sent by the firm's account with type, recipient, time and status.
+B072 [reports] A portal activity report lists when each customer opened, viewed or paid, by time.
+B073 [reports] Invoice report CSV opens with leading zeros kept in invoice numbers, and the export note tells Excel users to choose Don't Convert.
+B074 [scheduled_report] An aging report, a statement or a sales report can be scheduled by email weekly, monthly or custom, to chosen addresses.
+B075 [scheduled_report] A report run can be emailed to the logged-in user as an attachment instead of downloaded, and optionally with attached documents zipped.
+B076 [public_page] A hosted invoice page shows details, amounts and status, offers PDF of invoice and receipt, and lives at a long random private URL.
+B077 [public_page] The hosted invoice page offers every enabled pay method in one place: UPI, card, net banking.
+B078 [public_page] The hosted invoice page never shows other invoices or customers; the link is per invoice, not per customer.
+B079 [public_page] An owner can mark an invoice un-viewed again so the next customer view is tracked afresh.
+B080 [portal] A portal lets each customer see invoices, payments, credit notes and download a statement for any date range they choose.
+B081 [portal] Portal access is enabled per customer and per contact person, not for all customers at once.
+B082 [portal] Portal settings include welcome message, whether customers may edit their address and contacts, and whether they may forward documents.
+B083 [portal] A customer can pay money on account without picking an invoice; it lands as an unapplied payment the firm applies later.
+B084 [portal] The owner is told by email when a customer opens an invoice or pays through the portal, if that notice is switched on.
+B085 [portal] Portal colours can be set by the firm, with a contrast check warning before save.
+B086 [phone_app] The phone app syncs with the web account and keeps recent invoices readable offline; new work made offline syncs on reconnect.
+B087 [phone_app] Review pattern: WhatsApp invoice share from phone must send a real PDF; a blank file attachment counts as a failure.
+B088 [phone_app] Review pattern: entering an invoice number or line must not lag; typing latency stays low on a mid-range Android phone.
+B089 [phone_app] Review pattern: mobile and desktop edits sync both ways without date or setting drift.
+B090 [external_sync] Data can be exported in Tally-readable XML so the accountant imports sales vouchers into Tally.
+B091 [external_sync] Tally data can be imported into the product at first sign-up so old customers and invoices come across.
+B092 [ai] AI can read a PDF or photo of a purchase order and prefill customer, lines and amounts; the user reviews before issue.
+B093 [ai] AI answers questions such as who owes me most from the user's own data; answers cite the report they came from.
+B094 [ai] An MCP server or API lets an AI assistant read invoices only, with scoped keys the owner can revoke.
+B095 [languages] Invoices can be issued in the customer's language from 10 or more languages while the firm's screens stay in its own.
+B096 [languages] The app UI supports nine or more Indian languages including Hindi, Tamil and Bengali; numbers keep Indian grouping.
+B097 [languages] Amount in words follows the invoice language, and rupee and paise words are correct for numbers above one crore.
+B098 [languages] Custom labels let a firm rename built-in words such as Item to Service or Customer to Client on its documents.
+B099 [many_companies] One login switches between several firms from a list; the firm name sits in the header of every page.
+B100 [many_companies] A plan covers one business; adding a second business needs an upgrade, and the price page says so.
+B101 [many_companies] Request: one company with more than one GSTIN, for firms registered in several states, invoicing by branch.
+B102 [many_companies] Request: invoicing from a company that has no e-invoice must not be blocked by another company's e-invoice rule.
+B103 [audit_all] One activity log lists who created, edited, issued, voided or exported what and when, and is itself filterable by user and type.
+B104 [audit_all] Every export and every PII-including backup is logged with user and time.
+B105 [audit_all] Email delivery records stay for the life of the document: sent time, address, success or bounce.
+B106 [trash_all] Deleting a customer must not remove their invoices from totals; rivals do so, and here deletion is refused instead.
+B107 [trash_all] Archived records list with a status filter and a restore action that brings all data back unchanged.
+B108 [import_all] CSV, TSV and XLS files import with character encoding choice and field mapping, and a sample file is downloadable.
+B109 [import_all] Imported invoices need a unique number; lines sharing one number group into one invoice; a missing quantity or rate falls back to one unit.
+B110 [import_all] Import accepts a status value per row (draft, sent, paid) and an optional paid amount column, so history can arrive already settled.
+B111 [import_all] The import result is emailed with counts of created and rejected rows and the reason for each rejected row.
+B112 [import_all] A migration guide lists steps in order: firm profile, taxes, customers, items, then invoices and payments.
+B113 [import_all] Bank statement CSV imports map date, description and amount columns, and rows can be matched to invoices afterwards.
+B114 [import_all] Request: payments can be imported from a CSV, not only invoices.
+B115 [import_all] Tally customers, items and open bills import from a Tally export, and fields that cannot map are listed in a report.
+B116 [demo] A demo account with sample data opens before sign-up, and a button clears every sample record in one step.
+B117 [help] Help lives inside the app, with email support hours stated; Zoho states 24/5 free email support on its India plan.
+B118 [help] Review pattern: support must solve a problem on first call; a customer reported two hour-long phone calls without a fix.
+B119 [help] A what's new page lists each release in plain words, and errors link to a help article.
+B120 [help] Error codes shown to customers on payment failure map to a plain action, for example customer deleted or merchant not enabled.
+B121 [plans] Free plan limit is stated in documents, not days: Refrens gives 15 documents free, then asks for a paid plan.
+B122 [plans] Zoho's India invoicing is free forever but limits an account to two users; the plan page states the user limit.
+B123 [plans] Plans are priced by number of businesses, users and an accountant seat, for example 1 user plus 1 CA on the base plan.
+B124 [plans] Inactive free accounts have a stated retention period, and an email arrives before data is removed.
+B125 [admin_settings] A setting group Taxes holds GST settings, TDS settings and MSME settings as separate switches.
+B126 [admin_settings] Account page lists enabled modules so a firm can switch off those it does not use, such as quotes.
+B127 [admin_settings] Settings change history is searchable: setting name, old and new value, user and time.
+B128 [admin_settings] Group settings let a firm define different defaults for a group of customers, for example export clients versus domestic.
+B129 [admin_settings] Numbering pattern variables include year, counter and customer fields, with a live example, and can be overridden per group or customer.
+B130 [privacy] Custom fields can be marked personal data and encrypted; only admins can view them and others cannot export them.
+B131 [privacy] A backup of all data is a single compressed file of CSVs, link emailed, expires in 30 days, and one backup per 15 days.
+B132 [privacy] Backup and export dialogs have an explicit tick for including personal data such as bank account numbers.
+B133 [privacy] A user can export all their data and ask for deletion; the product states which records must stay under tax law.
+B134 [payment_links] A payment link carries an expiry date; after it the link shows expired and cannot be paid, and the invoice stays payable another way.
+B135 [payment_links] A payment link can allow partial payment with a minimum first amount, and each part shows on the invoice as its own payment.
+B136 [payment_links] A payment link can send reminders before expiry by email and SMS to the customer.
+B137 [payment_links] Request pattern: Razorpay as a built-in gateway for Indian firms; its absence was a 15-reaction request in a global tool.
+B138 [payment_links] A UPI QR on the invoice is generated for that invoice with the amount fixed; payment through it marks the invoice without typing a reference.
+B139 [payment_links] Gateway charges are the firm's own; the connect page states that, and notes input tax credit on the fee may apply.
+B140 [payment_links] Any fee the product keeps on online payments is shown to the firm in rupees before the option is switched on.
+B141 [payment_links] A payment can record a bank or card fee so net money received differs from the amount settled against the invoice.
+B142 [payment_links] The payment page offers more than one gateway and the firm sets their order; one gateway failing leaves the others usable.
+B143 [payment_links] When an online payment fails, the customer gets an email with the same link and the firm sees the failure on the invoice.
+B144 [payment_links] A standalone payment link, not tied to an invoice, can be created for a fixed amount and is switched on in settings.
+B145 [bank_match] Imported bank lines move through three states: unmatched, matched to an invoice, and converted into a payment.
+B146 [bank_match] A rule matches incoming money by description text and amount to an invoice, and may convert it into a payment without a click.
+B147 [bank_match] Deleting an imported bank line never deletes the payment created from it.
+B148 [bank_match] Request: bank reconciliation linking bank records to invoices and payments, which 18 users asked for in a global tool.
+B149 [bank_match] Bank statement import accepts CSV and XLS of the formats Indian banks export, and lists lines it could not parse.
+B150 [bank_match] Tally can read bank statement PDFs and match them with documents; a statement upload can show suggested invoice matches.
+B151 [bank_match] Request: bank integrations through third-party connectors, shown as a pick-list of banks and aggregators.
+B152 [gst_returns] For one period the GSTR-3B outward taxable total equals the GSTR-1 total; a rupee-level mismatch is raised as an error in the product.
+B153 [gst_returns] GSTR-1 totals include credit notes as negatives in the B2B, B2C and nil-rated tables, and the HSN summary deducts them as well.
+B154 [gst_returns] HSN summary taxable total matches the sum of the B2B and B2C tables for the same period, or the screen lists the invoices that differ.
+B155 [gst_returns] A customer saved with a GSTIN cannot be saved as unregistered; the wrong category made B2B and HSN totals differ.
+B156 [gst_returns] An error list names invoices that block a return, such as a missing HSN or SAC, with a link to fix each.
+B157 [gst_returns] The 3B summary exports to Excel as well as PDF and JSON, because users add quarterly figures themselves.
+B158 [gst_returns] A firm can mark itself a quarterly filer; the return screens then group by quarter and show the two monthly invoice-furnishing months.
+B159 [gst_returns] The month of March belongs to the financial year ending that March; return period 03-2026 is FY 2025-26.
+B160 [gst_returns] User can mark a period as filed with the filing date and ARN; editing a draft dated in that period then shows a warning.
+B161 [gst_returns] Marking a return unfiled inside the product does not change the GST portal, and the screen says so.
+B162 [gst_returns] A debit note raising value after issue is listed with credit notes in the notes section of the GSTR-1 data.
+B163 [gst_returns] Only GSTR-1 data is produced from invoices; GSTR-2 and 3 need purchases, so the screen says which returns it can help with.
+B164 [gst_returns] User can override transaction values, such as a place of supply, before generating the GST data for one document.
+B165 [gst_returns] A GSTR-1 JSON file is built per month with a check that rejects rows the portal would reject.
+B166 [gst_returns] A sales register splits supplies into B2B, B2C large, B2C small, export, nil and exempt as the return tables do.
+B167 [tds] TDS on professional fees is offered at 10 percent and on technical services at 2 percent, named by section, and the user can type another rate.
+B168 [tds] TDS is computed on the value without GST when GST is shown separately on the invoice, and the receipt shows the base used.
+B169 [tds] GST TDS at 2 percent from government deductors is separate from income-tax TDS, and each shows on its own line.
+B170 [tds] The payment form states in one line what TDS is and shows net money expected before saving.
+B171 [tds] TDS can be applied on quotes, invoices, credit notes, recurring invoices and payments, and shows the same on each.
+B172 [tds] A TDS summary by customer, quarter and section lists amounts so the firm can match its certificates and Form 26AS.
+B173 [accountant] Each paid plan includes one accountant seat that does not count in the user limit.
+B174 [accountant] The plan page states plainly whether the accountant seat costs extra; FreshBooks shows a per-user monthly price beside its accountant-access line.
+B175 [accountant] An accountant who serves several firms sees all of them in one list after accepting each invitation, and sees only the periods shared.
+B176 [accountant] A month-end pack, with sales register, aging, payments and credit notes, goes to the accountant by email in one click.
+B177 [accountant] An export for Tally gives sales vouchers with party, GSTIN, tax ledger split and round-off, so the accountant need not retype.
+B178 [whatsapp] Invoices and payment reminders can be sent on WhatsApp from the app, and the send log records time and result.
+B179 [whatsapp] A blank attachment on a WhatsApp send must not happen; the product checks the file is non-empty before sending.
+B180 [whatsapp] Request: WhatsApp for business integration drew 38 reactions in ERPNext.
+B181 [whatsapp] SMS needs paid credits, for example 5 credits at 75 rupees each with up to 300 messages each; stock shows the balance.
+B182 [einvoice] The 30-day reporting rule applies from 1 April 2025 to firms with turnover of 10 crore or more; the product warns before day 30.
+B183 [einvoice] Request: a daily warning when an invoice is nearing the 30-day limit for e-invoice.
+B184 [einvoice] Creating an e-invoice on a later date than the invoice date is warned, since numbers and dates then differ from the portal record.
+B185 [einvoice] Signed QR and IRN print on the invoice PDF as soon as they exist, and the PDF is regenerated.
+B186 [einvoice] Portal timeouts retry automatically with a pause and an attempt count shown on the invoice.
+B187 [einvoice] Export of services uses place of supply 96 Other Countries with a check that no state code is used for a foreign customer.
+B188 [einvoice] The e-invoice turnover band in firm profile decides if e-invoice is required and if the 30-day block applies.
+B189 [numbering] Prefix can differ per branch, for example BLR and DEL, with its own gapless counter per financial year.
+B190 [numbering] Stripe prefixes are 1 to 12 uppercase letters or numbers and unique; ours must stay within 16 characters in total.
+B191 [numbering] A voided invoice can be copied into a new draft that records which invoice it replaces, shown on both.
+B192 [invoice] One invoice can carry several due dates, such as milestone payments, with a part amount per date.
+B193 [invoice] Invoice-level discount spreads over lines and round-off is applied once, not twice.
+B194 [invoice] Rounding differences across many lines are shared out so the tax split sums to the invoice tax.
+B195 [invoice] The tax breakup shows taxable amount per rate that equals the sum of line taxable values.
+B196 [invoice] A customer PO number and PO date can be entered and printed on the invoice and in the register.
+B197 [invoice] A quote with lines converts to an invoice and is marked converted; a customer can accept it from the portal.
+B198 [invoice] A proforma invoice can be shared before work starts, takes no number from the tax series, and converts to a tax invoice.
+B199 [invoice] Billable time entries convert into invoice lines for a project or customer with hours, rate and description.
+B200 [invoice] Reimbursable expenses incurred for a customer can be added to its invoice with receipts attached to the PDF.
+B201 [invoice] A customer-specific price for a saved service applies when that customer is chosen.
+B202 [invoice] A default tax treatment can be set per customer so export and SEZ clients get the right rate each time.
+B203 [invoice] A due date beyond 45 days on an invoice from an MSME-registered firm shows an advisory, not a block.
+B204 [invoice] An invoice can be held for a set number of hours after creation before sending, so errors can be fixed.
+B205 [invoice] A required advance for services can be recorded as an advance receipt with GST, then adjusted on the final invoice.
+B206 [customers] Entering a GSTIN fills legal name, address and state from the portal data, and state names match the GST state list, including Puducherry.
+B207 [customers] GSTIN status such as cancelled or suspended is checked on save and shown as a warning on the customer.
+B208 [customers] Customer category registered, unregistered, SEZ or overseas is required and must agree with whether a GSTIN is present.
+B209 [customers] A customer's invoicing currency cannot change once an invoice exists for them; rivals change all old documents at once.
+B210 [customers] A customer record has a portal-access flag and a GST treatment, including tax deductor, separate from its address.
+B211 [credit_notes] A credit note can cite the customer's debit note number and date, and prints it.
+B212 [credit_notes] A credit note issued from the invoice can be set to adjust the next invoice or be refunded manually, and the choice is shown.
+B213 [payments] One bank receipt can be split across several invoices of the same customer in one entry.
+B214 [payments] A payment with no invoice yet is kept as unapplied and appears in the customer's credit balance until applied.
+B215 [payments] Late interest on an overdue invoice is computed once per period and is not charged again after a partial payment.
+B216 [payments] A payment saved without choosing a reminder still stops pending reminders for the invoice it settles.
+B217 [audit_all] Edits to allowed fields on an issued invoice keep old and new values, because buyers elsewhere ask for tamper-proof records.
+B218 [self_host] No self-hosted edition in v1; the plan page says so and offers a full data export instead.
+B219 [self_host] Complaint pattern: a licence change made users feel locked in; a full export in CSV and JSON stays available in every plan state.
+B220 [plans] After a trial or a lapse the firm can still view, search, print and export everything; only new documents stop.
+B221 [templates] Invoice layout lets the firm show or hide columns, change font size and reorder blocks; reviewers call fixed layouts a limit.
+B222 [reminders] Reminder email to a customer with no email address is skipped and listed on a screen for the owner to call.
+B223 [reminders] Customer can opt out of reminder emails with a link; the opt-out is stored and shown on the customer.
+B224 [invoice] Quote lines can be marked optional; the customer ticks the optional ones when accepting the quote.
+B225 [invoice] Time entries round to a firm-set step such as 15 minutes before they become invoice lines.
+B226 [reminders] Failed invoice emails are retried by the product a set number of times, and the outbox shows the attempt count.
+B227 [customers] A customer carries its own invoicing currency set at creation and printed on the PDF, for export clients.
+B228 [payments] A payment can carry an attached proof file, such as a UPI screenshot or a cheque photo.
+B229 [phone_app] App updates never block sign-in; an old version shows a banner and still works for reading.
+B230 [gst_returns] A month with 5,000 invoice lines builds its GSTR-1 data without a timeout, with progress shown.
+B231 [plans] A limit error names the limit hit, the plan's allowance and when it resets, not a code.
+B232 [signin_company] OTP and code dialogs stay open on an outside click so a typed code is not lost.
+B233 [gst_returns] Customers flagged as own branch or internal can be left out of the sales register and tax totals.
+B234 [invoice] A subtotal row can be inserted between line groups without becoming a taxable line.
+B235 [invoice] An export invoice shows the INR equivalent beside the foreign-currency total with the rate used.
+B236 [quick_entry] Travel and mileage costs can be added as billable lines to an invoice in one step.
+B237 [audit_all] A role that may view reports can open the GST data screens; a permission error names the missing permission.
+B238 [bank_match] Bank feeds import on a schedule that can be switched off per account.
+B239 [help] A directory of accountants who know the product is offered to firms that have none.
+B240 [payments] Overpayment above the balance is held as customer credit, shown on the payment and on the customer.
+C001 [flow] First screen after signup asks only mobile number and OTP; firm name, GSTIN and state come next, each skippable except firm name.
+C002 [flow] Entering a 15-character GSTIN fetches legal name, address and state from the GST portal lookup and prefills them; the user edits only if wrong.
+C003 [flow] Day-one freelancer reaches a first sent invoice in at most 12 taps and under 3 minutes from install, measured on a 2 GB RAM Android phone.
+C004 [flow] Cold start of the web app on a Rs 8,000 Android phone on 4G shows the invoice list in under 3 seconds after first visit.
+C005 [flow] The app is installable as a home-screen app (PWA) and the invoice list, customers and drafts open with no network from cache.
+C006 [flow] Creating an invoice offline saves a local draft with a visible "Not synced" mark and syncs on reconnect without creating a second copy.
+C007 [flow] Issuing an invoice needs the network; with none, Issue is disabled and the screen says "Connect to issue; your draft is safe".
+C008 [flow] If the network drops after the Issue tap and before the reply, reopening the draft shows the true result (issued with number, or still draft), never both.
+C009 [flow] Retrying Issue after a timeout uses one idempotency key so it never produces two invoices or two numbers.
+C010 [flow] New invoice starts from a bottom Plus button reachable by thumb; customer picker opens first with the 5 most recent customers listed.
+C011 [flow] A new customer can be created inside the invoice picker with only name typed; state defaults to the firm's state, all else optional until issue.
+C012 [flow] Customer pick prefills terms, place of supply, last-used lines and notes from that customer's previous invoice; the user can clear them in one tap.
+C013 [flow] Line description autocompletes from the firm's earlier lines and fills the last-used HSN or SAC, rate and tax rate for that description.
+C014 [flow] A new firm's lines are prefilled with a SAC suggestion from its chosen business type (design, IT, legal, coaching); the user confirms in one tap.
+C015 [flow] Typing an amount on a line needs no tax typing: 18 percent and the firm's state logic apply and the live total updates on every keystroke.
+C016 [flow] Numeric fields open the numeric keypad on phones; the decimal key and Indian grouping work while typing.
+C017 [flow] Invoice screen shows live a plain preview of the final PDF without leaving the form, reachable in one tap.
+C018 [flow] Issuing a typical one-line invoice takes at most 6 taps after choosing the customer, with the date, due date, number and tax prefilled.
+C019 [flow] After Issue, the next screen offers Send on WhatsApp, Send by email, Copy link and Download PDF as four buttons, WhatsApp first.
+C020 [flow] The WhatsApp button opens WhatsApp with the customer's number, a short message and the payment link filled, so the user taps only Send.
+C021 [flow] If the customer has no phone saved, the WhatsApp button asks for it once, saves it to the customer and then opens WhatsApp.
+C022 [flow] The invoice message in WhatsApp shows firm name, amount, due date and a link that previews a title card, not a raw URL.
+C023 [flow] The invoice link opens a mobile page with amount, firm name, a Pay with UPI button and a PDF download, with no login and no app install.
+C024 [flow] The Pay with UPI button opens the client's installed UPI app by intent with amount, payee and invoice number in the note preset.
+C025 [flow] On a desktop, the pay page shows a UPI QR code of the exact balance due that any UPI app can scan.
+C026 [flow] The pay page lists balance due, not total, so a part-paid invoice shows only what is still owed.
+C027 [flow] The client can pay a smaller amount on the pay page only if the firm allows part payment; default asks the exact balance.
+C028 [flow] After payment the client sees a receipt screen with amount, date and reference; the firm sees the invoice turn Paid within 1 minute without refresh.
+C029 [flow] Payments made by UPI through the product's own gateway are matched to the invoice automatically, with no manual recording step.
+C030 [flow] A client who pays by UPI to the firm's plain UPI ID outside the page can tell the firm with an I have paid button carrying a reference number.
+C031 [flow] The firm sees an I have paid claim as Pending check, not as paid, until the owner or accountant confirms it with one tap.
+C032 [flow] Pay link remains usable after the due date and shows the same balance, unless the invoice was voided or paid, when it states so plainly.
+C033 [flow] The firm sees on the invoice when the client opened the link (first and last open time) so the owner can say the client saw it.
+C034 [flow] Marking an invoice paid by hand takes at most 3 taps: open invoice, Record payment (prefilled with the full balance, today, last-used mode), Save.
+C035 [flow] Record payment screen shows balance due at the top and a one-tap Full amount chip; TDS has its own row prefilled from the customer's usual TDS percent.
+C036 [flow] After Save payment, an undo bar for 10 seconds reverses it without needing the owner reason text.
+C037 [flow] After Save payment, the screen offers Send receipt on WhatsApp as the next action.
+C038 [flow] Overdue invoices show on the home screen as a single total with a Remind all button that previews each message before sending.
+C039 [flow] A reminder on WhatsApp is one tap per client, opens WhatsApp with the text prefilled, and logs that a reminder was sent.
+C040 [flow] Reminder tone has three presets (gentle, firm, final) and the firm can edit the text once as a default.
+C041 [flow] The home screen shows only four numbers: unpaid total, overdue total, paid this month, drafts; each opens its list in one tap.
+C042 [flow] Every list has a sticky search box that finds a customer or invoice by typing 2 letters, with results while typing in under 1 second.
+C043 [flow] Every destructive action says what happens in plain words and gives Undo or a way back; where none exists the dialog says so.
+C044 [flow] Every form keeps typed data when the app is backgrounded, the phone call interrupts, the browser tab reloads, or the session expires.
+C045 [flow] An issued invoice has an Edit button that explains it is locked and offers Create credit note and Void and re-create, not a dead end.
+C046 [flow] Void and re-create copies lines into a new draft in one tap, with a fix-this field highlighted, and links the two documents both ways.
+C047 [flow] Agency owner at month end opens Bulk create, sees one row per recurring client with last month's lines, edits amounts inline and issues all in one tap.
+C048 [flow] Bulk issue shows a summary of count and total before confirming and reports per-invoice success or failure after, never an all-or-nothing error.
+C049 [flow] Bulk send queues WhatsApp messages as a list the owner steps through one by one, because WhatsApp cannot be sent in bulk from the web.
+C050 [flow] Bulk send by email sends all at once, and the result lists bounced addresses with a one-tap fix per row.
+C051 [flow] Recurring invoices can be set to auto-issue and auto-send, with a default of drafts waiting for approval and a 2-day heads-up reminder.
+C052 [flow] Recurring drafts for 40 clients appear in one Review screen, sorted by amount change from last month, with changed rows highlighted.
+C053 [flow] Month-end screen for an agency shows who has not been invoiced yet this month (active retainer, no invoice) as a checklist.
+C054 [flow] Client list for 40 clients loads with outstanding balance per client in one view, sortable by outstanding and by oldest due date.
+C055 [flow] A client statement (all invoices, payments, balance) can be created in 2 taps and sent on WhatsApp as a PDF.
+C056 [flow] Payment received for several invoices of one client in one bank credit can be recorded once and split across invoices, oldest first by default.
+C057 [flow] Lawyer can add a reimbursable expense line with no tax on the invoice (pure agent) and a separate line for professional fee with 18 percent.
+C058 [flow] Lawyer can record an advance received from a client before an invoice exists, with a receipt, and later adjust it against an invoice in 2 taps.
+C059 [flow] The advance balance for a client shows on the client page and on the invoice screen as Apply advance, prefilled with the lesser of advance and total.
+C060 [flow] Expense lines can carry the original receipt photo, taken from the phone camera, shown only to the firm, not on the client invoice, unless chosen.
+C061 [flow] A matter or project field on an invoice groups the invoices of one case or project and shows billed, paid and unpaid per matter.
+C062 [flow] An interim invoice (part bill) can be raised against a quote or fee agreement amount, showing billed so far and remaining of the total.
+C063 [flow] The office assistant sees a role-limited home: create drafts, record payments, send; no settings, no void, no tax-rate edit.
+C064 [flow] The assistant's drafts go to an Awaiting owner approval list; the owner sees count on home and can issue one by one or all in one tap.
+C065 [flow] The owner sees on every draft who created it and what the assistant changed since the last owner view.
+C066 [flow] The assistant who types a wrong customer name gets a warning when a similar existing customer exists (Did you mean ...?) before a duplicate is created.
+C067 [flow] Entering a GSTIN already used by another customer in the firm shows that customer and offers to open it instead.
+C068 [flow] The assistant who enters a quantity of 1000 instead of 10 sees an unusual-amount warning when the total is over 10 times the client's usual invoice.
+C069 [flow] A wrong-amount warning never blocks; it shows once, can be dismissed, and the dismissal is saved in history.
+C070 [flow] The assistant can raise a correction request on an issued invoice, which notifies the owner with the invoice and note, instead of editing.
+C071 [flow] The assistant sending the invoice to the wrong client can use Recall: link of that invoice is revoked in 1 tap and the owner is informed.
+C072 [flow] Accountant serving 30 firms switches firms from one menu with search, with the last 5 firms first, and the active firm name is always on screen.
+C073 [flow] Switching firms keeps the current screen type (for example Registers) so the accountant does not return to home each time.
+C074 [flow] Accountant home shows across all firms: invoices pending review, unpaid reminders due, filing dates, and firms with a problem, in one list.
+C075 [flow] Accountant gets a monthly pack per firm with sales register, payment register, credit notes and TDS in one zip, in one tap, with period preset to last month.
+C076 [flow] Accountant can mark a month closed for a firm; a closed month blocks new issue dates in it unless an owner reopens it, with the reason recorded.
+C077 [flow] Accountant can leave a comment on an invoice visible to the owner, with a Resolved tick, and see unresolved comments for each firm.
+C078 [flow] A firm invites its accountant by phone or email with a read-and-prepare role; the accountant accepts once and the firm appears in the accountant's list.
+C079 [flow] The accountant's export matches GSTR-1 sections (B2B, B2CS, CDNR, exports) with a checksum count of invoices and total taxable value per section.
+C080 [flow] A new accountant joining mid-year sees the full history and a note saying which documents were created before the accountant joined.
+C081 [flow] Client opening the WhatsApp link on a 2G connection sees the amount and Pay button in under 3 seconds because the page is under 100 KB before the PDF.
+C082 [flow] Client can view the invoice in the page itself and download the PDF with a file name like FirmName-INV-26-27-00012.pdf.
+C083 [flow] Client can ask a question on the invoice page with one tap, which messages the firm on WhatsApp with the invoice number prefilled.
+C084 [flow] Client can add or correct their GSTIN on the pay page only before issue; after issue the page says to contact the firm for a credit note.
+C085 [flow] The client page works in English and Hindi and chooses by the phone's language, with a switch at the top.
+C086 [flow] Pay page shows firm name, GSTIN and a verified mark once the firm's payee name matches the UPI name returned by the gateway.
+C087 [flow] Exporter creates an invoice in USD with the currency chosen in one field after the customer; the customer's country sets currency by default.
+C088 [flow] A foreign-currency invoice shows amount in dollars and its rupee equivalent at the exchange rate used, with the rate editable and the source named.
+C089 [flow] Exporter marks an invoice as export under LUT with no tax; the LUT number and validity year are saved once in settings and printed on every such invoice.
+C090 [flow] Payment received in dollars records the dollar amount, the rupee credited to the bank, the bank charge and the foreign exchange gain or loss as separate figures.
+C091 [flow] Payment from a payment platform (Wise, PayPal, Payoneer) can be recorded with the platform fee as a separate deduction, and the invoice settles at the dollar value.
+C092 [flow] Exporter can attach the foreign inward remittance advice number (FIRC or e-FIRA) to a payment and see invoices still lacking one.
+C093 [flow] Exporter's client sees the invoice in the client's currency with bank details for international transfer (SWIFT, IBAN where needed) in one block.
+C094 [flow] An invoice list shows foreign-currency invoices with both amounts, and totals are shown separately per currency and in rupees.
+C095 [flow] Owner who stops paying keeps read-only access to all invoices, payments and exports for at least 12 months after the plan ends.
+C096 [flow] Owner who wants to leave gets Download everything in one tap: all invoices as PDF, registers as CSV, customers and payments, in one zip emailed as a link.
+C097 [flow] The leave-and-export zip needs no payment, no call and no waiting for sales, and arrives within 15 minutes for a firm with 5,000 invoices.
+C098 [flow] Cancel plan takes at most 3 taps from settings, asks one optional reason, and shows the exact last paid day and what stays accessible.
+C099 [flow] When a plan lapses, issuing is paused but the pay links already sent keep working for 90 days so clients can still pay.
+C100 [flow] The firm gets 3 warnings before a plan lapse (7, 3 and 1 day) by email and WhatsApp, each with a one-tap renew link and the exact amount.
+C101 [flow] Free plan limit is shown as a counter on home (for example 7 of 10 invoices this month) and the limit never blocks recording a payment or exporting.
+C102 [flow] At the free limit, the user can still view, pay, export and print; only creating the next invoice shows the upgrade, with a price in rupees including GST.
+C103 [flow] Plan price page shows the monthly and yearly price including GST and states the GST invoice for the plan arrives in email within 24 hours of payment.
+C104 [flow] The firm can pay the plan by UPI AutoPay, card, or one-time UPI, and a failed renewal retries for 3 days without locking access before the grace ends.
+C105 [flow] The owner who loses the phone can log in on a new phone with OTP to the registered number and old sessions are ended from a list.
+C106 [flow] Login by OTP works on SMS and WhatsApp; the owner can add a second number for recovery that is confirmed once.
+C107 [flow] Changing the registered phone number requires an OTP to the old and the new number, or a 3-day wait with notices if the old is lost.
+C108 [flow] Password-free OTP login takes at most 4 taps and under 20 seconds, with auto-read of the SMS code on Android.
+C109 [flow] The app asks permission for notifications only after the first invoice is sent, in a sentence saying what it will notify (payments, overdue).
+C110 [flow] A push or WhatsApp message to the owner on payment arrival says client, amount and invoice number in one line.
+C111 [flow] Quick actions on the invoice row (swipe or long press) give Send, Record payment and Duplicate; no action needs the detail screen first.
+C112 [flow] Duplicate an invoice for the same client opens a draft at the edit screen in 1 tap, with dates updated and amounts editable.
+C113 [flow] Phone contacts picker adds a customer from the address book with name and number, after the user grants contacts permission once.
+C114 [flow] Voice or typed quick entry: typing Rahul 15000 design opens a draft for client Rahul, amount 15000, description design, ready to review.
+C115 [flow] Quick-entry misparse never issues anything; it only opens a draft that the user reviews before Issue.
+C116 [flow] Branding is set once: logo from gallery cropped square, a colour choice and a footer note; all invoices use it with no per-invoice setup.
+C117 [flow] Invoice templates number three at most (plain, standard, modern), all pass GST rules, and switching template never changes any figure.
+C118 [flow] The invoice PDF prints on A4 in under 2 pages for up to 12 lines, in a font that shows the rupee symbol on every device.
+C119 [flow] PDF text is real text, searchable and copyable, not an image, and includes a UPI QR code for the balance due.
+C120 [flow] PDF generation completes in under 3 seconds and works for names in Hindi, Bengali, Tamil and other Indian scripts without broken boxes.
+C121 [flow] Customer names with Indian-language characters search correctly by typing the Latin transliteration or the original script.
+C122 [flow] Dates show as DD-MM-YYYY, and entering a date uses a day-month picker; typing 5/6 picks 5 June of this year, never 6 May.
+C123 [flow] Amounts read back in words (lakh, crore) beside the number field as the user types, so an extra zero is seen.
+C124 [flow] The user can type 1.5L or 2k in an amount field and it becomes 150000 or 2000 shown back before saving.
+C125 [flow] Every error message says what to do next in plain words, in the app's language, with no codes shown first.
+C126 [flow] The app's screens are available in English and Hindi at launch and the language choice is saved per user.
+C127 [flow] Help is one tap from every screen and opens a short answer in context, with a WhatsApp chat to a human within 4 working hours.
+C128 [flow] Support replies carry the firm's last 5 actions, visible to support only with the user's consent per request, so the user never needs to explain the screen.
+C129 [flow] The 15-minute grace Cancel never deletes the number; it marks it void so numbering stays continuous, and states this in the dialog.
+C130 [flow] A user who taps Issue twice quickly gets one invoice; the second tap shows the same invoice.
+C131 [flow] A user who presses back after Issue lands on the invoice, never on the issued form with editable fields.
+C132 [flow] The next-thing-they-want after paying plan or first invoice is a short checklist (add logo, add bank, send first reminder) with each item one tap and a progress bar.
+C133 [flow] Bank details printed on the invoice are entered once; a UPI ID or account number is verified with a one-rupee check or name match before first use.
+C134 [attack] After a bank-detail change, all new invoices use the new details for 24 hours with a banner Bank details changed; clients opening old links see the details at issue time.
+C135 [attack] Bank details on an issued invoice are copied into it and cannot be changed by a later edit of the firm profile.
+C136 [attack] An accountant or assistant cannot change the firm's bank details, UPI ID or payout account; only an owner can, after OTP.
+C137 [attack] Payouts from a payment gateway go only to a bank account that was verified in the owner's name or the firm's name by a penny-drop check.
+C138 [attack] Money collected through the product's gateway settles to the firm's account directly; the product holds no balance beyond the settlement window.
+C139 [attack] Reversing or deleting a payment, voiding an invoice, or a credit note over Rs 10,000 sends the owner a WhatsApp or email message at once with the actor and amount.
+C140 [attack] A staff member who records a cash payment sees a receipt number that goes to the owner's daily summary; unpaid-but-cash-marked invoices are listed.
+C141 [attack] The owner's daily summary lists every payment recorded by hand, by user, so a payment marked paid with no money in the bank can be spotted.
+C142 [attack] A payment marked received by bank transfer can carry a bank statement match (CSV upload) and unmatched payments are listed as Unverified at month end.
+C143 [attack] Staff who issue invoices with a discount over the owner-set limit (default 20 percent) are blocked until the owner approves.
+C144 [attack] The owner can set a rule that invoices above a chosen amount need owner approval before Issue; it applies to every role except the owner.
+C145 [attack] A void, credit note or reversal needs the owner role and a reason; the reason text and the actor appear in history and in the owner's monthly exception list.
+C146 [attack] A user who exports all customers or all invoices triggers a notice to owners naming the user, row count and time.
+C147 [attack] When a user is deactivated, active sessions end within 60 seconds, share links they created keep working, and their drafts stay with the firm.
+C148 [attack] Share links and exports a deactivated user held cannot be used after deactivation; API keys and integrations they created are revoked.
+C149 [attack] Share link tokens are at least 128 bits random, never guessable by invoice number, and not listed in any URL shown by search engines (noindex and robots).
+C150 [attack] A share link opened from 20 different IP addresses in one hour is throttled and the owner is notified.
+C151 [attack] A pay page URL contains no client name or amount in the readable path, and the page is not cacheable by shared proxies.
+C152 [attack] Two firms with the same customer GSTIN, phone or email never see each other's data, notes or balance; a search shows only the firm's own matches.
+C153 [attack] Every database query is scoped by firm id by a rule enforced in the data layer, tested by an automated test that tries one firm's token on 100 other-firm IDs.
+C154 [attack] Uploaded files (logos, receipts) are stored under a firm folder and served by signed links that expire in 15 minutes; guessing a file URL returns 404.
+C155 [attack] Exports, PDFs and email attachments are generated per firm and never cached under a shared key that a second firm could read.
+C156 [attack] Accountant access to a firm is limited to the firms that invited them; removing the accountant by the owner takes effect on the next request.
+C157 [attack] Support staff cannot open a firm's data without a time-limited grant the owner gave in the app; each view is logged and visible to the owner.
+C158 [attack] The auditable history of every invoice and payment cannot be edited or deleted by any user, including the owner and the product's own staff; changes append only.
+C159 [attack] Invoice numbers are verified by a daily check that finds gaps or duplicates per firm, and a gap raises an alert to the product team, not only to the user.
+C160 [attack] A draft that fails to save at the moment of Issue never leaves a half-issued record: the invoice, its lines, number and history are written in one transaction.
+C161 [attack] A database restore test from backup runs every month and the restore time and the data loss window (at most 15 minutes) are recorded.
+C162 [attack] Backups are encrypted, kept in a second region in India, and a firm's backup can be restored alone without touching other firms.
+C163 [attack] If a restore ever returns to an earlier point, the numbers issued after that point are detected and listed, and no number is handed out twice.
+C164 [attack] A user who pastes the same invoice number into a manual-number field cannot set it; numbers are never typed by users except at the first opening balance.
+C165 [attack] A duplicate payment recorded for the same invoice by two users within 60 seconds is caught and the second user sees who recorded the first.
+C166 [attack] A gateway webhook delivered twice, or out of order, creates one payment only, keyed on the gateway payment id.
+C167 [attack] If the client pays through the gateway and the firm also records a cash payment for the same invoice, the second one is refused when balance would go negative.
+C168 [attack] A gateway payment that arrives after the invoice was voided is shown as unmatched money with a refund action, never silently dropped.
+C169 [attack] A client paying twice by UPI on one invoice (two successful payments) leads to a visible overpaid state with a one-tap refund request, not a hidden credit.
+C170 [attack] The pay page stops showing the Pay button for 5 minutes after a payment started and is pending, so a client does not pay twice while confirmation is slow.
+C171 [attack] A payment that stays pending at the gateway for over 30 minutes shows on the firm's screen as Pending with the gateway reference and checks status again every 10 minutes.
+C172 [attack] A failed or reversed UPI payment returns the invoice to unpaid and sends the firm a message; the receipt is marked void, not deleted.
+C173 [attack] Tax on a line is recomputed on the server at Issue; a client-side total that differs by even one paisa is rejected and the server value is shown.
+C174 [attack] Selling services to a client whose GSTIN is cancelled or suspended shows a warning at Issue, from a portal check done within the last 24 hours.
+C175 [attack] A tax-rate list is versioned by effective date; an invoice uses the rate in force on its issue date, and a rate change does not alter any issued invoice.
+C176 [attack] When GST rates change by notification, the product updates the list within 2 working days and warns every firm that issues an invoice dated on or after the change.
+C177 [attack] A firm with turnover crossing the registration limit sees a banner when its 12-month billed total reaches 90 percent of Rs 20 lakh (Rs 10 lakh in special states).
+C178 [attack] The date a firm's GSTIN started is stored; issuing a tax invoice dated before it is blocked.
+C179 [attack] Rounding differences between the invoice total and the sum of lines and tax are stored as a labelled round-off, never added as a hidden line.
+C180 [attack] An uploaded CSV for import is scanned for formula injection (cells starting with = + - @) and such cells are saved as text.
+C181 [attack] The CSV export escapes cells starting with = + - @ by prefixing a single quote so spreadsheets never run client-entered text as a formula.
+C182 [attack] Customer names, notes and lines are stored as plain text and shown escaped; a name containing HTML or script tags never runs on any screen, PDF or email.
+C183 [attack] Email invoice text cannot be changed to include links to other domains; only the product's pay link domain and the firm's own domain are allowed.
+C184 [attack] Sending invoices from the product's domain uses SPF, DKIM and DMARC aligned for the firm's reply-to, and the firm's name appears as sender name with no spoofable address.
+C185 [attack] A new firm's first 20 invoices to a new contact use the WhatsApp or email of the owner and show a mark so abuse by fake firms can be reviewed.
+C186 [attack] A fake firm using someone else's GSTIN is blocked: GSTIN legal name must match the firm name within a similarity check, and a mismatch needs a manual proof.
+C187 [attack] A firm cannot claim a GSTIN that another active firm already verified; the second claimant sees Contact support and the first firm's owner is notified.
+C188 [attack] SIM-swap risk is reduced: a login from a new device on a phone number changed in the last 7 days needs the second recovery contact or a 24-hour hold.
+C189 [attack] Sensitive actions (change bank, change owner, export all, delete firm) ask for a fresh OTP even inside an open session.
+C190 [attack] A firm owner transfer to another user needs both owners to confirm by OTP, and the old owner is told by WhatsApp and email.
+C191 [attack] A rate limit of 100 requests a minute per user and 1,000 per firm applies on the API, with a clear 429 message and a retry time.
+C192 [attack] Third-party tokens (gateway, WhatsApp, e-invoice portal) are stored encrypted and never returned to the browser or written in logs.
+C193 [attack] Application logs hold no full GSTIN, phone, bank account or amounts together with a name; logs older than 30 days are deleted.
+C194 [attack] A staff member of the product company reading a firm's data needs a ticket id and approval; every read is stored and a firm can request the list.
+C195 [attack] The product fails if the accountant dislikes it; the share of firms whose accountant exports a pack each month is tracked, with a goal of 60 percent.
+C196 [attack] Week-4 retention (firm issued an invoice in each of weeks 1 and 4) is tracked and reviewed monthly; a figure below 40 percent triggers a review of the first-session flow.
+C197 [attack] Gateway or WhatsApp provider outage never blocks issuing: invoices are issued and queued, and the user sees which sends are waiting.
+C198 [attack] Free plan abuse is limited: one free plan per GSTIN and per phone number, and a firm on free that makes 10 accounts is detected by device and payment signals.
+C199 [law] Invoice must be issued within 30 days of supply of service (Rule 47); an invoice dated more than 30 days after the service date shows a warning at Issue.
+C200 [law] An e-invoice IRN can be cancelled only within 24 hours on the portal; after that, the product offers a credit note and disables Cancel IRN with the reason.
+C201 [law] The product stores the e-invoice signed JSON, the QR code and the acknowledgement number and date, and prints the QR code on the PDF.
+C202 [law] The e-invoice applicability threshold is held as a dated setting (currently Rs 5 crore turnover in any year since 2017-18) and the firm's declared turnover chooses e-invoice mode.
+C203 [law] A B2C invoice to an unregistered buyer shows the dynamic UPI QR on it when turnover is above Rs 500 crore; below that the QR is optional and defaults on.
+C204 [law] Export of services is zero-rated: with LUT it carries no tax, without LUT it carries IGST with a refund claim; the choice is stored on the invoice and printed.
+C205 [law] Export of services needs payment in convertible foreign exchange or permitted rupees, and the product shows a flag for export invoices unpaid in foreign currency after 12 months.
+C206 [law] Place of supply for services to a foreign client is the client's location; an export invoice with Indian place of supply is blocked with a message.
+C207 [law] Deleting a firm by the owner deletes personal data not needed by law (user phones, notes) within 30 days but keeps invoices and tax data for the 6-year period.
+C208 [law] DPDP: the product asks consent in plain language, in English and Hindi, before storing a client's phone number, and the firm is shown as the data fiduciary for its clients.
+C209 [law] DPDP: a person can ask which of their data the product holds; the firm gets a Data request screen and answers within 30 days, with the actions logged.
+C210 [law] DPDP: data of under-18 users is not collected; the signup states the user must be 18 or older.
+C211 [law] Data of Indian firms is stored in India; the region of the database, backups and file store is stated on the privacy page.
+C212 [law] A debit note can be raised for an increase in value after issue, numbered in its own series with the same tax split as the original invoice.
+C213 [law] A TDS certificate (Form 16A) received from a client can be attached to the payment, and the ledger shows TDS deducted but certificate missing, by quarter.
+C214 [law] Section 194Q, 194C, 194J and 194H TDS rates are kept in a table with dates and edited by the product team, not by the user.
+C215 [law] Advance received for services needs a receipt voucher with tax at the time of receipt only where applicable; the product follows the current notification and states the rule applied.
+C216 [law] Reimbursable expense lines are marked as pure agent only when the firm picks it and the conditions (separate in books, client's expense) are shown as a checklist.
+C217 [law] Composition-scheme firms issue a Bill of Supply with the line Composition taxable person, not eligible to collect tax; selecting composition removes all tax fields.
+C218 [law] Reverse charge invoices show Tax payable on reverse charge: Yes, and the tax is not added to the total; a mixed invoice is blocked.
+C219 [law] An invoice needs the supplier state's name and code, the recipient's state name and code, and the place of supply, all printed.
+C220 [law] The invoice shows the amount in words, whole rupee total and the signature or digital sign space as required by Rule 46.
+C221 [law] A firm with turnover in two states with two GSTINs can add a second GSTIN registration with its own number series and bank details, chosen at invoice creation.
+C222 [law] A GSTIN lookup that fails because the portal is down never blocks; the user can continue with a Not verified mark that is cleared on the next successful check.
+C223 [law] Sensitive client documents (legal matter descriptions) are hidden from line text on the pay page if the firm marks the matter confidential, showing only Professional services.
+C224 [law] Legal firms can hide the matter detail from the invoice and use the section Legal services SAC 9982; the matter is kept in the firm's own notes only.
+D001 [quote] Quote numbers use series QT/YY-YY/NNNNN, gapless per firm, assigned when first sent; the invoice counter is never touched by quotes.
+D002 [quote] A quote has a validity date; after it passes the quote shows Expired, the client link disables Accept, and the owner can extend validity.
+D003 [quote] Client opens the quote share link and presses Accept or Decline with an optional reason up to 300 characters; time and IP go into history.
+D004 [quote] Convert an accepted quote to a draft invoice copying customer, lines, place of supply and notes; the quote then shows Converted and links the invoice.
+D005 [quote] Convert part of a quote: pick lines or a percent milestone; quote shows billed and remaining value and stays open until fully billed.
+D006 [quote] Quote list filters by status (draft, sent, accepted, declined, expired, converted), customer and validity range; sorts by date, total and validity; default newest first.
+D007 [quote] Editing a sent quote saves revision 2, 3 and so on; older revisions stay readable and the client link always shows the latest.
+D008 [quote] Quote PDF and page carry the words "Not a tax invoice", no tax-invoice number, and are excluded from every GST register and tax total.
+D009 [quote] Quote duplicate copies customer, lines, terms and notes; it never copies number, status, acceptance record or validity date.
+D010 [quote] Only draft quotes can be deleted; sent quotes can only be cancelled with a reason, and the number stays used.
+D011 [quote] Webhooks quote.sent, quote.accepted, quote.declined and quote.expired carry quote id, number, total and customer id.
+D012 [quote] Quote email can be scheduled for a chosen date and time; scheduled sends are listed and can be cancelled before they go.
+D013 [proforma] Proforma invoices use their own series PI/YY-YY/NNNNN and show "Proforma, not a tax invoice"; they create no tax liability and are absent from registers.
+D014 [proforma] Convert proforma to tax invoice in one action; the proforma locks as Converted, links the new invoice, and cannot be converted twice.
+D015 [proforma] Payment recorded against a proforma is held as advance on the customer and applied when the tax invoice is issued.
+D016 [item] A service item has name, SAC code, unit, default rate, default tax rate, description and active flag; name unique per firm ignoring case.
+D017 [item] The invoice line item picker searches name and SAC by substring from 1 character, shows rate and tax, and lists recently used items first.
+D018 [item] Creating a new item inline from a line asks only name, rate and SAC, saves it to the catalogue, and fills the line.
+D019 [item] Picking an item copies its values into the line; later price changes never alter existing drafts or issued invoices.
+D020 [item] SAC field offers a searchable directory of service codes with description; picking one suggests the standard rate and warns when the chosen rate differs.
+D021 [item] Units list holds hours, days, months, nos, sessions, and lets the owner add units up to 20 characters; unit prints beside quantity.
+D022 [item] Item list columns: name, SAC, unit, rate, tax rate, times used, last used; filters: active, tax rate, unit; sorts by name, rate, times used.
+D023 [item] Per-customer price list overrides an item's rate for that customer; the line shows the override and a small marker that it differs from the catalogue.
+D024 [item] Bulk change rate for selected items by percent or amount with a preview of old and new rate; failed rows are listed with reasons.
+D025 [item] Item CSV import matches on item code, else name; shows rows to create, update and skip before running; bad SAC or rate rows download as an error file.
+D026 [item] An item used on any document cannot be deleted; the screen says how many documents use it and offers archive, which hides it from the picker only.
+D027 [item] Item rate edits are recorded in history with old and new rate, who changed it and when.
+D028 [item] Item export CSV has code, name, SAC, unit, rate, tax rate, active, created date; filtered rows only; UTF-8 with byte-order mark.
+D029 [item] Items support firm-defined custom fields of text, number, date or dropdown, shown in list, form, import and export.
+D030 [item] Item duplicate copies all fields except code and appends "(copy)" to the name.
+D031 [expense] An expense records date, vendor, category, amount, GST paid, paid-through account, notes and receipt, and is filtered by category, vendor, date and billable flag.
+D032 [expense] Mark an expense billable to a customer; it then appears as an unbilled item that can be added to that customer's next invoice as a line.
+D033 [expense] Re-billed expense lines can carry a markup percent; a pure-agent reimbursement line is printed separately and flagged with no markup allowed.
+D034 [expense] Receipt upload accepts JPG, PNG or PDF up to 5 MB, 3 files per expense; larger or other types are refused with the limit stated.
+D035 [expense] Expense categories are a firm list with defaults (travel, software, rent, salaries, professional fees); renaming keeps old expenses; used categories cannot be deleted, only archived.
+D036 [expense] Bulk actions on expenses: categorise, mark billable, delete; result says "12 done, 1 failed" with reason per failed row and leaves failed rows selected.
+D037 [expense] An expense billed on an invoice is locked and links that invoice; voiding the invoice or deleting its draft returns the expense to unbilled.
+D038 [expense] Expense export CSV has date, vendor, category, amount, GST, billable, customer, invoice number, paid through, one row per expense.
+D039 [expense] Deleted expenses stay in a trash for 30 days and restore with receipts; billed expenses cannot be deleted.
+D040 [expense] Vendor is its own record with name, GSTIN, PAN, state; expense GST split into CGST, SGST or IGST by vendor state, with an input-tax-credit eligible flag.
+D041 [expense] A bank statement line can be turned into an expense in one click, prefilled with date, amount and description.
+D042 [expense] Expense duplicate copies vendor, category, amount and notes but not date, receipt or billing link.
+D043 [time] A time entry holds date, person, customer, item or task, hours in 0.25 steps, note and billable flag; entries over 24 hours a day per person are refused.
+D044 [time] A start and stop timer on the time page creates an entry; only one timer runs per person and stopping saves the elapsed hours rounded up to the firm's step.
+D045 [time] Add unbilled time to a draft invoice grouped by person, task or day; each group becomes one line with quantity as hours and rate from person or customer.
+D046 [time] Time rate order: customer-specific rate, then person rate, then item rate; the line shows which rate was used.
+D047 [time] Billed entries are locked and show the invoice number; returning an invoice to void or deleting its draft frees the entries again.
+D048 [time] Time list filters by person, customer, date range, billable and billed state; weekly view totals hours per day and per customer.
+D049 [time] Staff see and edit only their own entries; owner and accountant see all; viewer sees none.
+D050 [time] Time export CSV has date, person, customer, task, hours, rate, amount, billed invoice; bulk mark as non-billable lists failures such as already billed rows.
+D051 [time] Retainer hours: a customer can have monthly included hours; the customer page shows used and remaining hours and flags overage.
+D052 [recurring] A recurring plan has customer, lines, frequency (monthly, quarterly, yearly), start date, optional end date or run count, and mode: create draft, issue, or issue and email.
+D053 [recurring] Plan page shows the next 3 run dates and amounts before saving, including the effect of a day above 28.
+D054 [recurring] Pause and resume a plan; resuming asks whether to skip missed periods or create them; Skip next run is a separate one-click action.
+D055 [recurring] Plan has a run history listing each run date, result and generated invoice link; failed runs state the reason such as archived customer or invalid GSTIN.
+D056 [recurring] If a run fails the owner is notified and the plan stays active; the next day retries once without creating a duplicate for the same period.
+D057 [recurring] Editing a plan changes only future runs; invoices already created are untouched.
+D058 [recurring] A plan can raise its rate by a set percent on each anniversary, shown in the preview of future amounts.
+D059 [recurring] First period can be prorated by days from start date to the end of the month, with the calculation shown on the line.
+D060 [recurring] Plan list filters by status (active, paused, ended), customer and next run date; sorts by next run, customer, amount.
+D061 [recurring] Plan delete is only allowed when it has never run; otherwise Stop ends it and keeps history.
+D062 [recurring] Auto-issued recurring invoices use the run date as issue date and the current financial year's counter, so numbering stays consecutive.
+D063 [recurring] Webhook recurring_plan.run fires with plan id and invoice id for every run, success or failure.
+D064 [recurring] Duplicate plan copies customer, lines and mode but not run history, next run or end date.
+D065 [recurring] A plan can bill in advance: create the draft a set number of days before the invoice date.
+D066 [paylink] On an issued invoice, Create payment link produces a hosted page with UPI, card and netbanking; the link amount equals balance due, with an option to allow partial payment.
+D067 [paylink] Payment link has expiry date, status (created, paid, partially paid, expired, cancelled) and can be cancelled; a cancelled link shows a plain "link no longer active" page.
+D068 [paylink] Gateway payment success records a payment automatically with mode, gateway payment id, fee and net amount, and a receipt number.
+D069 [paylink] Gateway webhooks are idempotent: the same gateway payment id arriving twice records one payment only.
+D070 [paylink] A gateway payment above the balance due, as when two links race, records the excess as customer advance instead of failing.
+D071 [paylink] Gateway fee and its GST are recorded on the payment and can be listed as an expense of category payment fees.
+D072 [paylink] Payment link list filters by status, customer and date; columns invoice, amount, link status, created, paid on, gateway reference.
+D073 [paylink] Invoice PDF can print a UPI QR with the firm's UPI id, amount, and note set to the invoice number; QR shows only while balance due is above 0.
+D074 [paylink] Failed payment attempts appear on the invoice timeline with gateway reason, but never change status.
+D075 [paylink] Refund through the gateway is started from the payment row, needs owner role, and records a refund linked to the payment.
+D076 [paylink] Payout settlement report lists gateway payments per settlement with gross, fee, net and bank credit date to reconcile against statement lines.
+D077 [paylink] Gateway keys are stored per firm, shown masked, tested on save, and replacing them leaves existing links working.
+D078 [bank] A bank account has nickname, bank name, last 4 digits, IFSC, UPI id and a default flag; exactly one account is default and prints on invoices.
+D079 [bank] Invoice can pick which firm bank account prints; the choice is stored on the invoice at issue.
+D080 [bank] Statement import accepts CSV with column mapping saved per account, with presets for common bank layouts; rows show date, narration, debit, credit, balance.
+D081 [bank] Import skips lines already imported, matching on date, amount, reference and balance; the result states how many were new and skipped.
+D082 [bank] Bad statement rows (no date, both debit and credit) are listed with row numbers and reasons and can be corrected and re-run without re-uploading.
+D083 [bank] Credit lines show suggested invoice matches ranked by exact amount, invoice number in narration, then customer name.
+D084 [bank] One statement line can match several invoices, with a split amount per invoice; the total must equal the line amount.
+D085 [bank] A credit line can be matched as payment, ignored with a reason, or marked as not income (loan, transfer); each is reversible by Unmatch.
+D086 [bank] Statement list filters by matched, unmatched, ignored, credit or debit, date range and amount; default shows unmatched newest first.
+D087 [bank] Bulk accept suggested matches for selected lines; the result states how many matched and lists skipped lines with the reason.
+D088 [bank] Net receipt after TDS: a line smaller than the invoice by about the TDS percent offers to record payment plus TDS automatically.
+D089 [bank] Reconciliation page shows opening balance, matched total, unmatched total and difference against the closing balance entered by the user.
+D090 [bank] Deleting an import batch is allowed only when none of its lines is matched; the batch name, file and uploader stay in history.
+D091 [bank] Statement export CSV carries match status, matched document number and receipt number beside each line.
+D092 [bank] Statement lines are never edited after import; corrections happen by ignore and match actions, which are logged.
+D093 [refund] Refund of customer credit needs amount up to the credit balance, date, mode, reference and bank account; it is numbered REF/YY-YY/NNNNN gapless.
+D094 [refund] Refund list filters by customer, mode and date; columns number, date, customer, amount, mode, reference; exports to CSV.
+D095 [refund] A refund can be reversed by an owner with a reason, returning the amount to the customer's credit balance.
+D096 [refund] Refund print page shows number, date, customer, amount, mode, reference and the credit note or advance it settles.
+D097 [refund] Refund above available credit is refused with the available figure shown; two refunds at once cannot together exceed the balance.
+D098 [refund] Webhooks refund.created and refund.reversed carry refund id, customer id and amount.
+D099 [advance] Receipt voucher is issued when money arrives before an invoice; number RV/YY-YY/NNNNN, with customer, amount, GST rate and tax split by place of supply.
+D100 [advance] Advance on a customer shows as unapplied; applying it to an invoice offers the amount up to the smaller of advance and balance due.
+D101 [advance] One advance can be split across several invoices; one invoice can use several advances; each application is a listed row.
+D102 [advance] Applying an advance to an invoice reduces tax payable on that invoice by the tax already paid on the receipt voucher, shown on the print.
+D103 [advance] Unapply an advance returns it to unapplied balance and restores the invoice balance, with a logged reason.
+D104 [advance] Refund voucher is issued when an advance is returned without supply; it numbers RFV/YY-YY/NNNNN and appears negative in the register.
+D105 [advance] Report of unapplied advances by customer with age in days, total, and link to each voucher.
+D106 [advance] GST sales register export includes receipt vouchers and refund vouchers as separate sections for the advances table of the return.
+D107 [debit] A debit note raises the amount owed against an issued invoice for upward revision; it links that invoice, has reason, lines, tax at original rates, and number DN/YY-YY/NNNNN.
+D108 [debit] Issuing a debit note increases the invoice balance due and status can move from paid back to partially paid.
+D109 [debit] Debit note print page is titled "Debit Note" and states the original invoice number and date, reason and tax split.
+D110 [debit] Debit notes appear positive in the sales register with their own type column; void ones are excluded.
+D111 [debit] Debit note on an e-invoiced invoice requests its own IRN; failure leaves the note issued and retryable.
+D112 [debit] Only owner can void a debit note with no payment applied; reason of 5 to 200 characters is required and the number stays used.
+D113 [tds] A TDS certificate record stores customer, TAN, section (194J, 194C, 194H, 194O, other), quarter, FY, certificate number, certificate date, TDS amount and uploaded PDF.
+D114 [tds] Payment form TDS section list suggests rate (194J 10 percent, 194J 2 percent, 194C 1 or 2 percent) on taxable value excluding GST, editable.
+D115 [tds] TDS list filters by FY, quarter, customer, section and certificate received or pending; default shows pending certificates oldest first.
+D116 [tds] System matches certificates to payments' TDS amounts by customer and quarter, showing difference when totals disagree.
+D117 [tds] TDS receivable report totals TDS deducted by customer and quarter against certificates received, for claiming credit in the income tax return.
+D118 [tds] Form 26AS or AIS CSV import compares deductor TAN, section and amount with recorded TDS and lists mismatched rows.
+D119 [tds] Reminder to request a missing certificate can be queued to the customer contact 15 days after quarter-end TDS filing deadline.
+D120 [tds] TDS export CSV has customer, TAN, section, quarter, deducted, certificate number, certificate status and linked payment receipts.
+D121 [tds] A certificate with matched payments cannot be deleted; it can be replaced with a new upload and the old file stays in history.
+D122 [einv] Each e-invoice record stores IRN, acknowledgement number, acknowledgement date, signed QR and status; the QR prints on the invoice PDF.
+D123 [einv] Cancel IRN is allowed only within 24 hours of generation with a coded reason; after that the screen says to issue a credit note instead.
+D124 [einv] Attempt history on the invoice lists every portal call with time, result code and message, newest first.
+D125 [einv] Download e-invoice JSON for an invoice, built to the portal schema, for manual upload when the live connection is down.
+D126 [einv] Bulk generate e-invoices for selected invoices; the result lists each as done or failed with the portal message, and failures can be retried together.
+D127 [einv] List flag shows invoices that need an IRN and the days left of the reporting window, with a warning when 3 or fewer remain.
+D128 [einv] Invoice list filters by e-invoice status: not needed, pending, generated, failed, cancelled.
+D129 [einv] Invoice to a customer without GSTIN shows "e-invoice not applicable" and never calls the portal.
+D130 [einv] Webhooks einvoice.generated, einvoice.failed and einvoice.cancelled carry invoice id and IRN.
+D131 [remrule] A reminder rule has offset in days before or after due date, channel (email), template, and active flag; the firm can hold up to 10 rules.
+D132 [remrule] A before-due reminder (for example 3 days before) can be set; it is skipped when the invoice is already paid.
+D133 [remrule] A customer can be excluded from reminders with a toggle on the customer page; excluded invoices show a small "reminders off" marker.
+D134 [remrule] Marking a promise-to-pay date on an invoice pauses reminders until that date plus one day.
+D135 [remrule] Send reminder now on an invoice or on selected overdue invoices; each send is logged on the invoice and shows in the outbox.
+D136 [remrule] Reminder preview shows the exact email for a chosen invoice before the rule is saved, with variables filled.
+D137 [remrule] Reminders send only at the set hour on working days, skipping Sundays and listed holidays, and never more than one per invoice per day.
+D138 [remrule] A reminder for an invoice whose customer has no email is logged as skipped with the reason, and appears in a daily owner summary.
+D139 [remrule] Reminder log per invoice lists date, rule, recipient and result; list filters by result and date.
+D140 [remrule] Escalation rule notifies the owner, not the customer, when an invoice is over 30 days late.
+D141 [template] Invoice template settings: logo, accent colour, columns shown, footer text, signature image, paper A4 or A5, and a live preview using a sample invoice.
+D142 [template] Email templates per message type (invoice, reminder, receipt, credit note, quote) accept variables customer_name, invoice_number, amount_due, due_date, link.
+D143 [template] Saving a template with an unknown variable is refused and names the variable; missing data at send time renders blank, never the raw braces.
+D144 [template] Reset template to default restores the built-in text; the edited version is kept as a revision for 30 days.
+D145 [template] An issued invoice's PDF is stored at issue; changing the template later never changes how an old invoice looks when reopened.
+D146 [template] Terms and conditions text up to 1000 characters prints at the foot of invoices and quotes; a different text can be set per document type.
+D147 [template] Template language option for labels in English or Hindi; amount in words follows the chosen language.
+D148 [template] Test send emails a rendered template to the user's own address only.
+D149 [taxrate] System tax-rate table has effective-from dates; an invoice uses the rate valid on its issue date, and rate changes by law are added by the product, not the firm.
+D150 [taxrate] Cess, exempt, nil-rated and non-GST supplies can be selected per line and appear in their own columns of the register.
+D151 [taxrate] SAC directory search by code or words returns description and standard rate; unknown code is refused with "Not a valid SAC".
+D152 [taxrate] When a line rate differs from the SAC's standard rate the form shows a visible warning that the invoice will go out with that rate.
+D153 [taxrate] A firm cannot add or edit tax rates; the rate dropdown lists only allowed rates for the document date.
+D154 [taxrate] Place of supply list holds all states and union territories with GST codes, and "Other territory" and "Outside India" options.
+D155 [currency] Invoice currency can be chosen from a firm-enabled list (USD, EUR, GBP, AED, SGD, AUD); the symbol, name and 2 decimals are fixed per currency.
+D156 [currency] Foreign-currency invoice stores an exchange rate with 4 decimals, its source (reference rate or manual), and prints the INR equivalent.
+D157 [currency] Exchange rate defaults from the last entered rate for that currency and can be edited only on draft; at issue it is locked.
+D158 [currency] Export of services invoice under LUT prints "Supply meant for export under LUT without payment of IGST" with LUT number and date, and carries 0 tax.
+D159 [currency] Firm profile holds LUT number, date and expiry; 30 days before expiry a banner warns, and after expiry export invoices without tax are blocked with a message.
+D160 [currency] Payment in foreign currency records amount received, INR credited, bank charges and the exchange gain or loss line.
+D161 [currency] Foreign inward remittance advice reference (FIRC) can be attached to a payment with number and date.
+D162 [currency] Invoice list shows currency; filter by currency; totals row shows INR and foreign totals separately.
+D163 [currency] Customer default currency prefills new invoices, quotes and recurring plans.
+D164 [currency] Registers show taxable value in INR using the stored exchange rate; the exchange rate is a column in the sales register export.
+D165 [contact] A customer holds several contacts with name, email, phone, designation and a flag for each of: gets invoices, gets reminders, gets receipts.
+D166 [contact] Emails for invoices go to every contact flagged for invoices; the send screen shows the recipients and lets the user remove or add one for that send.
+D167 [contact] The same email twice on one customer is refused; one email may sit on several customers.
+D168 [contact] A contact whose email bounced shows a red marker and is skipped until corrected, and the owner sees the bounce in the outbox.
+D169 [contact] Each contact records consent to be messaged: source, date and a channel list; withdrawing consent stops sends and is logged.
+D170 [contact] Contact delete is allowed unless it is the only invoice recipient; contact history keeps the name on past emails.
+D171 [contact] Contact import is part of customer import; match is by customer GSTIN then contact email; extra contacts attach, none are overwritten.
+D172 [portal] A client contact signs in to a portal with email and one-time code; no password is stored, codes expire in 10 minutes and allow 5 tries.
+D173 [portal] Portal shows only that customer's issued invoices, payments, credit notes and statement, with PDF download and Pay online if a gateway is set.
+D174 [portal] Client can mark an invoice Disputed with a reason and message; the owner is notified, reminders for that invoice pause, and status shows "Disputed" beside the invoice.
+D175 [portal] Owner can revoke a portal user, or switch portal off for a customer; sessions end immediately.
+D176 [portal] Portal records "viewed" time on each invoice and shows it to the owner on the invoice timeline.
+D177 [portal] Portal sessions last 30 days idle-free 2 hours; portal users never see drafts, internal notes, tags or other customers.
+D178 [portal] Portal pages carry the firm's name and logo and a plain "Contact" line with the firm email and phone.
+D179 [branch] A firm can hold several GSTINs, each a branch with address, state, bank account, prefix and logo; one is the default.
+D180 [branch] Invoice form has an Issue from branch field; place of supply is compared with that branch's state, not the head office.
+D181 [branch] Counters run per branch, prefix and financial year; two branches may never share a prefix.
+D182 [branch] A branch used by any document cannot be deleted; it can be deactivated, hiding it from new documents.
+D183 [branch] Each branch GSTIN is validated for format and check character, and its first two digits must equal the branch state's code.
+D184 [branch] Register exports can be filtered by branch GSTIN, since returns are filed per GSTIN.
+D185 [branch] Changing the firm's registration status (unregistered to registered) takes effect from a chosen date; documents before it stay Bills of Supply, documents after are tax invoices.
+D186 [branch] Firm profile also holds PAN, Udyam number, CIN and tax scheme; PAN is derived from characters 3 to 12 of the GSTIN and mismatch is refused.
+D187 [branch] Logo upload accepts PNG or JPG up to 2 MB with minimum 200 pixels wide; the print preview updates before saving.
+D188 [branch] Financial-year lock date set by owner blocks creating, issuing or reversing anything dated before it, with the lock date named in the error.
+D189 [branch] Firm closure: owner requests it, gets a full export, sees a 30-day grace window to cancel, and records are kept readable by the owner until the retention period ends.
+D190 [branch] Firm settings show what personal data is held about customers and let the owner correct or erase a person's contact data on request, with the action logged.
+D191 [role] A read-only screen lists each role against every action (create, edit, issue, void, reverse, export, settings, users) as a grid.
+D192 [role] A role change takes effect on the user's next request without logout; the user sees a notice in-app and by email.
+D193 [role] A CA or external accountant role can be given access to reports, registers and exports only, with an end date after which access stops.
+D194 [role] Owner transfer: current owner nominates another active user; they must accept; both are logged; the first owner becomes accountant.
+D195 [role] Staff role sees only invoices they created and customers assigned to them, for firms that turn this setting on.
+D196 [invite] Invite list shows email, role, invited by, date, status (pending, accepted, expired, revoked).
+D197 [invite] Resend creates a new link and invalidates the old one; the old link says "This invite was replaced" rather than a generic error.
+D198 [invite] Inviting an email that already belongs to another firm is refused with a message that does not reveal which firm.
+D199 [invite] Invite page shows the firm name, role and inviter before the person sets a password.
+D200 [invite] Up to 10 emails can be invited at once, comma-separated; the result lists each as sent or refused with the reason.
+D201 [invite] Revoked or expired invites can be re-sent from the same row without retyping the email.
+D202 [integ] API keys are created with a name and read-only or read-write scope, shown once in full, listed with last used time and revocable at once.
+D203 [integ] API list endpoints page with a cursor, 100 maximum per page; filters include updated_since, status and external reference.
+D204 [integ] POST requests accept an Idempotency-Key header; the same key within 24 hours returns the first result without creating a second record.
+D205 [integ] Rate limit above 100 requests per minute per key returns 429 with a Retry-After header, and the call is not applied.
+D206 [integ] Webhook endpoint setup takes URL, chosen events and a signing secret; each delivery has an HMAC signature, timestamp and event id.
+D207 [integ] Delivery log per endpoint shows each attempt with status code and response time; failed ones retry on a backoff for 24 hours, and can be resent by hand.
+D208 [integ] An endpoint failing 20 times in a row is disabled and the owner is emailed; it can be re-enabled after a test delivery succeeds.
+D209 [integ] Export Tally vouchers as XML for sales, credit notes and receipts for a date range, with party ledger names matched to customer names.
+D210 [integ] Email sending can use the firm's own reply-to address; a verification email to that address is required before it is used.
+D211 [integ] Connected integrations list shows name, status, connected by, date and a Disconnect action; disconnecting never deletes records it created.
+D212 [integ] Every record has an optional external_ref field up to 60 characters, unique per object type and firm, for matching with other software.
+D213 [integ] API errors return a machine code, a human message and the field name; versions are pinned per key and a changelog is listed.
+D214 [import] Import wizard steps: upload, map columns, preview first 20 rows with problems marked, run; mapping choices are remembered per file layout.
+D215 [import] File limits 5 MB and 5000 rows; accepted CSV and XLSX in UTF-8; over-limit is refused before parsing with the limit stated.
+D216 [import] Amount cells with commas, rupee sign or spaces are cleaned; dates accept DD-MM-YYYY, DD/MM/YYYY and YYYY-MM-DD; anything else is a row error.
+D217 [import] Result screen counts created, updated, skipped and failed rows; the failed rows download as a CSV with the original columns plus Row and Reason.
+D218 [import] Customer import match key choice: GSTIN, else email, else name plus pincode; choose whether a match updates the record or skips it.
+D219 [import] State names and old spellings (Orissa, Pondicherry) map to the GST state list; unmapped values stop that row with the value shown.
+D220 [import] Historical invoices import as issued with their original number, date and totals, never use the counter, are marked Imported and cannot be edited.
+D221 [import] Imported invoice numbers that clash with an existing number in the same series are rejected; numbers that do not fit the firm's format are accepted but flagged.
+D222 [import] Whole import can be undone within 24 hours: records created by it are removed if untouched; touched ones are listed and left.
+D223 [import] Import history lists file name, who, when, counts and status; uploading a file with the same hash warns that it was already imported.
+D224 [import] Sample template downloads for each object show the columns, an example row and the allowed values for lists.
+D225 [import] Opening balances import: one row per unpaid invoice with customer, number, date, amount and balance, creating imported invoices that can take payments.
+D226 [import] Statement and payments imports show a matched-versus-unmatched summary before anything is saved, with a Confirm step.
+D227 [export] Export screen shows row count for the current filter before download, offers columns to include, and remembers the column choice per person.
+D228 [export] More than 5000 rows runs as a background job; the page shows queued, running, ready or failed, and an email with the link is sent when ready.
+D229 [export] Export files are kept 7 days then removed; the job row stays with row count, who ran it and filters used.
+D230 [export] Download invoice PDFs for a date range as one zip named FIRM_INVOICES_YYYY-MM; each file name carries number and customer with slashes replaced by dashes.
+D231 [export] GSTR-1 JSON export for a month builds B2B, B2CS, credit notes, HSN summary and document-issued tables in the portal's schema.
+D232 [export] Before GSTR-1 export a check lists invoices with missing HSN, bad GSTIN or rate mismatch, each opening the invoice; export is allowed with a confirm.
+D233 [export] Excel export option (XLSX) keeps amounts as numbers, dates as dates, and freezes the header row.
+D234 [export] Full-firm export is a zip with CSV of every object, PDFs of issued documents and attachments, plus a readme listing columns; owner only.
+D235 [export] Every export writes a history entry with who, what object, filters, row count and time; viewers cannot run any export.
+D236 [export] Custom fields are exported as columns named after the field label; columns for archived fields appear only when asked.
+D237 [report] Aged receivables report buckets balances by 0-30, 31-60, 61-90 and over 90 days past due, per customer, and each figure drills into the invoice list.
+D238 [report] Sales report groups taxable value by customer, item or month with period presets (this month, quarter, financial year, custom) and previous-period comparison.
+D239 [report] GST summary per month shows taxable value, CGST, SGST and IGST on sales, less credit notes, plus rate-wise table.
+D240 [report] HSN or SAC summary shows quantity, taxable value and tax per code as asked for in the return.
+D241 [report] Collections report shows receipts per day and per mode, TDS separately, and the share paid within terms.
+D242 [report] Customer statement for a date range lists invoices, payments and credit notes with running balance, prints to PDF and emails to the customer contacts.
+D243 [report] Days sales outstanding and average days to pay are shown per customer and for the firm for a chosen period.
+D244 [report] Each report states "as of" time, scope (firm or branch) and the filters used; changing a filter reloads without losing the others.
+D245 [report] Report empty state says "No data for these filters" and offers the nearest preset; error state offers Retry.
+D246 [report] Monthly accountant pack: owner schedules a monthly email to a chosen address with the sales register, receipts register, TDS list and aged receivables as CSV.
+D247 [report] Viewer can open reports but not export or schedule them; export buttons are not rendered for viewers.
+D248 [report] Dashboard tiles show outstanding, overdue, collected this month and drafts count, each opening the matching filtered list.
+D249 [report] Outstanding by customer report sorts by balance, shows oldest due date, and totals; export keeps the sort.
+D250 [saved] A saved view stores filters, sort and columns under a name of up to 40 characters; names unique per list per person.
+D251 [saved] Saved views are private or shared with the firm; only the creator or an owner edits a shared view.
+D252 [saved] One view can be the default for a person and opens first; a locked All view always exists and cannot be deleted.
+D253 [saved] Views appear as tabs above the list with a count; at most 20 per person per list, with a clear message at the limit.
+D254 [saved] A view that filters on a deleted or archived record shows a notice and still loads with that filter removed.
+D255 [saved] Starter views for invoices: Drafts, Unpaid, Overdue, Paid this month; for customers: With balance, Archived.
+D256 [notif] A bell lists events: payment received, invoice viewed, quote accepted or declined, e-invoice failed, import finished, reminder skipped; unread count shown, mark all read.
+D257 [notif] Per person settings choose in-app, email or none for each event type; owner events default on, others off.
+D258 [notif] Daily summary email at 8 AM IST lists new overdue invoices, payments received and failed e-invoices, and is skipped on days with nothing.
+D259 [notif] Notifications link to the record and are kept 90 days; opening one marks it read.
+D260 [notif] Mute a customer to stop viewed and payment alerts for it; the customer page shows the mute state.
+D261 [notif] Customer-facing emails state the firm name as sender and the firm email as reply-to; unsubscribing from reminders is a link, logged on the contact.
+D262 [audit] Audit log lists time, actor, action, object, record number and summary; filters actor, object type, action and date range; sort by time newest first.
+D263 [audit] Entries show field-level old and new values and link to the record; entries cannot be edited or removed by anyone, including owner.
+D264 [audit] Audit includes sign-ins, failed sign-ins, role changes, exports, API key creation and permission-denied attempts, with IP address and device.
+D265 [audit] Audit CSV export is owner only and is itself logged; each row includes actor email and IP.
+D266 [audit] Audit entries and issued documents are retained at least 8 years even after a firm lapses, and a closed firm's owner can still export them.
+D267 [audit] Audit log search finds by record number, such as INV/26-27/00012, and returns every entry touching it.
+D268 [plan] Plans page shows Free, Pro with limits (invoices per month, users, e-invoices) and what changes on upgrade.
+D269 [plan] Free plan shows "7 of 10 invoices this month" on the invoice list; at the limit, issuing is blocked with an upgrade prompt while drafts, payments and all reading stay open.
+D270 [plan] After a plan lapses the firm is set read-only with export open; no record is deleted, and paying again restores full use at once.
+D271 [plan] Trial shows days left in a banner; at the end the firm moves to Free automatically, never to a blocked state.
+D272 [plan] Plan change takes effect now for upgrades, with proration shown before confirming, and at period end for downgrades.
+D273 [plan] Downgrade is blocked when active users exceed the new plan's seats; the message names how many to deactivate.
+D274 [plan] The product issues its own GST invoice to the firm for each subscription payment, with the firm's GSTIN, listed under Billing with PDF download.
+D275 [plan] Failed subscription payment gives a 7-day grace with banner and emails on day 1, 3 and 6 before read-only mode.
+D276 [plan] Cancel at period end keeps full use until the date, shows the date, and offers Undo cancel until then.
+D277 [plan] Billing page lists payment method, next charge date and amount; annual and monthly toggle shows the saving.
+D278 [plan] Usage count for the free limit counts issued invoices only, resets on the 1st IST, and voided invoices still count.
+D279 [support] Owner can grant support access for 24 hours or 7 days, read-only, from Settings; the page shows who has it and until when.
+D280 [support] Every support view is written to the firm's audit log with the staff member's identity, time and records opened.
+D281 [support] While support has access, every screen shows a banner "Support can view this firm" and the owner can revoke it with one click.
+D282 [support] Support access never exposes password hashes, API secrets, gateway keys or the full bank account number.
+D283 [support] Support cannot write, issue, void or reverse anything on a firm's behalf; fixes are made by the firm's own users.
+D284 [tag] Tags are free labels up to 30 characters, shared per firm per object type; same tag in different case is one tag.
+D285 [tag] Renaming a tag renames it everywhere; deleting a tag removes it from records but never touches them, after a confirm that states the count.
+D286 [tag] Tags are searchable, filterable and exportable on customers, invoices, expenses and items; up to 10 per record.
+D287 [attach] Files can be attached to invoice, customer, expense, payment and credit note: PDF, JPG, PNG, XLSX, DOCX up to 5 MB, 10 per record.
+D288 [attach] An attachment can be marked Send with email; those files go with the invoice email up to a 10 MB total.
+D289 [attach] Attachments on issued documents can be added and removed after issue; each add and remove is logged with file name and user.
+D290 [attach] File type is checked by content, not name; an executable renamed to .pdf is refused.
+D291 [dispute] A dispute on an invoice records raised by, reason, amount in question and status (open, resolved, written off); open disputes pause reminders.
+D292 [dispute] Resolving a dispute offers: no change, issue credit note for the amount in question, or note; the choice is logged.
+D293 [numser] Numbering settings show per series the next number, last issued number and date, and the year; the next number is read-only and cannot be set backwards.
+D294 [numser] Numbering screen offers Check gaps, which lists any missing sequence numbers in a series and why (none expected); a gap is a defect report.
+D295 [numser] A second series (for example a branch or export prefix) can be created before first use only; the prefix cannot be changed once any document uses it.
+D296 [latefee] Late fee setting: flat amount or percent per month on overdue balance; when on, it adds a fee line to a draft, never changes an issued invoice.
+D297 [latefee] Late fee drafts are created monthly per overdue customer for review, never issued automatically; GST on the fee uses the invoice's rate.
+D298 [creditled] Customer credit ledger lists each credit in, amount applied, refund and balance after, newest first, each row linking to its document.
+D299 [creditled] Ledger balance always equals credits issued minus credits applied minus refunds; a mismatch is shown as an error banner and logged.
+D300 [creditled] Unapply credit from an invoice returns it to the ledger, restores balance due, and records who and why.
+D301 [onboard] Setup checklist shows firm profile, bank account, first customer, first invoice, invite accountant; each item links to its form and ticks when done.
+D302 [onboard] GSTIN entry fetches legal name, address and state from the portal and fills the profile, with the status shown (active or cancelled).
+D303 [onboard] Sample data can be loaded to explore and removed in one action; sample records never count toward invoice numbers or plan limits.
+D304 [search] Global search finds customers, invoices, payments, quotes and items from one box; typing an exact document number jumps straight to it.
+D305 [search] Search results group by object with 5 per group, show a match reason (number, GSTIN, name), and a View all link keeps the query.
+D306 [search] Search ignores spaces and slashes inside numbers, so INV2627 00001 finds INV/26-27/00001, and matches amounts typed as 12500 or 12,500.
+D307 [outbox2] Outbox shows delivered, opened and bounced where known; a bounce marks the contact and names the invoice that failed.
+D308 [outbox2] Queued emails can be cancelled before send; a cancelled row stays in the list with who cancelled it.
+D309 [outbox2] Outbox filters by status, type (invoice, reminder, receipt, invite), customer and date; each row opens the exact body and attachments sent.
+D310 [customer] Customer detail first shows outstanding, overdue amount, unused credit, average days to pay and last payment date, ahead of tabs.
+D311 [customer] Customer list columns: name, GSTIN, state, outstanding, overdue, last invoice date, terms, tags; chosen and ordered per person.
+D312 [customer] Customer filters: state, has balance, has overdue, has GSTIN yes or no, tag, owner, created date; sorts by name, outstanding, last invoice date.
+D313 [customer] Customer default tax treatment (regular, SEZ, export, unregistered) and default TDS section prefill new invoices and payments.
+D314 [customer] GSTIN lookup on the customer form fills name, address and state and warns in red when the registration is cancelled.
+D315 [customer] Bulk on customers: tag, set terms, archive; result reads "18 done, 2 failed" with each failed customer and reason, failed rows stay selected.
+D316 [customer] Customer import matches on GSTIN, else email, else name plus pincode; update or skip chosen once; bad rows download with reasons.
+D317 [customer] Customer export CSV has name, type, GSTIN, state, address, contact email, phone, terms, outstanding, tags, archived, custom fields.
+D318 [customer] Deleted customers with no documents stay in trash for 30 days and restore with contacts and notes.
+D319 [customer] Customer duplicate copies address, terms, tags and settings but leaves GSTIN, id, balances and documents blank.
+D320 [customer] Merge two customers: pick the survivor, preview what moves, documents keep their issue-time snapshot, and the loser stays as a redirect; different GSTINs need a confirm.
+D321 [customer] Customer attachments for agreement, KYC and work order, 10 files of 5 MB, with name, date and uploader shown.
+D322 [customer] Customer custom fields: text, number, date, dropdown, up to 10, optionally printed on invoices; shown in list, import and export.
+D323 [customer] Customer owner field assigns a staff member; list filter Mine shows only theirs.
+D324 [customer] Customer-level toggle stops reminders; statement email can be set monthly to the customer's billing contacts.
+D325 [customer] API customers carry external_ref; GET by GSTIN or ref returns the record; events customer.created, updated and archived carry changed fields.
+D326 [customer] Customer statement link shares a read-only statement with 30-day expiry, revocable, showing balance and open invoices.
+D327 [customer] Customer list empty search says "No customer matches" and offers Create customer with the typed text prefilled.
+D328 [customer] Unregistered customer with no GSTIN on an invoice above 2.5 lakh asks for state and address before issue, since B2C large supplies need them.
+D329 [invoice] Invoice list extra columns to pick: place of supply, tags, owner, sent date, viewed date, e-invoice status, currency, branch, PO number.
+D330 [invoice] Invoice extra filters: amount range, due date range, overdue by days, sent or not sent, viewed or not, tag, owner, branch, e-invoice status.
+D331 [invoice] Invoice list can group by customer or month showing a subtotal per group; the totals row sums total and balance for the filtered rows.
+D332 [invoice] Starter saved views: Drafts, Unpaid, Overdue, Due this week, Paid this month; each shows a count.
+D333 [invoice] Bulk email on selected issued invoices queues one message each; result lists queued and skipped (no email, draft) with reasons.
+D334 [invoice] Bulk issue of selected drafts issues in issue-date order, skips drafts failing checks with the reason, and consumes numbers only for those issued.
+D335 [invoice] Bulk PDF download of selected invoices gives one zip; bulk tag, bulk send reminder and bulk delete drafts follow the same partial-result report.
+D336 [invoice] Invoice CSV export columns: number, date, due, customer, GSTIN, POS, taxable, CGST, SGST, IGST, round-off, total, paid, TDS, credited, balance, status; line-level option gives one row per line.
+D337 [invoice] PDF is stored at issue; reopening years later shows the same layout, logo and wording; file name is number plus customer with slashes replaced.
+D338 [invoice] PDF carries a DRAFT watermark on drafts, VOID on voided and PAID on paid invoices, and labels copy as "Original for Recipient".
+D339 [invoice] Preview shows exactly how the client will see the invoice page and email, in desktop and phone widths, before issue.
+D340 [invoice] Schedule send: choose date and time to email an issued invoice; scheduled sends appear in outbox and can be cancelled.
+D341 [invoice] Share link page shows PDF download, pay button if enabled, and records first viewed and last viewed times on the invoice.
+D342 [invoice] Invoice owner field defaults to creator; list filter Mine; owner shown in history.
+D343 [invoice] Comments thread on an invoice, internal only, with @mention of a user that notifies them; comments cannot be edited after 5 minutes.
+D344 [invoice] Invoice attachments up to 10 files of 5 MB, optionally sent with the email; add and remove after issue logged.
+D345 [invoice] Custom invoice fields (PO number, project code, work order) of text, number, date or dropdown print on the invoice and are searchable and exportable.
+D346 [invoice] Draft autosaves every 30 seconds and on leaving; the draft shows "Saved 10:42" and a lost connection shows "Not saved, retrying".
+D347 [invoice] Invoice related panel shows payments, credit notes, debit notes, e-invoice record, source quote, recurring plan, emails sent and time entries billed.
+D348 [invoice] Duplicate copies customer, lines, notes, tags, custom fields, branch and place of supply; never copies number, dates, payments, attachments or IRN.
+D349 [invoice] Deleted drafts sit in trash 30 days and restore with their lines; issued and void invoices have no delete.
+D350 [invoice] Mark promise-to-pay date and a reminder pause on an invoice, shown on the list as a date chip.
+D351 [invoice] API: create draft, update draft, issue as a separate call; GET by number; filter updated_since; issue returns the number and PDF link.
+D352 [invoice] Webhooks invoice.issued, invoice.paid, invoice.voided, invoice.overdue with signed delivery, event id and full invoice body.
+D353 [invoice] Issue screen shows a final check list (customer GSTIN, SAC present, place of supply, tax split) with a plain warning for anything unusual before the number is taken.
+D354 [invoice] Invoice with a different customer GSTIN state than place of supply shows a visible note "Place of supply differs from customer state" on the draft.
+D355 [invoice] Invoice notify: owner is told when the customer views an invoice for the first time, if the setting is on.
+D356 [invoice] Invoice empty-search state says "No invoices match" with the active filters listed as removable chips.
+D357 [payment] Payments list columns: date, receipt, customer, invoice, mode, amount, TDS, reference, deposit account, recorded by; filters mode, date, customer, reversed, amount range; newest first.
+D358 [payment] Search payments by receipt number, reference, customer name, or exact amount.
+D359 [payment] One customer payment can be split across several invoices, oldest due first by default, editable per row; the receipt shows each allocation.
+D360 [payment] Payment mode list is firm-extendable with custom modes (wallet, gateway name) of up to 20 characters; used modes can be hidden, not deleted.
+D361 [payment] Deposit account chosen per payment from the firm's bank accounts and Cash in hand; filter and export by it.
+D362 [payment] Cheque payments hold cheque date and status (received, deposited, cleared, bounced); bounced reverses the payment and logs a bounce note.
+D363 [payment] Payment has received date and bank clearing date separately; clearing date optional and used for reconciliation.
+D364 [payment] Proof file such as UPI screenshot or cheque image attaches to a payment, JPG PNG or PDF up to 5 MB.
+D365 [payment] Import payments CSV matches rows to invoices by invoice number, else customer and amount; unmatched or over-balance rows go to an error file; duplicates follow the existing guard.
+D366 [payment] Payments export CSV: date, receipt, customer, invoice numbers, mode, amount, TDS, reference, deposit account, status; filtered rows; large sets run in background.
+D367 [payment] Receipt email to the customer is a checkbox at record time, default on when the customer has an email, and goes to the outbox.
+D368 [payment] Reversal reason is chosen from a list (wrong amount, bounced, duplicate, other) plus a note; reversal frees the invoice and shows on both timelines.
+D369 [payment] Receipt print shows allocations, amount in words, mode, reference, TDS, balance after and a note that it is not a tax document.
+D370 [payment] API POST payments with an Idempotency-Key; response gives receipt number; GET filters by invoice, customer and updated_since.
+D371 [payment] Webhooks payment.recorded and payment.reversed with amount, invoice ids, receipt number and mode.
+D372 [payment] Payment recorded on the invoice page shows a toast with Undo for 10 seconds; undo reverses it and keeps the receipt number as void.
+D373 [payment] Unmatched amount typed above balance shows the balance and offers "Record rest as advance" rather than only an error.
+D374 [payment] Group payments by day for a daybook view with a total per day and per mode.
+D375 [payment] Payment recorded by a gateway shows its source and cannot be reversed here; a refund through the gateway is the path.
+D376 [payment] Payments filter shows reversed rows greyed with a reversed chip and excluded from totals unless asked.
+D377 [creditnote] Credit note list columns: number, date, customer, original invoice, reason, total, unapplied credit, status; filters reason, status, date, customer, unapplied above 0.
+D378 [creditnote] Search credit notes by number, original invoice number and customer name; default sort newest issue date first.
+D379 [creditnote] Email a credit note to the customer's contacts with PDF and share link; goes through the outbox like invoices.
+D380 [creditnote] Credit note preview shows the resulting invoice balance and new customer credit before issue.
+D381 [creditnote] Credit note on an e-invoiced invoice requests its own IRN referencing the original IRN; failure leaves it issued and retryable.
+D382 [creditnote] Draft credit notes can be deleted after a confirm and restored from trash within 30 days; issued ones cannot.
+D383 [creditnote] Attach a supporting document (return slip, approval email) to a credit note, 5 MB each, kept with it.
+D384 [creditnote] Credit note related panel lists the original invoice, each application to other invoices, refunds and the e-invoice record.
+D385 [creditnote] Unapply credit from an invoice returns the amount to the customer credit balance and restores that invoice's balance due, logged with reason.
+D386 [creditnote] API creates a credit note against an invoice, with webhooks credit_note.issued and credit_note.voided carrying invoice id and amount.
+D387 [creditnote] Credit note print shows applications ("applied to INV/26-27/00044: 2,000.00") and PDF is stored at issue like invoices.
+D388 [creditnote] Credit note issued past the 30 November deadline is refused with the exact deadline date and a suggestion to record a commercial discount instead.
+D389 [creditnote] Credit note export CSV: number, date, invoice, customer, reason, taxable, CGST, SGST, IGST, total, status; credit rows negative in registers.
+K001 [core] roles: owner can edit firm profile, numbering prefixes, defaults and e-invoice mode
+K002 [core] roles: owner can invite, change role, deactivate users
+K003 [core] roles: owner only can void invoices, void credit notes, reverse payments
+K004 [core] roles: accountant can create and edit customers, drafts, payments, credit notes
+K005 [core] roles: accountant cannot edit settings or users
+K006 [core] roles: viewer can view, search, print only
+K007 [core] roles: viewer cannot export, share, or email
+K008 [core] roles: at least one active owner per firm
+K009 [core] roles: one user belongs to one firm; email unique system-wide
+K010 [core] roles: forbidden actions return 403, hidden buttons are not security
+K011 [core] roles: tenant isolation, other firm record returns 404
+K012 [core] roles: roles shown on user list; role change recorded in history
+K013 [core] roles: auditor/CA read-only external role (deferred)
+K014 [core] roles: per-customer assignment of accountants (deferred)
+K015 [core] roles: maker-checker approval before issue (deferred)
+K016 [core] workflow: draft -> issue -> pay -> paid
+K017 [core] workflow: issue -> credit note -> reduced balance
+K018 [core] workflow: issue with wrong data -> void (no payments) -> new invoice
+K019 [core] workflow: issue with wrong data and payments -> credit note, re-invoice
+K020 [core] workflow: partial payment, then second payment
+K021 [core] workflow: client deducts TDS and pays net; record cash + TDS
+K022 [core] workflow: payment recorded by mistake -> reverse and re-record
+K023 [core] workflow: credit note larger than balance due -> customer credit
+K024 [core] workflow: customer credit applied to next invoice
+K025 [core] workflow: customer credit refunded manually (deferred)
+K026 [core] workflow: duplicate invoice for repeat work
+K027 [core] workflow: monthly retainer -> recurring draft
+K028 [core] workflow: email invoice -> outbox -> sent or failed -> retry
+K029 [core] workflow: overdue -> reminder at 1, 7, 15 days
+K030 [core] workflow: e-invoice generate -> portal fails -> retry
+K031 [core] workflow: e-invoice generated -> void blocked -> credit note
+K032 [core] workflow: invite user -> set password -> login
+K033 [core] workflow: archive customer with open invoices -> still collectable
+K034 [core] workflow: month-end register export for accountant
+K035 [core] workflow: customer GSTIN changes after issue -> old invoices keep snapshot
+K036 [core] workflow: backdated invoice blocked by number order
+K037 [core] workflow: credit note after 30 Nov deadline blocked
+K038 [core] data: firm id on every row
+K039 [core] data: money stored as integer paise
+K040 [core] data: customer: name, type, GSTIN, state, address, email, phone, terms days, archived at
+K041 [core] data: invoice: number, series, FY, dates, customer snapshot, place of supply, status, notes, IRN fields, totals
+K042 [core] data: line: description, HSN/SAC, qty, rate, discount, tax rate, taxable, cgst, sgst, igst
+K043 [core] data: payment: invoice, amount, TDS, date, mode, reference, receipt number, reversed flag
+K044 [core] data: credit note: original invoice, reason, lines, number, dates, status
+K045 [core] data: customer credit ledger
+K046 [core] data: user: email, password hash, role, active, failed attempts
+K047 [core] data: firm settings: profile, prefixes, defaults, e-invoice mode
+K048 [core] data: counters per firm, prefix, FY
+K049 [core] data: outbox message: to, subject, body, status, reason, attempts
+K050 [core] data: history entries: actor, time, entity, old, new
+K051 [core] data: share link: token, invoice, expiry, revoked
+K052 [core] data: recurring schedule: day, last run
+K053 [core] data: export job record (deferred)
+K054 [core] data: attachments on invoice (deferred)
+K055 [core] data: custom fields (deferred)
+K056 [core] data: multi-currency (deferred; INR only)
+K057 [core] rules: FY April to March, label YY-YY
+K058 [core] rules: number max 16 characters (CGST Rule 46)
+K059 [core] rules: number unique per FY, consecutive
+K060 [core] rules: intra-state = CGST + SGST half each
+K061 [core] rules: inter-state = IGST
+K062 [core] rules: place of supply defaults to customer state
+K063 [core] rules: HSN/SAC 4,6,8 digits
+K064 [core] rules: allowed rates 0, 0.25, 3, 5, 18, 40
+K065 [core] rules: rounding per line half up to paise, total to whole rupee with round-off line
+K066 [core] rules: credit note linked to invoice, own series, reason
+K067 [core] rules: credit note deadline 30 Nov after FY end (Section 34)
+K068 [core] rules: credit note cannot exceed original value
+K069 [core] rules: unregistered firm issues Bill of Supply, no tax
+K070 [core] rules: TDS reduces cash but settles invoice
+K071 [core] rules: no advance payments in v1
+K072 [core] rules: reverse charge (deferred)
+K073 [core] rules: composition scheme firm (deferred)
+K074 [core] rules: TCS (deferred)
+K075 [core] rules: export / SEZ supplies, LUT (deferred)
+K076 [core] rules: e-invoice threshold by turnover (fake portal skips threshold)
+K077 [core] rules: invoice date not future
+K078 [core] rules: due date not before issue
+K079 [core] rules: payment date between issue date and today
+K080 [core] rules: late fee / interest (deferred)
+K081 [core] states: invoice draft, issued, partially_paid, paid, void
+K082 [core] states: overdue derived, not stored
+K083 [core] states: credit note draft, issued, void
+K084 [core] states: payment active, reversed
+K085 [core] states: outbox queued, sent, failed
+K086 [core] states: customer active, archived
+K087 [core] states: user invited, active, deactivated
+K088 [core] states: e-invoice none, generated, failed
+K089 [core] states: share link active, expired, revoked
+K090 [core] states: status computed from balance due
+K091 [core] exception: two users issue at once -> distinct numbers
+K092 [core] exception: issue fails midway -> no number consumed
+K093 [core] exception: double click on pay -> duplicate guard
+K094 [core] exception: payment above balance
+K095 [core] exception: payment on void / draft invoice
+K096 [core] exception: credit above remaining creditable value
+K097 [core] exception: void with payments blocked
+K098 [core] exception: delete customer with documents blocked
+K099 [core] exception: last owner demotion blocked
+K100 [core] exception: edit issued invoice blocked
+K101 [core] exception: FY rollover resets counter
+K102 [core] exception: backdate before latest issued
+K103 [core] exception: portal failure leaves invoice payable
+K104 [core] exception: expired / revoked share link
+K105 [core] exception: invalid login lockout
+K106 [core] exception: session timeout mid-form (draft preserved)
+K107 [core] exception: concurrent edit of same draft (last-write warning)
+K108 [core] exception: other firm's ID in URL
+K109 [core] validate: GSTIN format + check char
+K110 [core] validate: GSTIN state code matches state
+K111 [core] validate: GSTIN unique per firm
+K112 [core] validate: pincode 6 digits
+K113 [core] validate: phone 10 digits starting 6-9
+K114 [core] validate: email format, 120 chars
+K115 [core] validate: name 1-100
+K116 [core] validate: description 1-200
+K117 [core] validate: qty > 0, 3 decimals
+K118 [core] validate: rate 2 decimals
+K119 [core] validate: discount 0-100
+K120 [core] validate: lines 1-50
+K121 [core] validate: total below 100 crore
+K122 [core] validate: reference 60 chars
+K123 [core] validate: notes lengths
+K124 [core] validate: reason 5-200
+K125 [core] validate: prefix 1-4 upper alphanumeric
+K126 [core] validate: terms 0-90 days
+K127 [core] validate: password 10+ chars
+K128 [core] validate: PAN (deferred)
+K129 [core] validate: bank IFSC (deferred)
+K130 [core] msg: field-level error text states field and limit
+K131 [core] msg: outbox invoice email with share link
+K132 [core] msg: outbox invite with set-password link
+K133 [core] msg: outbox overdue reminder
+K134 [core] msg: outbox payment receipt email (deferred)
+K135 [core] msg: toast on success
+K136 [core] msg: empty list message with create button by role
+K137 [core] msg: error screen with retry
+K138 [core] msg: confirm dialogs for delete, void, reverse
+K139 [core] msg: history timeline on documents
+K140 [core] msg: WhatsApp / SMS (out: external)
+K141 [core] msg: in-app notifications (deferred)
+K142 [core] job: outbox sender, every minute
+K143 [core] job: overdue reminders daily 09:00 IST
+K144 [core] job: recurring invoice drafts daily 06:00 IST
+K145 [core] job: share link expiry sweep
+K146 [core] job: session / lockout cleanup
+K147 [core] job: nightly backup (deferred)
+K148 [core] job: e-invoice retry queue (manual retry only)
+K149 [core] move: customer CSV import (deferred)
+K150 [core] move: invoice opening balances import (deferred)
+K151 [core] move: CSV export of invoices
+K152 [core] move: GST sales register CSV
+K153 [core] move: customer export CSV (deferred)
+K154 [core] move: full firm data export (deferred)
+K155 [core] move: user leaves -> deactivate, history keeps name
+K156 [core] move: customer merge (deferred)
+K157 [core] move: archive/restore customer
+K158 [core] move: firm delete (deferred)
+K159 [core] move: JSON export of GSTR-1 (deferred)
+K160 [core] customer: create, edit, duplicate (skip), archive, restore, delete when empty
+K161 [core] customer: undo (none; archive is the undo)
+K162 [core] customer: search name/GSTIN/phone
+K163 [core] customer: filter by archived, state (state filter deferred)
+K164 [core] customer: sort by name, outstanding (deferred)
+K165 [core] customer: saved view (deferred)
+K166 [core] customer: bulk archive (deferred)
+K167 [core] customer: import / export (deferred)
+K168 [core] customer: notes, history
+K169 [core] customer: merge (deferred)
+K170 [core] customer: empty list screen
+K171 [core] customer: phone width card layout
+K172 [core] invoice: create draft, edit draft, delete draft, issue, void, duplicate
+K173 [core] invoice: undo issue (none; void or credit note)
+K174 [core] invoice: search number, customer, GSTIN
+K175 [core] invoice: filters status, customer, date range
+K176 [core] invoice: sort date, number, total, due, balance
+K177 [core] invoice: saved view (deferred)
+K178 [core] invoice: bulk issue, bulk email (deferred)
+K179 [core] invoice: CSV export
+K180 [core] invoice: print page A4, amount in words
+K181 [core] invoice: share link
+K182 [core] invoice: notes customer and internal
+K183 [core] invoice: history
+K184 [core] invoice: reminders
+K185 [core] invoice: recurring
+K186 [core] invoice: custom numbering prefix
+K187 [core] invoice: merge (n/a)
+K188 [core] invoice: permissions
+K189 [core] invoice: empty / error screens, phone width
+K190 [core] line: add, edit, remove, reorder (deferred), duplicate line (deferred)
+K191 [core] line: tax rate, discount, HSN/SAC
+K192 [core] line: saved items catalogue (deferred)
+K193 [core] line: 50 line limit
+K194 [core] payment: record, reverse (no delete), edit reference only
+K195 [core] payment: filter by mode, date (deferred)
+K196 [core] payment: receipt print
+K197 [core] payment: duplicate guard
+K198 [core] payment: TDS
+K199 [core] payment: history
+K200 [core] credit note: create from invoice, draft, issue, void
+K201 [core] credit note: print
+K202 [core] credit note: apply customer credit
+K203 [core] credit note: refund (deferred)
+K204 [core] credit note: history, number series
+K205 [core] user: invite, change role, deactivate, reactivate (deferred)
+K206 [core] user: login, lockout, password reset via outbox (deferred)
+K207 [core] user: history
+K208 [core] settings: profile, GSTIN, prefixes, defaults, e-invoice mode
+K209 [core] settings: FY lock date (deferred)
+K210 [core] settings: logo upload (deferred)
+K211 [core] outbox: list, status, retry, view body
+K212 [core] outbox: delete (none, append-only)
+K213 [core] export: invoice CSV
+K214 [core] export: GST register CSV
+K215 [core] export: audit of who exported (history)
+W001 [core] A customer needs a name of 1 to 100 characters, a type (business or individual) and a billing state from the GST state list; saving without any is rejected with a field-level error.
+W002 [core] A customer GSTIN, if given, must match the 15-character GST format and pass the standard check-character test; otherwise the save is rejected with the message "Invalid GSTIN".
+W003 [core] When a customer GSTIN is given, its first two digits must equal the GST code of the selected billing state, otherwise the save is rejected.
+W004 [core] A GSTIN may belong to only one non-archived customer within a firm; a second customer with the same GSTIN is rejected, while another firm may use that GSTIN.
+W005 [core] Billing address needs line 1 (1 to 150 characters), city (1 to 60 characters) and a pincode of exactly 6 digits not starting with 0; line 2 is optional.
+W006 [core] Customer email, if given, must be a valid address of at most 120 characters, and phone, if given, must be a 10-digit Indian mobile number starting with 6, 7, 8 or 9.
+W007 [core] Default payment terms on a customer is a whole number of days from 0 to 90; when blank, the firm default terms apply to that customer's new invoices.
+W008 [core] Editing a customer changes only drafts and future invoices; issued invoices and credit notes keep the name, address, GSTIN and state copied at the time of issue.
+W009 [core] Owner or accountant can archive a customer; archived customers leave the invoice customer picker and the default list, keep all their documents, and can be restored.
+W010 [core] Deleting a customer that has any invoice, payment or credit note is refused with a message to archive instead; a customer with none can be deleted after a confirm step.
+W011 [core] Customer detail shows outstanding balance as the total balance due on that customer's issued and partially paid invoices, in rupees, with unused credit balance shown as a separate figure.
+W012 [core] Customer detail has tabs listing that customer's invoices, payments and credit notes, newest first, 25 rows per page.
+W013 [core] A draft invoice needs only a customer; it shows "Draft" instead of a number and may be saved with zero lines.
+W014 [core] Issue date defaults to today in Indian Standard Time and cannot be in the future.
+W015 [core] Issue date cannot be earlier than the issue date of the latest issued invoice in the same number series, so numbers and dates rise together.
+W016 [core] Due date defaults to issue date plus the customer's payment terms (else the firm default) in days, and cannot be earlier than the issue date.
+W017 [core] The financial year runs 1 April to 31 March by issue date and is labelled YY-YY, for example 26-27 for 1 April 2026 to 31 March 2027.
+W018 [core] Invoice number format is PREFIX/YY-YY/NNNNN, for example INV/26-27/00001, with a prefix of 1 to 4 characters and a 5-digit sequence, so no number exceeds 16 characters.
+W019 [core] An invoice number is assigned only when the invoice is issued, from a counter per firm, prefix and financial year that starts at 00001 each year and adds 1 per issue.
+W020 [core] Invoice numbers have no gaps: deleting a draft or a failed issue attempt never uses a number, and two simultaneous issues never receive the same number.
+W021 [core] An invoice needs 1 to 50 lines to be issued; issuing with zero lines is rejected.
+W022 [core] A line needs a description of 1 to 200 characters, a quantity above 0 up to 999999.999 with 3 decimals, and a unit rate from 0 to 9999999.99 with 2 decimals.
+W023 [core] A line discount is a percentage from 0 to 100 with at most 2 decimals and is applied before tax.
+W024 [core] When the firm has a GSTIN, every line needs an HSN or SAC code made of 4, 6 or 8 digits.
+W025 [core] A line tax rate must be one of 0, 0.25, 3, 5, 18 or 40 percent, with 18 percent as the default for new lines.
+W026 [core] Line taxable value equals quantity times rate times (1 minus discount percent divided by 100), rounded half up to 2 decimals.
+W027 [core] Place of supply defaults to the customer's billing state, can be changed while the invoice is a draft, and is locked at issue.
+W028 [core] When place of supply equals the firm's state, each line's CGST and SGST are each taxable value times rate divided by 200, rounded half up to 2 decimals.
+W029 [core] When place of supply differs from the firm's state, each line carries IGST equal to taxable value times rate divided by 100, rounded half up to 2 decimals, and no CGST or SGST.
+W030 [core] Grand total is the sum of taxable values and taxes rounded half up to a whole rupee, and the signed round-off amount is shown on its own line.
+W031 [core] An invoice grand total above 99,99,99,999 rupees is rejected on save with a message that states the limit.
+W032 [core] A firm without a GSTIN produces documents titled "Bill of Supply" with all line tax rates fixed at 0, no HSN or SAC requirement, and no tax columns.
+W033 [core] After issue, the customer, lines, amounts, issue date and place of supply cannot be changed, and any attempt is refused with a clear error.
+W034 [core] After issue, only the due date (not before issue date), customer note and internal note can be edited, and each change is recorded in history.
+W035 [core] Invoice status is computed: issued when nothing is paid or credited, partially_paid when balance due is above 0 and below grand total, paid at 0; draft and void are set only by issue and void.
+W036 [core] An issued or partially paid invoice whose due date is before today in IST is labelled overdue; overdue is a displayed label, not a stored status.
+W037 [core] Balance due equals grand total minus non-reversed payments and TDS, minus active credit notes and customer credit applied to this invoice, and is never below 0.
+W038 [core] Only an owner can void an invoice, and only if it has no active payment, credit note or IRN; a reason of 5 to 200 characters is required and the number stays used.
+W039 [core] Owner or accountant can hard-delete a draft invoice after a confirm step; an issued or void invoice can never be deleted.
+W040 [core] Duplicate creates a new draft with the same customer, lines, place of supply and notes, with today's date, no number and no payments.
+W041 [core] An invoice has a customer note of up to 500 characters that is printed, and an internal note of up to 1000 characters that is never printed or shared.
+W042 [core] The invoice print page is A4 and shows firm name, address and GSTIN, number, dates, customer details, lines with HSN or SAC, tax summary per rate, round-off, grand total in Indian words and bank details.
+W043 [core] Money shows with Indian digit grouping, the rupee sign and 2 decimals, for example ₹12,34,567.50, and dates show as DD-MM-YYYY everywhere in the interface and print pages.
+W044 [core] Owner or accountant can create a read-only share link for an issued invoice with a random token of at least 32 characters; it expires after 30 days, can be revoked, and needs no login.
+W045 [core] With e-invoicing on, Generate e-invoice on an issued invoice to a customer with a GSTIN asks the fake portal, which follows the firm's mode (succeed, fail, fail 1 in 5) and returns a 64-hex IRN.
+W046 [core] When the fake portal fails, the invoice stays issued and payable, the error code and message show on the invoice, and Retry is allowed any number of times.
+W047 [core] Owner or accountant can mark an invoice to repeat monthly on a chosen day from 1 to 28; a daily job at 06:00 IST then creates a draft copy and never issues it.
+W048 [core] Owner or accountant can record a payment on an issued or partially paid invoice only; draft, paid and void invoices refuse payments with a clear message.
+W049 [core] Payment amount must be above 0 with 2 decimals, and amount plus TDS cannot exceed the invoice balance due; larger amounts are rejected because advance payments are out of scope.
+W050 [core] Payment date cannot be in the future in IST and cannot be earlier than the invoice issue date.
+W051 [core] Payment mode must be one of cash, bank transfer, UPI, cheque, card or other.
+W052 [core] Payment reference holds up to 60 characters and is required for cheque, bank transfer and UPI payments.
+W053 [core] A payment may carry a TDS amount of 0 or more that counts toward settling the invoice but is not money received, and is shown separately in totals and on the receipt.
+W054 [core] After a payment the invoice becomes partially_paid if balance due is still above 0 and paid when balance due is exactly 0.
+W055 [core] A payment matching an existing non-reversed payment on the same invoice, amount, date and reference within 24 hours is rejected unless the user explicitly confirms it.
+W056 [core] Each payment receives a receipt number REC/YY-YY/NNNNN from its own gapless counter per firm and financial year of the payment date.
+W057 [core] The receipt print page shows receipt number, payment date, invoice number, customer, amount received, TDS, mode and reference.
+W058 [core] A saved payment cannot be edited except its reference and note; a wrong amount is fixed by reversing and recording again.
+W059 [core] Only an owner can reverse a payment with a reason of 5 to 200 characters; the row stays listed as reversed, balance and status are recalculated, and its receipt number is never reused.
+W060 [core] A credit note can be created only from an issued, partially paid or paid invoice, stores a link to it, and an invoice may have many credit notes.
+W061 [core] A credit note needs one reason from sales return, post-sale discount, invoice correction or deficiency in service, plus an optional note of up to 300 characters.
+W062 [core] Credit note lines start as copies of the original lines; each may be lowered but never above that line's remaining creditable taxable value.
+W063 [core] Credit note tax uses each original line's rate, HSN or SAC and place of supply, giving CGST and SGST or IGST as the invoice did, with the same rounding.
+W064 [core] Credit note number format is CN/YY-YY/NNNNN from its own gapless counter per firm and financial year, assigned at issue, with the year taken from its issue date.
+W065 [core] A credit note issue date cannot be before the original invoice date or in the future, and cannot be after 30 November following the end of the original invoice's financial year.
+W066 [core] Issuing a credit note lowers the invoice balance due, and any amount above that balance becomes the customer's credit balance.
+W067 [core] Owner or accountant can apply a customer's credit balance to another issued invoice of the same customer, up to the smaller of the credit balance and that invoice's balance due.
+W068 [core] The credit note print page is titled "Credit Note" and shows its number and date, the original invoice number and date, reason, lines, tax split and total.
+W069 [core] An issued credit note cannot be edited or deleted; only an owner can void it with a reason, restoring invoice balance, and only if none of its credit has been applied elsewhere.
+W070 [core] Firm profile needs a legal name of 1 to 120 characters, address and state, with an optional GSTIN validated as for customers and starting with the firm state's code; only an owner can edit it.
+W071 [core] Invoice and credit note prefixes are each 1 to 4 uppercase letters or digits, default INV and CN, and can change only while no document with that prefix is issued in the current financial year.
+W072 [core] Firm defaults hold payment terms of 0 to 90 days (initially 15), a default customer note up to 500 characters and bank details up to 300 characters for printing.
+W073 [core] Owner can invite a user by email with role owner, accountant or viewer; the email must be unique system-wide, a user belongs to one firm, and the outbox invite link expires in 7 days.
+W074 [core] An owner can change a user's role or deactivate them, but the last active owner of a firm cannot be demoted or deactivated.
+W075 [core] A viewer can only view, search and print; an accountant can do everything except edit firm settings, manage users, void invoices or credit notes and reverse payments; forbidden actions return 403.
+W076 [core] Login uses email and a password of at least 10 characters stored hashed; 5 failed attempts within 15 minutes lock the account for 15 minutes, and a session ends after 8 hours idle.
+W077 [core] Every record belongs to one firm and users reach only their own firm's data; requesting another firm's record by ID, in lists, search, export or share link, returns 404.
+W078 [core] The invoice list shows number, customer, issue date, due date, total, balance due and status, 25 per page, newest issue date first, with drafts at the top.
+W079 [core] The invoice list filters by status (draft, issued, partially_paid, paid, void, overdue), customer and issue date range, and active filters combine with AND.
+W080 [core] Invoice search matches, case-insensitively and by substring, invoice number, customer name or customer GSTIN once at least 2 characters are typed, and combines with filters.
+W081 [core] Customer search matches name, GSTIN or phone by case-insensitive substring from 2 characters; archived customers appear only when "Show archived" is switched on.
+W082 [core] Invoice list columns number, issue date, due date, grand total and balance due each sort ascending or descending, and the chosen sort stays in the page URL.
+W083 [core] Owner or accountant can export the current filtered invoice list as CSV, UTF-8 with byte-order mark, ISO dates (YYYY-MM-DD), amounts as plain decimals with 2 places, up to 50,000 rows.
+W084 [core] A GST sales register CSV for a date range has one row per invoice and credit note line with HSN or SAC, taxable value, CGST, SGST and IGST; credit note rows negative; void invoices excluded.
+W085 [core] At 375 pixels wide every list, form and print preview uses one column with no sideways page scroll, and every button is at least 44 pixels tall.
+W086 [core] Emailing an issued invoice creates one outbox row with recipient, subject, body containing the share link, and status queued; draft invoices cannot be sent and the recipient email must be valid.
+W087 [core] The outbox page lists rows newest first with status queued, sent or failed; a local job marks queued rows sent within 60 seconds, except recipients ending @fail.test, which fail; Retry requeues failed rows.
+W088 [core] A daily job at 09:00 IST queues a reminder 1, 7 and 15 days after due date for each overdue invoice with a customer email, at most 3 per invoice, none after paid or void.
+W089 [core] History is append-only: each create, edit, issue, void, payment, reversal, credit note, e-invoice attempt and role change stores actor, time and old and new values, and shows on the document's page.
+W090 [core] An empty list shows a plain message and a create button only if the role may create; a failed load shows a plain error message with a Retry button instead of a blank page.

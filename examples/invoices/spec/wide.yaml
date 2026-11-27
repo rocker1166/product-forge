@@ -1,0 +1,10 @@
+# The wide list comes before the objects. Every line lands somewhere or is refused in words.
+- {id: W001, text: "Make an invoice from the last customer in one press", d: now, at: ["product:quick_entry", "invoice.create"]}
+- {id: W002, text: "Filter invoices by tax state", d: now, at: ["invoice.tax"]}
+- {id: W003, text: "Export the tax summary of a month for the accountant", d: now, at: ["invoice.export"]}
+- {id: W004, text: "Correct an issued invoice with a credit note", d: now, at: ["invoice.reverse", "rule:R1"]}
+- {id: W005, text: "Tell the accountant when the tax portal refuses", d: now, at: ["message:tax_failed"]}
+- {id: W006, text: "Merge two copies of one customer", d: now, at: ["customer.merge"]}
+- {id: W007, text: "Show the firm's logo on the paper", d: now, at: ["setting:logo"]}
+- {id: W008, text: "Monthly invoices that make themselves", d: later, why: "space only, after the first firms ask"}
+- {id: W009, text: "Forecast of next quarter's income", d: no, why: "not the job of this product"}

@@ -1,0 +1,566 @@
+# Every screen, phone first. Written by g8. does lists every move a person makes that the screen type does not already cover.
+defaults:
+  loading: "Grey rows in the final shape, a few seconds at most; a long job shows a progress bar and can be closed."
+  error: "What failed in one sentence and a Retry button. Typed text is kept. Nothing says 'error 500'."
+  denied: "Says what this role cannot do and names the person who can, with their email. The menu never shows it in the first place."
+  read_only: "A bar at the top: your plan has stopped, new invoices are paused, payments, credit notes, exports and your data stay open."
+  plan_locked: "Shows the feature, the plan that has it and the price, with one Upgrade button for the owner and a note to ask the owner for everyone else."
+  big: "10,000 rows: pages of 50, the count reads 10,000+, filters and search stay fast, exports go by email."
+  not_found: "Says the page is gone or never existed, with a link back to the list. A wrong link token looks exactly like this."
+  phone: "One column at 375 px, no sideways scroll, every button 44 px tall, main action in thumb reach, number keypad on amount fields."
+  invalid: "Summary on top naming each field, a message at each field with the limit and the fix, shown on submit, never a code."
+  saving: "Saving, then Saved 10:42, beside the button. A lost connection says Not saved, retrying."
+  failed: "Nothing is lost; the same button tries again, and the text says what went wrong in plain words."
+  leave: "Unsaved changes: Save or Discard. Drafts also save by themselves every 30 seconds."
+screens:
+  - id: sign_up
+    name: "Create account"
+    path: "/sign-up"
+    type: public
+    for: ["owner"]
+    from: ["link"]
+    primary: "Create account"
+    does: ["user.create"]
+  - id: sign_in
+    name: "Sign in"
+    path: "/sign-in"
+    type: public
+    for: ["owner","accountant","staff","viewer","support"]
+    from: ["link"]
+    primary: "Sign in"
+  - id: second_step
+    name: "Second step"
+    path: "/sign-in/code"
+    type: public
+    for: ["owner","accountant","staff","viewer","support"]
+    from: ["sign_in"]
+    primary: "Confirm code"
+  - id: reset_password
+    name: "Reset password"
+    path: "/reset-password"
+    type: public
+    for: ["owner","accountant","staff","viewer","support"]
+    from: ["sign_in"]
+    primary: "Send reset link"
+    does: ["user.edit"]
+  - id: accept_invite
+    name: "Accept an invite"
+    path: "/invite/:token"
+    type: public
+    for: ["owner","accountant","staff","viewer"]
+    from: ["link"]
+    primary: "Accept invite"
+    does: ["invite.accept","user.create"]
+  - id: not_found
+    name: "Page not found"
+    path: "/*"
+    type: public
+    for: ["owner","accountant","staff","viewer","client","support"]
+    from: ["link"]
+    primary: "Go to start"
+  - id: firm_switcher
+    name: "Your firms"
+    path: "/firms"
+    type: list
+    for: ["owner","accountant","staff","viewer"]
+    from: ["menu","sign_in"]
+    primary: "Open firm"
+    notes: ["For an Accountant, columns after the firm and role: drafts waiting, overdue count, failed e-invoices, month locked yes or no, pack built yes or no; a filter Not locked; a Build pack for selected firms button.", "Create a firm for a client lives here; Hand to owner is on the Users page of that firm.", "Before Leave is confirmed the screen lists the drafts waiting, the unlocked months and any failed pack for that firm."]
+    shows: ["firm","membership"]
+    does: ["membership.leave","membership.accept_ownership","membership.decline_ownership","firm.create"]
+    states:
+      first_use: "You are not in any firm yet. Create yours, or open the invite link your accountant or boss sent."
+      no_match: "No firm matches. Try part of the firm name or the GSTIN."
+  - id: setup_guide
+    name: "Setup guide"
+    path: "/setup"
+    type: wizard
+    for: ["owner"]
+    from: ["home","firm_switcher","sign_up"]
+    primary: "Continue setup"
+    notes: ["Order: the last invoice number used (written to the series) comes before any import and before the first Issue; opening invoices keep their old numbers and never take from the series; a Practice invoice button renders a PRACTICE watermark and takes no number."]
+    does: ["firm.create","firm.edit","customer.create","invoice.create","invite.create","template.customise"]
+  - id: home
+    name: "Home"
+    path: "/"
+    type: home
+    for: ["owner","accountant","staff","viewer"]
+    from: ["menu"]
+    primary: "New invoice"
+    notes: ["Viewer Home is a read-only strip: unpaid total, overdue total and issued this month, each linking to the Unpaid or Overdue view. Owners also see the Needs a look cards."]
+    does: ["invoice.create"]
+  - id: search
+    name: "Search"
+    path: "/search"
+    type: list
+    for: ["owner","accountant","staff","viewer"]
+    from: ["menu","home"]
+    primary: "Search"
+    shows: ["invoice","customer","payment"]
+    states:
+      first_use: "Type a number, a name, a GSTIN or an amount. Spaces and slashes in a number are ignored."
+      no_match: "Nothing matches. Check the spelling, or try only the last digits of the number."
+  - id: invoices
+    name: "Invoices"
+    path: "/invoices"
+    type: list
+    for: ["owner","accountant","staff","viewer"]
+    from: ["home","menu","customer","search"]
+    primary: "New invoice"
+    notes: ["The Drafts view carries Issue selected (the bulk issue): each row runs its own check list and failures are listed with the field.", "A draft that uses a service created by staff and not yet approved shows a Needs review badge."]
+    shows: ["invoice"]
+    states:
+      first_use: "No invoices yet. Make your first one, it takes about two minutes."
+      no_match: "No invoice matches these filters. Clear them or widen the dates."
+  - id: invoice_form
+    name: "Write an invoice"
+    path: "/invoices/new"
+    type: form
+    for: ["owner","accountant","staff"]
+    from: ["invoices","home","invoice","customer","quote","recurring_plans","setup_guide","search"]
+    primary: "Issue"
+    shows: ["invoice"]
+    notes: ["MAYBE WAVE 1 (owner decides before the build): Add unbilled time and Add expenses to bill sit under the lines; each group of entries becomes one line, and a billed entry is locked until the invoice is voided or the draft is deleted."]
+    does: ["invoice.issue","invoice.preview","invoice.delete","customer.create","item.create","time_entry.bill","expense.bill"]
+    states:
+      done: "Invoice is issued and the number is taken. Send it now on WhatsApp or by email, or copy the link."
+  - id: invoice
+    name: "An invoice"
+    path: "/invoices/:id"
+    type: detail
+    for: ["owner","accountant","staff","viewer"]
+    from: ["invoices","search","customer","payments","payment","credit_note","outbox","einvoice_queue","history","link"]
+    primary: "Record payment"
+    notes: ["One button, Correct this invoice, chooses the route from the state (Void when nothing counts, credit note plus a new draft when money or credit counts) and says which and why before the first press; an Accountant sees Request void instead of Void.", "Staff see the payment date and mode on the invoice, a Viewer also the amount, never TDS or reference; a Viewer's PDF has no bank block.", "A staff comment on an issued invoice shows on the owners' Home as Needs a look.", "After Issue, Send shows Waiting for IRN for an e-invoice firm until the IRN is stored; on reopening a banner says if the last Issue went through."]
+    shows: ["invoice","payment"]
+    does: ["invoice.create","share_link.create","share_link.revoke","message.create","credit_note.create","payment.create","invoice.issue","invoice.void","invoice.record_part","invoice.record_full","invoice.reverse_to_part","invoice.reverse_to_unpaid","invoice.write_off","invoice.undo_write_off_part","invoice.undo_write_off_unpaid","invoice.start_portal_call","invoice.cancel_irn","payment.record","payment.confirm_claim","payment.decline_claim","payment.undo_save","payment.reverse","payment.bounce","invoice.request_void"]
+  - id: credit_notes
+    name: "Credit notes"
+    path: "/credit-notes"
+    type: list
+    for: ["owner","accountant","viewer"]
+    from: ["menu","invoice"]
+    primary: "New credit note"
+    shows: ["credit_note"]
+    states:
+      first_use: "No credit notes yet. They are made from an invoice that needs a correction."
+      no_match: "No credit note matches these filters. Clear them or widen the dates."
+  - id: credit_note_form
+    name: "Write a credit note"
+    path: "/credit-notes/new"
+    type: form
+    for: ["owner","accountant"]
+    from: ["credit_notes","invoice"]
+    primary: "Issue credit note"
+    shows: ["credit_note"]
+    does: ["credit_note.issue","credit_note.preview","credit_note.delete"]
+    states:
+      done: "Credit note is issued and linked to its invoice. Send it to the customer or leave it as credit."
+  - id: credit_note
+    name: "A credit note"
+    path: "/credit-notes/:id"
+    type: detail
+    for: ["owner","accountant","viewer"]
+    from: ["credit_notes","invoice","customer","search"]
+    primary: "Send credit note"
+    shows: ["credit_note"]
+    does: ["message.create","share_link.create","share_link.revoke","credit_note.issue","credit_note.void","credit_note.spend_credit","credit_note.restore_credit","credit_note.start_portal_call","credit_note.cancel_irn"]
+  - id: quotes
+    name: "Quotes"
+    path: "/quotes"
+    type: list
+    for: ["owner","accountant","staff","viewer"]
+    from: ["home","menu","customer"]
+    primary: "New quote"
+    shows: ["quote"]
+    states:
+      first_use: "No quotes yet. Send a quote first when the customer wants a price before work starts."
+      no_match: "No quote matches these filters. Clear them or widen the dates."
+  - id: quote_form
+    name: "Write a quote"
+    path: "/quotes/new"
+    type: form
+    for: ["owner","accountant","staff"]
+    from: ["quotes","customer","quote"]
+    primary: "Send quote"
+    shows: ["quote"]
+    does: ["quote.send","quote.preview","quote.delete","customer.create","item.create"]
+    states:
+      done: "Quote is sent. You will see here when the customer opens it."
+  - id: quote
+    name: "A quote"
+    path: "/quotes/:id"
+    type: detail
+    for: ["owner","accountant","staff","viewer"]
+    from: ["quotes","search","customer","link"]
+    primary: "Convert to invoice"
+    shows: ["quote"]
+    does: ["share_link.create","share_link.revoke","message.create","quote.send","quote.revise","quote.accept","quote.decline","quote.extend","quote.convert","quote.cancel"]
+  - id: recurring_plans
+    name: "Repeating invoices"
+    path: "/recurring"
+    type: list
+    for: ["owner","accountant"]
+    from: ["menu","customer"]
+    primary: "New plan"
+    shows: ["recurring_plan"]
+    does: ["recurring_plan.edit","recurring_plan.delete","recurring_plan.duplicate","recurring_plan.version","recurring_plan.reverse","recurring_plan.preview","recurring_plan.attach","recurring_plan.schedule","recurring_plan.history","recurring_plan.link_related","recurring_plan.pause","recurring_plan.resume","recurring_plan.skip_next","recurring_plan.redo_period","recurring_plan.end_plan"]
+    states:
+      first_use: "No repeating invoices. Set one up for a customer you bill every month and get a draft to check on the day."
+      no_match: "No plan matches. Try the customer name."
+  - id: einvoice_queue
+    name: "E-invoices"
+    path: "/e-invoices"
+    type: list
+    for: ["owner","accountant"]
+    from: ["menu","home","invoice"]
+    primary: "Retry failed"
+    shows: ["einvoice"]
+    does: ["einvoice.reverse","einvoice.preview","einvoice.comment","einvoice.attach","einvoice.remind","einvoice.schedule","einvoice.history","einvoice.link_related","einvoice.cancel_irn","einvoice.call_portal"]
+    states:
+      first_use: "Nothing waiting. E-invoices appear here when your turnover needs them."
+      no_match: "No e-invoice matches. Try Failed or Due soon."
+  - id: customers
+    name: "Customers"
+    path: "/customers"
+    type: list
+    for: ["owner","accountant","staff","viewer"]
+    from: ["home","menu","search"]
+    primary: "New customer"
+    shows: ["customer"]
+    states:
+      first_use: "No customers yet. Add one, or bring a list from Excel."
+      no_match: "No customer matches. Try part of the name, the phone or the GSTIN."
+  - id: customer_form
+    name: "Add or edit a customer"
+    path: "/customers/new"
+    type: form
+    for: ["owner","accountant","staff"]
+    from: ["customers","customer","invoice_form","setup_guide"]
+    primary: "Save"
+    shows: ["customer"]
+    states:
+      done: "Saved. You can invoice this customer now."
+  - id: customer
+    name: "A customer"
+    path: "/customers/:id"
+    type: detail
+    for: ["owner","accountant","staff","viewer"]
+    from: ["customers","invoice","search","credit_register"]
+    primary: "New invoice"
+    shows: ["customer","credit_ledger","refund"]
+    notes: ["A Client page panel: state (Off, On, Locked, Expired), last sign-in and opens. Turn on asks for a password or Make one for me and shows it once. Send link goes by email or WhatsApp with no password in it, and Email the password sends it on its own. Set password also unlocks. Turn off ends every session."]
+    does: ["customer.open_portal","customer.set_password","customer.send_portal_link","customer.close_portal","invoice.create","quote.create","recurring_plan.create","refund.create","refund.edit","customer.put_away","customer.bring_back","credit_ledger.apply","credit_ledger.unapply","refund.reverse_refund","credit_ledger.write_off_owed","refund.confirm_paid","refund.release_reserved"]
+  - id: items
+    name: "Services"
+    path: "/services"
+    type: list
+    for: ["owner","accountant","staff","viewer"]
+    from: ["menu","invoice_form"]
+    primary: "New service"
+    shows: ["item"]
+    does: ["item.edit","item.delete","item.archive","item.restore","item.duplicate","item.history","item.link_related","item.put_away","item.bring_back"]
+    states:
+      first_use: "No saved services. Save the ones you bill often, and each invoice line fills itself."
+      no_match: "No service matches. Try part of the name or the SAC code."
+  - id: payments
+    name: "Payments"
+    path: "/payments"
+    type: list
+    for: ["owner","accountant"]
+    from: ["home","menu","customer"]
+    primary: "Record payment"
+    shows: ["payment","allocation"]
+    states:
+      first_use: "No payments yet. When a customer pays, record it here or from the invoice."
+      no_match: "No payment matches these filters. Clear them or widen the dates."
+  - id: payment_form
+    name: "Record a payment"
+    path: "/payments/new"
+    type: form
+    for: ["owner","accountant"]
+    from: ["payments","invoice","customer"]
+    primary: "Save payment"
+    shows: ["payment","allocation"]
+    does: ["payment.record","payment.undo_save"]
+    states:
+      done: "Payment is saved and the invoice is updated. Send the receipt on WhatsApp, or undo within 10 seconds."
+  - id: payment
+    name: "A payment"
+    path: "/payments/:id"
+    type: detail
+    for: ["owner","accountant"]
+    from: ["payments","invoice","customer","search"]
+    primary: "Send receipt"
+    shows: ["payment","allocation"]
+    does: ["message.create","payment.record","payment.confirm_claim","payment.decline_claim","payment.undo_save","payment.reverse","payment.bounce","allocation.reassign"]
+  - id: credit_register
+    name: "Customer credit"
+    path: "/credit"
+    type: list
+    for: ["owner","accountant","viewer"]
+    from: ["menu","customer","credit_note"]
+    primary: "New refund"
+    shows: ["credit_ledger","refund"]
+    states:
+      first_use: "No customer credit. It appears when you issue a credit note for an invoice that was paid."
+      no_match: "No row matches. Try the customer name or With balance."
+  - id: outbox
+    name: "Sent mail and links"
+    path: "/outbox"
+    type: list
+    for: ["owner","accountant","support"]
+    from: ["menu","invoice","support_console"]
+    primary: "Retry failed"
+    shows: ["message","share_link"]
+    does: ["message.preview","message.attach","message.schedule","message.history","message.link_related","message.retry","message.lift_bounce","message.lift_complaint","message.skip","share_link.edit","share_link.preview","share_link.history","share_link.link_related","share_link.extend","share_link.renew","share_link.revoke"]
+    states:
+      first_use: "Nothing sent yet. Every email and every link you share is listed here."
+      no_match: "No message matches. Try Failed, Bounced or the customer name."
+  - id: shared_document
+    name: "Invoice page for the customer"
+    path: "/d/:token"
+    type: public
+    for: ["client"]
+    from: ["link"]
+    primary: "Pay with UPI"
+    notes: ["Something is wrong, I deduct TDS (section and rate, changes the QR and claim amount), a receipt download after a confirmed payment, Request a fresh link on an expired page, UPI ID with Copy and an Open in browser hint inside an in-app browser, the last four digits of the account and the date the details last changed, and Replaced by on a cancelled invoice."]
+    does: ["share_link.view","payment.create","invoice.print_pdf","share_link.report_problem","share_link.renew"]
+  - id: client_sign_in
+    name: "Your page from the firm"
+    path: "/c/:token"
+    type: public
+    for: ["client"]
+    from: ["link"]
+    primary: "Open my page"
+    notes: ["One field, Password, and Open my page. Forgot password asks for the email on file and always answers We sent a link. After a wrong password: Wrong password, 3 tries left. After the fifth: Too many tries. Try again after 14:35 or ask the firm for a new password, with the firm's phone and email. An expired link says This link has expired with Send me a fresh link. A switched-off page and a wrong token both say This page is not available."]
+    does: ["customer.sign_in","customer.wrong_password","customer.reset_password","customer.renew_portal"]
+    states:
+      denied: "This page is not available. Ask the firm for a link."
+  - id: client_page
+    name: "Your documents"
+    path: "/c/:token/home"
+    type: public
+    for: ["client"]
+    from: ["client_sign_in","link"]
+    primary: "Pay selected"
+    shows: ["customer","invoice","quote","payment","credit_note"]
+    notes: ["Top: the firm's name, logo, phone and email, and Sign out. Then Waiting for you (open invoices with a tick box and the total of the ticked ones, and quotes to answer), then Receipts, Credit notes, Cancelled and Statement. A cancelled invoice stays listed as Cancelled with its replacement; a payment that did not go through shows Did not go through. Pay selected opens one UPI payment of the ticked total and then I have paid for that amount; it waits as Pending check. Never drafts, internal notes or other customers."]
+    does: ["payment.create","payment.print_pdf","invoice.print_pdf","credit_note.print_pdf","quote.print_pdf","customer.print_pdf","share_link.report_problem"]
+    states:
+      first_use: "Nothing yet. Invoices and quotes from the firm will show here."
+      no_match: "No document in this period."
+  - id: client_statement
+    name: "Your statement"
+    path: "/c/:token/statement"
+    type: public
+    for: ["client"]
+    from: ["client_page"]
+    primary: "Download PDF"
+    shows: ["customer"]
+    notes: ["Pick a period (this month, last month, this financial year or two dates). Shows opening balance, each invoice, payment, credit note and cancellation with a running balance, the closing balance, and the open invoices. Same figures the firm sees."]
+    does: ["customer.print_pdf"]
+  - id: client_quote
+    name: "Quote from the firm"
+    path: "/c/:token/quotes/:id"
+    type: public
+    for: ["client"]
+    from: ["client_page"]
+    primary: "Accept quote"
+    shows: ["quote"]
+    notes: ["Lines, total, terms and the last day to answer. Accept quote asks for your name; Decline asks for an optional reason up to 300 letters. After an answer the page says Accepted on 3 Dec or Declined on 3 Dec and the buttons go. A passed validity date says This quote expired on 30 Nov, with the firm's contact."]
+    does: ["quote.accept","quote.decline","quote.print_pdf"]
+  - id: time_entries
+    name: "Time"
+    path: "/time"
+    type: list
+    d: room
+    for: ["owner","accountant","staff"]
+    from: ["menu","customer"]
+    primary: "Add time"
+    shows: ["time_entry"]
+    notes: ["MAYBE WAVE 1, owner decides before the build. Staff see only their own rows; a week view totals hours per day and customer; Approve and Bill selected sit on the list. Billed rows are locked and show the invoice number."]
+    does: ["time_entry.approve","time_entry.unapprove","time_entry.delete","time_entry.history","time_entry.put_away","time_entry.bring_back"]
+    states:
+      first_use: "No time logged. Add the hours you spend on a customer, then bill them on an invoice."
+      no_match: "No entry matches. Try another person, customer or week."
+  - id: expenses
+    name: "Expenses to bill"
+    path: "/expenses"
+    type: list
+    d: room
+    for: ["owner","accountant","staff"]
+    from: ["menu","customer"]
+    primary: "Add expense"
+    shows: ["expense"]
+    notes: ["MAYBE WAVE 1, owner decides before the build. Each row has Billable to a customer, a receipt (JPG, PNG or PDF up to 5 MB, 3 files), markup percent and the Pure agent ticks. A re-billed line is taxable at the service's rate unless all three pure-agent ticks are on."]
+    does: ["expense.mark_billable","expense.unmark_billable","expense.delete","expense.history","expense.put_away","expense.bring_back"]
+    states:
+      first_use: "No expenses. Add one you paid for a customer and bill it back on the next invoice."
+      no_match: "No expense matches. Try another vendor, customer or category."
+  - id: reports
+    name: "Reports and registers"
+    path: "/reports"
+    type: home
+    for: ["owner","accountant","viewer"]
+    from: ["menu","home"]
+    primary: "Open month end"
+    does: ["export_job.create"]
+  - id: report
+    name: "A report"
+    path: "/reports/:name"
+    type: detail
+    for: ["owner","accountant","viewer"]
+    from: ["reports","home","month_end"]
+    primary: "Export"
+    notes: ["TDS without certificate: by customer and quarter with a bulk tick and a per customer export for the reminder to the client."]
+    shows: []
+    does: ["export_job.create"]
+  - id: month_end
+    name: "Month end"
+    path: "/month-end"
+    type: wizard
+    for: ["owner","accountant"]
+    from: ["menu","home","reports"]
+    primary: "Build month-end pack"
+    does: ["export_job.create","firm.edit"]
+  - id: exports
+    name: "Exports"
+    path: "/exports"
+    type: list
+    for: ["owner","accountant"]
+    from: ["menu","reports","month_end","settings_security"]
+    primary: "New export"
+    shows: ["export_job"]
+    does: ["export_job.delete","export_job.duplicate","export_job.reverse","export_job.share_link","export_job.preview","export_job.attach","export_job.schedule","export_job.history","export_job.link_related","export_job.retry","export_job.cancel","export_job.delete_file"]
+    states:
+      first_use: "No exports yet. Build the month-end pack, a register, a Tally file or a full copy of your books."
+      no_match: "No export matches. Try Ready or Failed."
+  - id: imports
+    name: "Imports"
+    path: "/imports"
+    type: list
+    for: ["owner","accountant"]
+    from: ["menu","customers","items","invoices","setup_guide"]
+    primary: "Bring in data"
+    shows: ["import_job"]
+    does: ["import_job.draft","import_job.delete","import_job.duplicate","import_job.version","import_job.reverse","import_job.preview","import_job.attach","import_job.tag","import_job.history","import_job.link_related","import_job.start","import_job.retry","import_job.cancel","import_job.undo","import_job.delete_file"]
+    states:
+      first_use: "Nothing imported yet. Bring customers, services or open invoices from Excel, Tally or another app."
+      no_match: "No import matches. Try Failed or Done."
+  - id: import_wizard
+    name: "Bring in data"
+    path: "/imports/new"
+    type: wizard
+    for: ["owner","accountant"]
+    from: ["imports","customers","items","invoices","setup_guide"]
+    primary: "Check my file"
+    does: ["import_job.create","import_job.start","import_job.cancel"]
+  - id: history
+    name: "History"
+    path: "/history"
+    type: list
+    for: ["owner","accountant","support"]
+    from: ["menu","invoice","customer","payment","settings","support_console","link"]
+    primary: "Search history"
+    shows: ["history_entry"]
+    does: ["history_entry.link_related"]
+    states:
+      first_use: "No history yet. Every change to your books is written here from now on."
+      no_match: "No entry matches. Try a name, an invoice number or a wider date range."
+  - id: settings
+    name: "Settings"
+    path: "/settings"
+    type: settings
+    for: ["owner","accountant"]
+    from: ["menu"]
+    primary: "Open firm profile"
+  - id: settings_firm
+    name: "Firm profile, bank and reminders"
+    path: "/settings/firm"
+    type: settings
+    for: ["owner","accountant"]
+    from: ["settings","setup_guide"]
+    primary: "Save"
+    does: ["firm.create","firm.edit","firm.view","firm.search","firm.sort","firm.version","firm.preview","firm.schedule","firm.history","firm.link_related"]
+  - id: settings_tax
+    name: "Tax, numbers and period lock"
+    path: "/settings/tax"
+    type: settings
+    for: ["owner","accountant"]
+    from: ["settings","month_end"]
+    primary: "Save"
+    notes: ["Says that opening invoices keep their old numbers and never take from the series, and that the next number can be raised only before the first document of the year."]
+    does: ["firm.edit","number_series.create","number_series.edit","number_series.view","number_series.sort","number_series.version","number_series.preview","number_series.schedule","number_series.history","number_series.link_related","number_series.close_series","lut.create","lut.edit","lut.view","lut.sort","lut.delete","lut.duplicate","lut.version","lut.preview","lut.remind","lut.schedule","lut.history","lut.link_related","lut.withdraw"]
+  - id: templates
+    name: "Look of your documents"
+    path: "/settings/templates"
+    type: list
+    for: ["owner","accountant"]
+    from: ["settings","setup_guide"]
+    primary: "Edit look"
+    shows: ["template"]
+    does: ["template.edit","template.draft","template.restore","template.version","template.preview","template.assign","template.attach","template.tag","template.history","template.link_related","template.customise","template.save_version","template.reset"]
+    states:
+      first_use: "Your invoices use the standard look. Add a logo and colour to make them yours."
+      no_match: "No template matches. Try Invoice, Credit note, Receipt or Email."
+  - id: team
+    name: "People and roles"
+    path: "/settings/team"
+    type: list
+    for: ["owner"]
+    from: ["settings","setup_guide"]
+    primary: "Invite person"
+    shows: ["membership","invite"]
+    does: ["membership.edit","membership.archive","membership.restore","membership.assign","membership.history","membership.link_related","membership.cancel_invited","membership.reinvite","membership.change_role","membership.deactivate","membership.reactivate","membership.offer_ownership","invite.reverse","invite.schedule","invite.history","invite.link_related","invite.accept","invite.revoke","invite.resend"]
+    states:
+      first_use: "Only you are in this firm. Invite your accountant or a colleague."
+      no_match: "No person matches. Try the name or the email."
+  - id: settings_security
+    name: "Security, support access and closing"
+    path: "/settings/security"
+    type: settings
+    for: ["owner"]
+    from: ["settings"]
+    primary: "Save"
+    does: ["firm.edit","firm.delete","firm.restore","firm.start_closing","firm.cancel_closing","firm.restore_paid"]
+  - id: settings_billing
+    name: "Plan and billing"
+    path: "/settings/billing"
+    type: settings
+    for: ["owner","accountant","support"]
+    from: ["settings","home","support_console","link"]
+    primary: "Upgrade"
+    does: ["subscription.create","subscription.edit","subscription.view","subscription.version","subscription.reverse","subscription.preview","subscription.remind","subscription.schedule","subscription.history","subscription.link_related","subscription.upgrade","subscription.pay_again","subscription.cancel","subscription.undo_cancel","subscription.switch_to_free","subscription.refund_charge"]
+  - id: tax_tables
+    name: "Tax rates and codes"
+    path: "/tax-tables"
+    type: list
+    for: ["owner","accountant","staff","viewer","support"]
+    from: ["settings","invoice_form","support_console"]
+    primary: "Search codes"
+    shows: ["rate_master"]
+    does: ["rate_master.duplicate","rate_master.version","rate_master.preview","rate_master.schedule","rate_master.history","rate_master.link_related","rate_master.publish","rate_master.withdraw"]
+    states:
+      first_use: "No rows yet. Support publishes GST rates, SAC codes and TDS sections here."
+      no_match: "No code matches. Try the SAC number or a word from the service."
+  - id: account
+    name: "My account"
+    path: "/account"
+    type: settings
+    for: ["owner","accountant","staff","viewer"]
+    from: ["menu"]
+    primary: "Save"
+    does: ["user.create","user.edit","user.view","user.archive","user.restore","user.reverse","user.history","user.link_related","user.close_account"]
+  - id: support_console
+    name: "Support console"
+    path: "/support"
+    type: list
+    for: ["support"]
+    from: ["menu"]
+    primary: "Find a firm or user"
+    shows: ["firm","user","history_entry"]
+    does: ["user.deactivate","user.reopen","export_job.create","user.reset_second_step"]
+    states:
+      first_use: "No open tickets. Search a firm or a login to start."
+      no_match: "No firm or user matches. Check the ticket number and the owner's email."

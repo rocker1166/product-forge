@@ -1,0 +1,180 @@
+# Six roles. owner and support differ from the rest in kind: owner holds the firm, support is our staff under an owner's grant.
+# scope: own = rows the person made or their own login; team = only the documents that role may open; all = the whole firm.
+# A move's who wins over this table for abilities that are also move names.
+# Staff payment create is an I-got-paid claim only (Pending check); staff and viewer see a payment's date, mode and amount on the invoice, never TDS or reference; a viewer's invoice copy has no bank block; support export_job.create is for sealed firms only (R65).
+roles:
+  - {id: "owner", name: "Owner", home: "home", joins: "signs up with email and a password; sign-up makes the firm and its first owner, or an owner hands the role over and the new owner accepts", leaves: "hands ownership over first; the last owner cannot leave or close the login; the firm, its books and drafts stay"}
+  - {id: "accountant", name: "Accountant", home: "home", joins: "by an owner's invite that expires in 7 days; a CA who already has a login accepts it and the firm shows in the switcher; or the CA creates the firm for a client and presses Hand to owner when it is set up", leaves: "loses access on the next request when an owner removes them or they leave; their entries keep their name and their drafts stay with the firm"}
+  - {id: "staff", name: "Staff", home: "home", joins: "by an owner's invite that expires in 7 days; the invite page defaults to this role and says so", leaves: "loses access on the next request when an owner removes them or they leave; drafts they made stay with the firm under their name"}
+  - {id: "viewer", name: "Viewer", home: "home", joins: "by an owner's invite that expires in 7 days, for a partner or advisor who only reads", leaves: "loses access on the next request when an owner removes them or they leave; they own no work, so nothing moves"}
+  - {id: "client", name: "Client", home: "shared_document", joins: "opens a link from an invoice, credit note or quote mail or a WhatsApp tap and sees one document with no sign-in; or opens the client page link the firm sent for that customer and signs in with the password the firm set or sent, one password per customer, and sees that customer's documents, receipts and statement", leaves: "the document link expires, is revoked, or the sender voids the document; a later send renews an expired link on an unpaid document. The client page ends after 2 idle hours, when the firm switches it off, or when five wrong passwords lock it for 30 minutes"}
+  - {id: "support", name: "Support", home: "support_console", joins: "only when an owner grants access for 24 hours, 3 days or 7 days with a ticket number; read only, banner shown to the firm, every view logged with a Support label", leaves: "the grant ends by its date or the owner ends it; sessions on that firm close at once"}
+access:
+  owner:
+    allocation: "*"
+    credit_ledger: "*"
+    credit_note: "*"
+    customer: "*"
+    einvoice: "*"
+    export_job: "*"
+    firm: "*"
+    import_job: "*"
+    invite: "*"
+    invoice: "*"
+    item: "*"
+    lut: "*"
+    membership: "*"
+    message: "*"
+    number_series: "*"
+    payment: "*"
+    quote: "*"
+    recurring_plan: "*"
+    refund: "*"
+    share_link: "*"
+    subscription: "*"
+    template: "*"
+    time_entry: "*"
+    expense: "*"
+    history_entry: {do: ["create", "view", "search", "filter", "sort", "link_related", "export"], scope: "all"}
+    rate_master: {do: ["view", "search", "filter", "sort", "link_related", "preview"], scope: "all"}
+    user: {do: ["create", "edit", "view", "history", "link_related"], scope: "own"}
+  accountant:
+    allocation: {do: ["create", "view", "search", "filter", "sort", "saved_view", "columns", "export", "history", "link_related"], scope: "all"}
+    credit_ledger: {do: ["view", "search", "filter", "sort", "link_related", "export", "reverse", "history"], scope: "all"}
+    credit_note: {do: ["create", "edit", "draft", "view", "search", "filter", "sort", "saved_view", "columns", "export", "delete", "print_pdf", "share_link", "preview", "comment", "attach", "history", "link_related"], scope: "all"}
+    customer: {do: ["create", "edit", "view", "search", "filter", "sort", "import", "export", "delete", "archive", "restore", "print_pdf", "comment", "history", "link_related"], scope: "all"}
+    einvoice: {do: ["create", "view", "search", "filter", "sort", "saved_view", "columns", "bulk", "export", "reverse", "preview", "comment", "attach", "remind", "schedule", "history", "link_related"], scope: "all"}
+    export_job: {do: ["create", "view", "filter", "sort", "saved_view", "columns", "duplicate", "reverse", "share_link", "preview", "attach", "history", "link_related"], scope: "all"}
+    firm: {do: ["create", "view", "search", "sort", "edit", "preview", "version", "history", "link_related"], scope: "all"}
+    history_entry: {do: ["view", "search", "filter", "sort", "link_related", "export"], scope: "all"}
+    import_job: {do: ["create", "draft", "view", "filter", "sort", "duplicate", "version", "reverse", "preview", "attach", "tag", "history", "link_related"], scope: "all"}
+    invite: "none"
+    invoice: {do: ["create", "edit", "draft", "view", "search", "filter", "sort", "saved_view", "columns", "bulk", "import", "export", "delete", "duplicate", "version", "print_pdf", "share_link", "preview", "comment", "attach", "remind", "history", "link_related"], scope: "all"}
+    item: {do: ["create", "edit", "view", "search", "filter", "sort", "import", "delete", "archive", "restore", "duplicate", "history", "link_related"], scope: "all"}
+    lut: {do: ["create", "view", "sort", "duplicate", "preview", "version", "remind", "schedule", "history", "link_related"], scope: "all"}
+    membership: {do: ["view", "search", "filter", "sort", "link_related"], scope: "all"}
+    message: {do: ["create", "view", "search", "filter", "sort", "bulk", "preview", "attach", "schedule", "history", "link_related"], scope: "all"}
+    number_series: {do: ["view", "sort", "version", "preview", "history", "link_related"], scope: "all"}
+    payment: {do: ["create", "edit", "view", "search", "filter", "sort", "saved_view", "columns", "export", "print_pdf", "comment", "remind", "history", "link_related"], scope: "all"}
+    quote: {do: ["create", "edit", "draft", "view", "search", "filter", "sort", "saved_view", "columns", "export", "delete", "duplicate", "print_pdf", "share_link", "preview", "comment", "attach", "history", "link_related"], scope: "all"}
+    rate_master: {do: ["view", "search", "filter", "sort", "link_related", "preview"], scope: "all"}
+    recurring_plan: {do: ["create", "edit", "view", "search", "filter", "sort", "delete", "duplicate", "version", "reverse", "preview", "attach", "schedule", "history", "link_related"], scope: "all"}
+    refund: {do: ["create", "edit", "view", "search", "filter", "sort", "export", "print_pdf", "comment", "history", "link_related"], scope: "all"}
+    share_link: {do: ["create", "edit", "view", "preview", "history", "link_related"], scope: "all"}
+    subscription: {do: ["view", "history", "link_related"], scope: "all"}
+    template: {do: ["view", "preview", "version", "history", "link_related"], scope: "all"}
+    time_entry: {do: ["create", "edit", "view", "search", "filter", "sort", "delete", "history", "link_related", "export"], scope: "all"}
+    expense: {do: ["create", "edit", "view", "search", "filter", "sort", "delete", "history", "link_related", "export"], scope: "all"}
+    user: {do: ["create", "edit", "view", "history", "link_related"], scope: "own"}
+  staff:
+    allocation: "none"
+    credit_ledger: "none"
+    credit_note: "none"
+    customer: {do: ["create", "edit", "view", "search", "filter", "sort", "comment", "link_related"], scope: "all"}
+    einvoice: "none"
+    export_job: "none"
+    firm: {do: ["view", "search", "sort", "link_related"], scope: "all"}
+    history_entry: {do: ["view", "search", "link_related"], scope: "team"}
+    import_job: "none"
+    invite: "none"
+    invoice: {do: ["create", "edit", "draft", "view", "search", "filter", "sort", "saved_view", "columns", "duplicate", "print_pdf", "share_link", "preview", "comment", "attach", "history", "link_related"], scope: "all"}
+    item: {do: ["create", "view", "search", "filter", "sort", "link_related"], scope: "all"}
+    lut: {do: ["view", "sort", "link_related"], scope: "all"}
+    membership: "none"
+    message: {do: ["create", "view", "search", "filter", "sort", "preview", "link_related"], scope: "own"}
+    number_series: "none"
+    payment: {do: ["create", "view"], scope: "all"}
+    quote: {do: ["create", "edit", "draft", "view", "search", "filter", "sort", "saved_view", "columns", "duplicate", "print_pdf", "share_link", "preview", "comment", "attach", "history", "link_related"], scope: "all"}
+    rate_master: {do: ["view", "search", "filter", "sort", "link_related", "preview"], scope: "all"}
+    recurring_plan: "none"
+    refund: "none"
+    share_link: {do: ["create", "view", "preview", "history", "link_related"], scope: "all"}
+    subscription: "none"
+    template: {do: ["view", "preview", "link_related"], scope: "all"}
+    time_entry: {do: ["create", "edit", "view", "search", "filter", "sort", "delete", "link_related"], scope: "own"}
+    expense: {do: ["create", "edit", "view", "search", "filter", "sort", "link_related"], scope: "own"}
+    user: {do: ["create", "edit", "view", "history", "link_related"], scope: "own"}
+  viewer:
+    allocation: "none"
+    credit_ledger: "none"
+    credit_note: {do: ["view", "search", "filter", "sort", "link_related", "print_pdf", "preview"], scope: "all"}
+    customer: {do: ["view", "search", "filter", "sort", "link_related", "print_pdf"], scope: "all"}
+    einvoice: "none"
+    export_job: "none"
+    firm: {do: ["view", "search", "sort", "link_related"], scope: "all"}
+    history_entry: {do: ["view", "link_related"], scope: "team"}
+    import_job: "none"
+    invite: "none"
+    invoice: {do: ["view", "search", "filter", "sort", "link_related", "print_pdf", "preview"], scope: "all"}
+    item: {do: ["view", "search", "filter", "sort", "link_related"], scope: "all"}
+    lut: {do: ["view", "sort", "link_related"], scope: "all"}
+    membership: "none"
+    message: "none"
+    number_series: {do: ["view", "sort", "link_related"], scope: "all"}
+    payment: {do: ["view"], scope: "all"}
+    quote: {do: ["view", "search", "filter", "sort", "link_related", "print_pdf", "preview"], scope: "all"}
+    rate_master: {do: ["view", "search", "filter", "sort", "link_related", "preview"], scope: "all"}
+    recurring_plan: {do: ["view", "search", "filter", "sort", "link_related", "preview"], scope: "all"}
+    refund: "none"
+    share_link: {do: ["view", "link_related"], scope: "all"}
+    subscription: "none"
+    template: {do: ["view", "preview", "link_related"], scope: "all"}
+    time_entry: "none"
+    expense: "none"
+    user: {do: ["create", "edit", "view", "history", "link_related"], scope: "own"}
+  client:
+    allocation: "none"
+    credit_ledger: "none"
+    credit_note: {do: ["view", "print_pdf"], scope: "own"}
+    customer: {do: ["view", "print_pdf"], scope: "own"}
+    einvoice: "none"
+    export_job: "none"
+    firm: "none"
+    history_entry: "none"
+    import_job: "none"
+    invite: "none"
+    invoice: {do: ["view", "print_pdf"], scope: "own"}
+    item: "none"
+    lut: "none"
+    membership: "none"
+    message: "none"
+    number_series: "none"
+    payment: {do: ["create", "view", "print_pdf"], scope: "own"}
+    quote: {do: ["view", "print_pdf"], scope: "own"}
+    rate_master: "none"
+    recurring_plan: "none"
+    refund: "none"
+    share_link: {do: ["view"], scope: "own"}
+    subscription: "none"
+    template: "none"
+    time_entry: "none"
+    expense: "none"
+    user: "none"
+  support:
+    allocation: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    credit_ledger: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    credit_note: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    customer: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    einvoice: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    export_job: {do: ["create", "view", "history"], scope: "all"}
+    firm: {do: ["view", "search", "sort", "history", "link_related"], scope: "all"}
+    history_entry: {do: ["view", "search", "filter", "sort", "link_related"], scope: "all"}
+    import_job: {do: ["view", "filter", "sort", "history", "link_related"], scope: "all"}
+    invite: "none"
+    invoice: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    item: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    lut: {do: ["view", "sort", "history", "link_related"], scope: "all"}
+    membership: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    message: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    number_series: {do: ["view", "sort", "history", "link_related"], scope: "all"}
+    payment: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    quote: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    rate_master: {do: ["create", "duplicate", "view", "search", "filter", "sort", "version", "preview", "schedule", "history", "link_related"], scope: "all"}
+    recurring_plan: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    refund: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    share_link: {do: ["view", "history", "link_related"], scope: "all"}
+    subscription: {do: ["view", "history", "link_related"], scope: "all"}
+    template: {do: ["view", "history", "link_related"], scope: "all"}
+    time_entry: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    expense: {do: ["view", "search", "filter", "sort", "link_related", "history"], scope: "all"}
+    user: {do: ["view", "archive", "restore", "reverse", "history", "link_related"], scope: "all"}

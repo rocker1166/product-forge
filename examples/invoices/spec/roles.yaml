@@ -1,0 +1,8 @@
+roles:
+  - {id: owner, name: Owner, home: home, joins: "signs up with phone and email", leaves: "hands ownership over first; the last owner cannot leave"}
+  - {id: accountant, name: Accountant, home: home, joins: "by an invite that expires in 10 days", leaves: "loses access at once; their entries keep their name"}
+access:
+  owner: {customer: "*", invoice: "*"}
+  accountant:
+    customer: {do: [view, create, edit, search, filter, sort, saved_view, columns, export, comment, attach, tag, history, link_related], scope: all}
+    invoice: {do: [view, create, edit, draft, search, filter, sort, saved_view, columns, bulk, export, duplicate, reverse, print_pdf, share_link, preview, comment, attach, tag, remind, schedule, history, link_related], scope: all}

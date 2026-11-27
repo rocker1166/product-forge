@@ -1,0 +1,77 @@
+id: subscription
+name: Subscription
+module: billing
+kinds: [money, setting]
+why: the plan a firm pays us for, its trial, limits and the month's issued-invoice count; our own GST invoices to the firm hang here
+links:
+  - {to: firm, on_delete: "never removed with the firm's plan; books stay at least 8 years whatever the plan state"}
+refs: []
+abilities:
+  create: {d: now, how: "Made by the system when a firm signs up, in trial. Nobody adds a second one; a second business needs its own firm and plan.", e: ["wide:B100"]}
+  edit: {d: now, how: "Owner changes plan or monthly and yearly period; upgrades start now with proration shown first, downgrades start at period end and are refused with the number of users to deactivate when the new plan has fewer seats.", e: ["wide:D272", "wide:D273"]}
+  delete: {d: no, how: "A subscription is never deleted; cancelling ends renewal and the history of plans and payments stays.", e: ["judge"]}
+  archive: {d: no, how: "Nothing is hidden; cancelled is a state the billing page shows with the last paid day.", e: ["judge"]}
+  restore: {d: no, how: "Paying again returns the same subscription to active at once; nothing is restored from an archive.", e: ["judge"]}
+  merge: {d: no, how: "One firm has one subscription; two are never joined.", e: ["judge"]}
+  duplicate: {d: no, how: "A plan is never copied between firms.", e: ["judge"]}
+  reverse: {d: now, how: "Cancel at period end can be undone until the date; a plan change at period end can be withdrawn; a charge itself is refunded by support outside the app.", e: ["wide:D276", "wide:D272"]}
+  search: {d: no, how: "One row per firm; the billing page is not a list.", e: ["judge"]}
+  filter: {d: no, how: "One row per firm; the billing page is not a list.", e: ["judge"]}
+  sort: {d: no, how: "One row per firm; there is nothing to order.", e: ["judge"]}
+  saved_view: {d: no, how: "One row per firm, so no views are kept.", e: ["judge"]}
+  columns: {d: no, how: "One row per firm, so no columns are chosen.", e: ["judge"]}
+  export: {d: no, how: "Plan history leaves with the full firm export, which works in read-only and after cancellation.", e: ["judge"]}
+  print_pdf: {d: no, how: "The paper is our GST invoice for each period, made as a separate document and listed on the billing page.", e: ["wide:A223", "wide:C103"]}
+  comment: {d: no, how: "No thread; the optional cancel reason is stored once.", e: ["judge"]}
+  remind: {d: now, how: "Owner is told 7 and 1 days before the trial ends, at 80 and 100 percent of the invoice limit, and on day 1, 3 and 6 of a failed payment.", e: ["judge"]}
+  notify: {d: now, how: "Owners only: trial, limit, failed renewal, read-only, cancel and a pre-debit notice at least 24 hours before an auto-debit. Accountants and staff see the banner but get no email.", e: ["wide:A222", "wide:D275"]}
+  preview: {d: now, how: "The upgrade and plan-change dialog shows the prorated amount with GST before the owner confirms.", e: ["wide:D272"]}
+  api: {d: later, how: "Plan reads come with the public API.", e: ["judge"]}
+  webhook: {d: later, how: "Plan events come with the public API.", e: ["judge"]}
+answers:
+  amount: {a: "Rupees in paise, the plan price per month or per year with GST added, shown with GST on the price page; an upgrade is prorated and the figure is shown before confirming. The yearly toggle shows the saving.", e: ["wide:D272", "wide:D277"]}
+  settles: {a: "One plan period of one firm. Each paid period gets our own GST invoice carrying the firm's GSTIN, emailed within 24 hours of payment, so the firm can claim input credit.", e: ["wide:A223", "wide:C103"]}
+  undo: {a: "Cancel at period end keeps full use until the date, shows the date and can be undone until then. A paid period is not refunded by the app; a wrong charge is refunded by support and noted in the history.", e: ["judge"]}
+  fail: {a: "A failed renewal retries for 3 days with full use, then 7 days of grace counted from the first failure with a banner and emails on day 1, 3 and 6, then read-only. The firm pays by UPI AutoPay, card or one-time UPI.", e: ["wide:D275"]}
+  fee: {a: "The gateway fee is ours; the firm pays the listed price and never sees a fee line.", e: ["judge"]}
+  dispute: {a: "A charge the firm disputes with its bank is handled as a failed renewal until support settles it; books and exports stay open meanwhile.", e: ["judge"]}
+  proof: {a: "The firm's own GST invoice for the plan, with number and GSTIN, plus a billing page with payment method, next charge date and amount.", e: ["wide:D277"]}
+  match: {a: "The gateway reference and our plan invoice number are stored on each period, and the billing page lists them with the next charge date.", e: ["wide:D277"]}
+  scope: {a: "One subscription per firm; users and accountant seats are counted per firm, and a second business needs an upgrade and its own firm.", e: ["wide:B100", "wide:B123"]}
+  used: {a: "Users and issued invoices use the plan's limits. A change never touches old invoices, payments or books; they stay open in every state.", e: ["judge"]}
+  default: {a: "A new firm starts in trial; when the trial ends without a paid plan the firm moves to Free and is never blocked. Only the owner can change the plan. The trial and the free allowance are given once per owner email and per PAN when given (R45).", e: ["wide:D271", "walk:X048"]}
+  effective: {a: "Upgrades start now with proration; downgrades start at period end; a cancel takes effect after the paid period; the plan table behind the limits is product-owned and effective-dated.", e: ["wide:D272", "wide:D276"]}
+  order: {a: "Plans have a fixed order, Free then paid; the owner picks one and cannot reorder anything.", e: ["judge"]}
+  who: {a: "Owner only for plan, billing details and cancel; accountant sees the plan read-only and gets 403 on a change; staff and viewer see only the banner; support sees it only under an owner's grant.", e: ["wide:A016"]}
+  limit: {a: "Free allows 10 issued invoices a month, counted in IST from the 1st; a void within 24 hours with nothing sent or viewed does not count, and the corrected copy never counts (R42). Only a new issued invoice is blocked at the limit; credit notes, payments, voids and exports stay open. The message names the limit, the allowance and the reset date. Alerts at 80 and 100 percent.", e: ["wide:B121", "wide:B231", "walk:F007", "walk:X054"]}
+tracks:
+  payment:
+    states: [{id: trial, start: true}, {id: free}, {id: active}, {id: past_due}, {id: grace}, {id: read_only}, {id: cancelled}]
+    moves:
+      - {do: trial_ends, from: trial, to: free, who: [system], guard: "trial end date reached and no paid plan chosen", effect: "firm is on Free with its limit; issues already made this month count; nothing is blocked except a new issue over the limit. users above the Free limit become viewers (the oldest stay) and the owner is told", reverse: "upgrade", notify: [sub_trial_over], e: ["wide:D271", "walk:X025"]}
+      - {do: upgrade, from: [trial, free], to: active, who: [owner], guard: "payment method accepted; the prorated amount was shown and confirmed", effect: "paid limits start at once, our GST invoice is made for the period", reverse: "cancel, or switch_to_free at period end", notify: [sub_plan_changed], e: ["wide:D272", "wide:D277"]}
+      - {do: renewal_fails, from: active, to: past_due, who: [system], guard: "the charge for the next period failed", effect: "full use continues, banner shows, the failure day is day 1 of the 7-day grace (R44) and retries run inside it", reverse: "pay_again", notify: [sub_renewal_failed], e: ["wide:D275", "walk:X023"]}
+      - {do: retry_paid, from: past_due, to: active, who: [system], guard: "a retry inside the grace was paid", effect: "banner goes, period continues", reverse: "none: a new failure starts the move again", notify: none, e: ["judge"]}
+      - {do: grace_starts, from: past_due, to: grace, who: [system], guard: "the renewal failed (the same day, day 1)", effect: "banner and emails on day 1, 3 and 6 of the 7 days; full use continues", reverse: "pay_again", notify: [sub_grace], e: ["wide:D275", "walk:X023"]}
+      - {do: go_read_only, from: grace, to: read_only, who: [system], guard: "day 8 after the failure has begun (00:00 IST)", effect: "viewing, share links, payments, exports and downloads stay; new invoice and quote issue and their mails stop; reminders, receipts, credit note mails and void notices still go, because money is owed", reverse: "pay_again", notify: [sub_read_only], e: ["wide:D275", "wide:A068", "walk:X023", "walk:X026"]}
+      - {do: pay_again, from: [past_due, grace, read_only], to: active, who: [owner, system], guard: "a payment succeeded", effect: "full use returns at once, nothing is lost", reverse: "none: a new failure starts the move again", notify: [sub_plan_changed], e: ["judge"]}
+      - {do: cancel, from: active, to: cancelled, who: [owner], guard: "in at most 3 taps; one optional reason", effect: "full use until the period end, the last paid day is shown, exports stay open", reverse: "undo_cancel until the date", notify: [sub_cancel_set], e: ["wide:D276"]}
+      - {do: undo_cancel, from: cancelled, to: active, who: [owner], guard: "period end has not passed", effect: "renewal continues as before", reverse: "cancel", notify: none, e: ["judge"]}
+      - {do: period_ends, from: cancelled, to: free, who: [system], guard: "paid period is over", effect: "firm moves to Free; users above the Free limit become viewers; books, share links and exports stay open for at least 8 years", reverse: "pay_again or switch_to_free", notify: [sub_read_only], e: ["wide:A068", "walk:X024"]}
+      - {do: refund_charge, from: active, to: active, who: [support], guard: "a charge made in the last 30 days, not refunded before, a ticket number typed", effect: "the charge goes back to the original payment method through the provider, a history row names the ticket and the owner is emailed", reverse: "none: a refund cannot be recalled; charge again by upgrading", notify: [sub_refund_notice], e: ["walk:F050"]}
+      - {do: switch_to_free, from: [active, read_only], to: free, who: [owner, system], guard: "active users and issued data fit Free; otherwise refused with how many users to deactivate", effect: "an active firm keeps paid use until period end and the system makes the move then; a read-only firm moves at once", reverse: "upgrade", notify: [sub_plan_changed], e: ["wide:D273", "wide:D272"]}
+fields:
+  - {id: plan, type: choice, required: true, default: free, edit: "owner; upgrade now, downgrade at period end", msg: "Choose a plan."}
+  - {id: billing_period, type: choice, required: true, default: monthly, edit: "owner; at period end", msg: "Choose monthly or yearly."}
+  - {id: trial_ends_at, type: date, required: false, edit: "nobody", auto: true}
+  - {id: period_ends_at, type: date, required: false, edit: "nobody", auto: true}
+  - {id: grace_ends_at, type: date, required: false, edit: "nobody", auto: true}
+  - {id: user_limit, type: number, required: true, limit: "set by the plan table", edit: "nobody", msg: "This plan allows fewer users; deactivate some first."}
+  - {id: issued_limit, type: number, required: true, limit: "Free 10 a month; paid set by the plan table", edit: "nobody", msg: "You have used all issued invoices of this month. They reset on the 1st."}
+  - {id: issued_count, type: number, required: true, limit: "0 up to the limit for Free", edit: "nobody", auto: true}
+  - {id: pending_plan, type: choice, required: false, edit: "owner, until period end", msg: "Choose the plan that starts at period end."}
+  - {id: cancel_reason, type: text, required: false, limit: 300, edit: "owner, at cancel", msg: "The reason is longer than 300 letters."}
+  - {id: payment_method_ref, type: text, required: false, limit: 120, edit: "nobody", auto: true}
+fields_e: ["wide:D277"]
+volume: {y1: 4, y3: 12}
+queries: []

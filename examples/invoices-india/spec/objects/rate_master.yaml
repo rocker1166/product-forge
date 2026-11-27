@@ -1,0 +1,70 @@
+id: rate_master
+name: Tax Master
+module: tax
+kinds: [master, setting]
+why: the dated tables of GST rates, SAC codes, TDS sections, thresholds and state codes that every invoice and payment reads; the product owns it, no firm edits it
+links:
+  - {to: invoice, on_delete: "a row is never deleted while any invoice or line points to it; a newer row closes it"}
+  - {to: payment, on_delete: "a row is never deleted while any payment recorded a TDS rate from it"}
+  - {to: item, on_delete: "a row is never deleted; items keep the SAC and rate they were saved with"}
+abilities:
+  create: {d: now, how: "Product support adds a dated row or a whole new version of a table. Firms cannot add rows.", e: [wide:A060, wide:A098]}
+  edit: {d: no, how: "A published row is never edited in place. A change is a new row with its own effective date, so old documents compute the same.", e: [wide:A060, wide:A113]}
+  delete: {d: no, how: "Rows are closed by a newer row, never deleted.", e: ["judge"]}
+  archive: {d: no, how: "A superseded row stays readable as it is; there is nothing to put away.", e: ["judge"]}
+  restore: {d: no, how: "Nothing is archived, so nothing returns; a withdrawn scheduled row goes back to draft.", e: ["judge"]}
+  duplicate: {d: now, how: "Support copies a table version as the start of the next one, then changes the dates and values.", e: ["judge"]}
+  merge: {d: no, how: "Two rows for one code and date would be a mistake, so the second is refused.", e: ["judge"]}
+  reverse: {d: no, how: "A wrong row is fixed by publishing a correcting row, never by taking one back after it is live.", e: ["judge"]}
+  import: {d: later, how: "Loading the official SAC list from a file is a support task done by script for now.", e: ["judge"]}
+  export: {d: later, how: "Firms see the tables on screen; a download comes when asked.", e: ["judge"]}
+  bulk: {d: no, how: "Rows are published one table version at a time.", e: ["judge"]}
+  tag: {d: no, how: "Tables are structure, not things to label.", e: ["judge"]}
+  attach: {d: no, how: "The notification number and date sit in the source field; no files.", e: ["judge"]}
+  comment: {d: no, how: "The source field says why the row exists.", e: ["judge"]}
+  custom_fields: {d: no, how: "No firm adds fields to a product table.", e: ["judge"]}
+  api: {d: later, how: "Reading tables by software comes with the API.", e: [judge]}
+  webhook: {d: later, how: "Rate change events come with the API.", e: [judge]}
+answers:
+  identity: {a: "One row is one code in one table from one effective date. The same table, code and effective date twice is refused.", e: ["judge"]}
+  snapshot: {a: "At issue a line copies its rate, SAC, description and the row used. A payment copies the TDS section serial, old alias and rate. Later rows never touch them.", e: ["judge"]}
+  remove: {a: "Rows are never deleted. A newer row closes the old one by setting its end date.", e: ["judge"]}
+  owner: {a: "The product owns it and support staff publish it. Every role in a firm reads it; no firm role edits it; a client never sees it.", e: [wide:A060, wide:A098]}
+  contacts: {a: "One row holds one code with its old aliases, such as the earlier TDS section number. There are no addresses or contacts.", e: ["judge"]}
+  code: {a: "The code is the identity and is kept as text so leading zeros stay: SAC digits, the Income-tax Act 2025 section 393(1) serial number for TDS, the two-digit GST state code.", e: [wide:A112, wide:A096]}
+  inactive: {a: "A row past its end date stays readable and cannot be picked for a date of supply after it ends. Old documents still show it.", e: ["judge"]}
+  scope: {a: "One table for the whole product; every firm sees the same rows.", e: ["judge"]}
+  used: {a: "Every issued invoice and payment points to the row it used. A change adds a row and leaves every issued document as it was.", e: ["judge"]}
+  default: {a: "New lines start at 18 percent. A firm cannot change the default; only support can.", e: [wide:W025]}
+  effective: {a: "A row applies by date of supply. Drafts saved earlier are rechecked at issue, and the issue screen shows old and new tax and needs a click.", e: [wide:A113, wide:A060]}
+  order: {a: "Rates by value, SAC by code, TDS by serial number, states by GST code. Firms cannot reorder.", e: ["judge"]}
+  who: {a: "Support publishes. Owner, accountant, staff and viewer read it through pickers.", e: ["judge"]}
+  limit: {a: "GST rates are 0, 0.25, 3, 5, 18 and 40 percent. SAC is 4, 6 or 8 digits, with the firm's turnover band setting the minimum. There is no count limit per table.", e: [wide:W025, wide:A111, wide:W024]}
+tracks:
+  lifecycle:
+    states: [{id: draft, start: true}, {id: scheduled}, {id: current}, {id: superseded, end: true}]
+    moves:
+      - {do: publish, from: draft, to: scheduled, who: [support], guard: "effective date is today or later, the source note is filled, and no row for the same table, code and date exists. a second support person has approved the row, and the effective date is at least 24 hours ahead unless both mark it a correction", effect: "firms using the code are told before the date. the issue screen shows 'rate changed this week' for a code whose rate changed in the last 7 days", reverse: "withdraw", notify: [rate_change_notice], e: [wide:A113, wide:A060, "walk:X037"]}
+      - {do: withdraw, from: scheduled, to: draft, who: [support], guard: "the effective date has not arrived", effect: "the row stops being scheduled", reverse: "publish", notify: none, e: ["judge"]}
+      - {do: go_live, from: scheduled, to: current, who: [system], guard: "the effective date has arrived in IST", effect: "new documents use it by date of supply", reverse: "none: a live row is corrected by a new row", notify: none, e: ["judge"]}
+      - {do: supersede, from: current, to: superseded, who: [system], guard: "a newer row for the same code is now live", effect: "end date is set to the day before the newer row", reverse: "none: history stays as it was", notify: none, e: ["judge"]}
+fields:
+  - {id: table, type: choice, required: true, edit: "support, while draft", msg: "Choose the table: GST rate, SAC, TDS section, threshold or state code."}
+  - {id: code, type: text, required: true, limit: 12, edit: "support, while draft", msg: "Enter the code. SAC is 4, 6 or 8 digits and TDS uses the 393(1) serial."}
+  - {id: name, type: text, required: true, limit: 200, edit: "support, while draft", msg: "Enter the name or description, up to 200 letters."}
+  - {id: alias, type: text, required: false, limit: 40, edit: "support, while draft", msg: "The old name or number, such as the earlier TDS section, up to 40 characters."}
+  - {id: rate, type: number, required: false, limit: 100, edit: "support, while draft", msg: "A rate is a percentage from 0 to 100 with up to 2 decimals."}
+  - {id: threshold, type: money, required: false, limit: 99999999999, edit: "support, while draft", msg: "A threshold is a rupee amount; for yearly limits it is per financial year."}
+  - {id: effective_from, type: date, required: true, edit: "support, while draft", msg: "Choose the date the row starts. It cannot be earlier than today unless the row corrects an earlier one."}
+  - {id: effective_to, type: date, required: false, edit: "nobody", auto: true}
+  - {id: source, type: text, required: true, limit: 200, edit: "support, while draft", msg: "Name the notification or Act section this row follows."}
+fields_e: [wide:A060, wide:A096, wide:A098]
+list:
+  search: [code, name, alias]
+  filters: [lifecycle, table]
+  sorts: [code, -effective_from]
+  default_sort: code
+  columns: [table, code, name, rate, effective_from, effective_to]
+  page: 50
+  e: [wide:A112, wide:A098]
+volume: {y1: 1500, y3: 3500}

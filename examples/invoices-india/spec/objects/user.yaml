@@ -1,0 +1,49 @@
+id: user
+name: User
+module: core
+kinds: [person]
+why: one login per email for the whole product; a person who may belong to many firms
+links:
+  - {to: membership, on_delete: "a login is never erased while memberships exist; closing it ends every membership and the name stays on history"}
+  - {to: invite, on_delete: "invites belong to an email, not a login; they survive a closed login and cannot be accepted by it"}
+abilities:
+  create: {d: now, how: "Sign up with email and a password of 10 or more characters, or set one on an invite page. The person must be 18 or older. The email must be confirmed by a link before any invite can be accepted.", e: [wide:W073, wide:W076, wide:C210, wide:D199]}
+  edit: {d: now, how: "A person edits their own name, password and second step. Email changes only after a link sent to the new address is opened; invites to the old address stay bound to it. Nobody edits their own role.", e: [judge, wide:W076]}
+  search: {d: no, how: "People are found through a firm's memberships; there is no search over all logins, because that would show who else uses the product.", e: ["judge"]}
+  filter: {d: no, how: "No list of logins exists outside a firm.", e: ["judge"]}
+  sort: {d: no, how: "No list of logins exists outside a firm.", e: ["judge"]}
+  reverse: {d: now, how: "Support reopens a closed login on the person's request; old sessions stay ended and memberships need an owner to reactivate.", e: [judge]}
+  assign: {d: no, how: "The role lives on the membership, one per firm.", e: ["judge"]}
+  schedule: {d: no, how: "Sessions end after 8 hours idle and lockout lasts 15 minutes; nothing else is timed on the login.", e: [wide:W076]}
+  api: {d: later, how: "People and keys through an API come with the API wave.", e: ["judge"]}
+  notify: {d: now, how: "Emails: sign-in from a new place, password reset link (1 hour, once), role changed, second step turned on.", e: [wide:K206, judge]}
+answers:
+  secret: {a: "The password is stored hashed and never shown; the second-step secret is shown once as a QR and saved only after one valid code is typed.", e: [wide:W076, judge]}
+  scope: {a: "A login has no power on its own. Each membership gives one role in one firm and every request is checked on the server.", e: ["judge"]}
+  expiry: {a: "Sessions end after 8 hours idle; the reset link lasts 1 hour and works once. An invite link lasts 7 days.", e: [wide:W076, wide:K206, wide:W073]}
+  last: {a: "A login that is the only active owner of any firm cannot be closed or deactivated; the message names the firm and says transfer first.", e: [wide:W074, wide:W074]}
+  leave: {a: "Sessions end at once, memberships end, the name stays on history, and drafts they made stay with the firm for an owner to reassign.", e: ["judge"]}
+  proof: {a: "Email and password, five wrong tries lock it for 15 minutes; an optional authenticator code becomes required when the owner turns it on for the firm.", e: [wide:W076, judge]}
+  layers: {a: "Two layers: firm membership first, then role. Another firm's record returns 404, a forbidden action in your own firm returns 403.", e: [wide:W077, wide:W075]}
+  audit: {a: "Sign-ins, failed tries, password and second-step changes and role changes are logged with IP and device and kept at least 8 years.", e: [judge, wide:A068]}
+tracks:
+  access:
+    states: [{id: active, start: true}, {id: deactivated}]
+    moves:
+      - {do: close_account, from: active, to: deactivated, who: [owner, accountant, staff, viewer], guard: "not the only active owner of any firm; password typed again", effect: "all sessions end at once and every membership goes inactive", reverse: reopen, notify: [account_closed], e: ["judge"]}
+      - {do: deactivate, from: active, to: deactivated, who: [support], guard: "not the only active owner of any firm; reason written. the person's proved email is given, the ticket number is written in history, and the move is offered only while an owner's grant is open", effect: "all sessions end at once; no firm data is opened to support by this", reverse: reopen, notify: [account_closed], e: [wide:W074, judge, "walk:F052"]}
+      - {do: reopen, from: deactivated, to: active, who: [support], guard: "the person asked, proved by email", effect: "can sign in; no membership returns by itself", reverse: deactivate, notify: none, e: [judge]}
+      - {do: reset_second_step, from: active, to: active, who: [support], guard: "the person proved their email and the firm GSTIN, 48 hours have passed and every owner was mailed", effect: "the authenticator is cleared and the person sets it again; the recovery codes are new", reverse: "none: the person enrols again", notify: none, e: ["walk:F039"]}
+fields:
+  - {id: email, type: text, required: true, limit: 254, edit: "the person, after confirming the new address", msg: "This email does not look right. Use one you can open."}
+  - {id: name, type: text, required: true, limit: 100, edit: "the person", msg: "Enter your name, up to 100 letters."}
+  - {id: password_hash, type: text, required: true, limit: 255, auto: true, edit: "the person; never shown", msg: "A password has at least 10 characters."}
+  - {id: email_verified_at, type: date, required: false, auto: true, edit: "system when the link is opened", msg: "Set by the system."}
+  - {id: recovery_codes, type: text, required: false, limit: 255, auto: true, edit: "system at enrolment; 8 one-time codes shown once", msg: "Set by the system."}
+  - {id: totp_secret, type: text, required: false, limit: 64, auto: true, edit: "the person; saved after one valid code", msg: "Type the code your authenticator shows."}
+  - {id: failed_attempts, type: number, required: false, limit: 5, default: 0, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: locked_until, type: date, required: false, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: last_active_at, type: date, required: false, auto: true, edit: "system", msg: "Set by the system."}
+fields_e: [wide:W076, judge, wide:K206, judge]
+volume: {y1: 8, y3: 20}
+queries: []

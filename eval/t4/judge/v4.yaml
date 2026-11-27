@@ -1,0 +1,20 @@
+- {id: H01, p: "pass", pn: "Page and API: 269.97, 24.30/24.30, grand 319.00, round-off 0.43 (shown unsigned)", q: "pass", qn: "Page and API match; round-off shown +₹0.43"}
+- {id: H02, p: "pass", pn: "0.03; 100.00 -0.03; 101.00 +0.50; 100.00 -0.49", q: "pass", qn: "Same values; negative shown -₹0.49"}
+- {id: H03, p: "pass", pn: "All CGST/SGST 0.00, grand 1.00, round-off 0", q: "pass", qn: "Same: 0.00 each, taxable 1.00, round-off 0"}
+- {id: H04, p: "pass", pn: "IGST 48.59 only, round-off 0.44; reverts to 24.30 each", q: "fail", qn: "IGST right, but page still shows CGST ₹0.00 and SGST ₹0.00 columns and rows"}
+- {id: H05, p: "unsure", pn: "Check amounts total 9,999,999,999 but limit 99,99,99,999 is 999,999,999; contradictory; both reject literal case", q: "unsure", qn: "Same contradiction; at 999,999,999 saves, 1,000,000,000 rejected with limit message"}
+- {id: H06, p: "fail", pn: "Draft dated 31-03-2026 issued after 01-04-2026 invoice as INV/25-26/00002", q: "pass", qn: "25-26/00001, 26-27/00001, third refused (date before 01-04-2026)"}
+- {id: H07, p: "pass", pn: "IST date default in both zones; tomorrow refused; due today not overdue, yesterday overdue", q: "pass", qn: "Same results"}
+- {id: H08, p: "pass", pn: "07-03-2026; 0 gives 20-02; 90 gives 31-03; 19-02 refused, 20-02 ok", q: "pass", qn: "Same results"}
+- {id: H09, p: "pass", pn: "n+1, n+2, zero-line refused, voided number stays on its own invoice", q: "pass", qn: "Same results"}
+- {id: H10, p: "pass", pn: "10 distinct consecutive numbers; double send one 200, one 409, next number +1", q: "pass", qn: "Same results"}
+- {id: H11, p: "pass", pn: "All four refused; 900+100 paid, balance 0; amount and TDS shown separately", q: "pass", qn: "Same; invoice and receipt show 900.00 and 100.00 separately"}
+- {id: H12, p: "pass", pn: "600, 300, 700 partially_paid, 1000 issued; reversed row listed", q: "pass", qn: "Same results"}
+- {id: H13, p: "pass", pn: "Void refused with payment; abcd and 201 chars refused; abcde ok; 403s; later actions 409", q: "pass", qn: "Same results"}
+- {id: H14, p: "pass", pn: "Duplicate 409 until confirmed; UTR2 saves; UTR1 after reversals saves; balance 500", q: "pass", qn: "Same results"}
+- {id: H15, p: "pass", pn: "REC/25-26/00001, REC/26-27/00001, then 00002; reversed row kept", q: "pass", qn: "Same results"}
+- {id: H16, p: "pass", pn: "Three dates refused, 30-11-2025 gives CN/25-26/00001", q: "pass", qn: "Same results"}
+- {id: H17, p: "pass", pn: "400.01 and 600.01 refused; 400.00 and 600.00 accepted", q: "pass", qn: "Same results"}
+- {id: H18, p: "pass", pn: "All 19 routes 404 same shape as fake id; A customer in B invoice 404; no leaks", q: "fail", qn: "Routes 404 same as fake, but A's customer in B invoice returns 400, not 404"}
+- {id: H19, p: "pass", pn: "Last-owner rules, email clash refused, accountant 403, viewer 403, no create button", q: "pass", qn: "Same results"}
+- {id: H20, p: "pass", pn: "All GSTIN cases correct; 'Invalid GSTIN' exact in API and form", q: "pass", qn: "Same results"}

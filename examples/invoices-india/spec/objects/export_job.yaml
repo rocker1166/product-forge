@@ -1,0 +1,98 @@
+id: export_job
+name: Export Job
+module: migration
+kinds: [job, file, report]
+why: builds registers, the month-end accountant pack, Tally XML and the full-firm export as files; a link lives 7 days and the record stays
+links:
+  - {to: firm, on_delete: "records stay for the 8 year book-keeping period, then go with the firm"}
+  - {to: invoice, on_delete: "the file holds copies; invoices are never removed once issued"}
+  - {to: payment, on_delete: "the file holds copies; reversed payments stay listed as reversed"}
+refs: []
+abilities:
+  create: {d: now, how: "Owner and accountant start one from a list's Export button, Reports, or Settings; the full-firm export is owner only and mails every owner. Staff and viewers cannot. Plan and unpaid dues never block it, in read-only or grace too. Support may build the full-firm export for a sealed firm only, for a former owner, after the proofs of R65; support never exports a live firm.", e: [wide:B104, wide:W083, "walk:F049", "walk:X039"]}
+  edit: {d: no, how: "A run is not edited; change the filters and start a new one.", e: ["judge"]}
+  draft: {d: no, how: "Filters are chosen in a dialog and the run starts; nothing is kept half done.", e: ["judge"]}
+  search: {d: later, how: "Runs are few; filters by kind, state and person are enough.", e: ["judge"]}
+  bulk: {d: no, how: "Runs are cancelled or retried one at a time; nothing else changes in bulk.", e: ["judge"]}
+  group: {d: no, how: "A flat history, newest first; months are grouped inside the pack itself.", e: ["judge"]}
+  import: {d: no, how: "A file made here is never read back; the full-firm zip is for keeping and for another system.", e: [judge]}
+  export: {d: no, how: "This object is the export; the list of runs is not exported again.", e: ["judge"]}
+  delete: {d: now, how: "The file is deleted 7 days after creation and its link dies with it; the owner may delete it earlier. The record stays with row count, who ran it and the filters.", e: [wide:D228, mk-008]}
+  restore: {d: no, how: "An expired file does not come back; run it again.", e: ["judge"]}
+  archive: {d: no, how: "Expired runs stay in the list as expired.", e: [wide:D228]}
+  duplicate: {d: now, how: "Run again with the same filters as a new run with a new file and a new 7 days.", e: [judge]}
+  reverse: {d: now, how: "Cancel while queued or running and no file is kept; a ready file is not recalled but can be deleted at once.", e: [wide:D228]}
+  tag: {d: no, how: "Kind and period already label every run.", e: ["judge"]}
+  version: {d: no, how: "Each run is its own file; change the dates to get another.", e: ["judge"]}
+  print_pdf: {d: no, how: "Packs are CSV and zip; a PDF of a report is printed from the report screen.", e: ["judge"]}
+  share_link: {d: now, how: "A ready file is fetched through a sign-in page with a link that lives 7 days; a month-end pack to an outside address is created by an owner only and uses a random link of at least 128 bits that opens only after a code sent to the same address and lives 24 hours, and each download is written to history.", e: [judge, "walk:X034"]}
+  preview: {d: now, how: "The dialog shows the row count and columns before starting and says when a file will come by email instead of at once.", e: ["judge"]}
+  schedule: {d: now, how: "The month-end pack builds on the 1st at 08:00 IST for the month before, once per firm and month, to an address the owner chooses; there is a pause switch.", e: ["judge"]}
+  notify: {d: now, how: "The starter is told when a file is ready or fails; every owner gets an email when a full-firm export runs.", e: ["judge"]}
+  api: {d: later, how: "Starting exports by API waits with the API.", e: [judge]}
+  webhook: {d: later, how: "Ready and failed events for other software wait with the API.", e: [judge]}
+answers:
+  size: {a: "Invoice list export is up to 50,000 rows; over 5,000 rows runs in the background and comes by email. The full-firm zip has no row cap. Beyond 50,000 the dialog says to narrow the dates.", e: [wide:W083, wide:D228]}
+  fail: {a: "A file that fails half way is dropped whole; nothing partial is offered. The run shows failed with the reason, the starter is told, and Retry builds it again from the start.", e: [judge]}
+  again: {a: "Safe. Every run makes a new file. The month-end job has a unique key of firm, kind and month, so a second runner makes nothing twice.", e: [judge]}
+  progress: {a: "Queued, ready or expired, with rows done of total. A queued run can be cancelled; the page may be closed because the email follows.", e: ["judge"]}
+  who: {a: "Owner and accountant start and open runs; the full-firm export is owner only; staff, viewers and customers cannot. An accountant sees all runs of the firm and the owner sees every download.", e: [wide:B104, wide:W075]}
+  result: {a: "The file is kept 7 days under the firm's own path and then deleted. The run record, row count, filters and who ran it stay at least 8 years.", e: [wide:D228, wide:A068]}
+  limit: {a: "Two runs at once per firm, the rest queue; no rate limit on the owner's own export. A job lock keeps two app instances off the same run.", e: [judge]}
+  timing: {a: "The run reads one snapshot taken at start, so totals and rows agree while people keep working; the file says the time it was made as of.", e: [judge]}
+  limits: {a: "CSV is UTF-8 with a byte-order mark, ISO dates and plain 2 decimal amounts. Tally output is XML with party, sales, tax and round-off ledgers. HSN and SAC codes keep their zeros.", e: [wide:W083, wide:A248, mk-025]}
+  store: {a: "Files sit under the firm's own path and are never cached under a key another firm could read.", e: [judge]}
+  remove: {a: "Deleted at 7 days or by the owner. If the firm is deleted, a final export link comes first and the books stay at least 8 years.", e: [wide:D228, wide:A256]}
+  safe: {a: "Cells that start with = + - or @ get a single quote in front so Excel cannot run them. The file is built by us, so it is not scanned.", e: [wide:A252]}
+  dupe: {a: "The same filters twice give two files; nothing is merged.", e: ["judge"]}
+  meta: {a: "File names have no customer or firm name: kind, period and run date, with slashes in document numbers turned into hyphens. The full-firm zip holds a read-me with field meanings.", e: [judge]}
+  definition: {a: "Each export lists its columns and how they are worked. Credit note rows are negative, void invoices are left out of totals and a switch lists them as marked rows, and foreign currency rows show currency, rate and the rupee value. TDS rows name the section and the certificate form: Form 131 from 1 April 2026, Form 16A before, and the yearly list by quarter is for matching with Form 168 or AIS.", e: [wide:W084, wide:B069]}
+  period: {a: "Default is the month before for the pack and the current financial year for registers, in IST with April to March years; the filing mode of the firm decides quarter cuts.", e: [wide:A123, wide:B068]}
+  fresh: {a: "Live data as of the start time, printed in the file and the read-me; there is no cache.", e: [judge]}
+  drill: {a: "A totals row equals the sum of the rows above it, and the filters used are printed with the file so the screen and the file match.", e: ["judge"]}
+  big: {a: "Over 5,000 rows is a background run with an email link; smaller exports are ready in the same minute but still create a run, so every export is logged.", e: [wide:D228, wide:B104]}
+  money: {a: "Rupees with 2 decimals and no separators; a foreign currency row also carries the exchange rate column and the taxable value in rupees.", e: [wide:W083, wide:K056]}
+  log: {a: "Every export writes a history row with who, what, filters, row count and time, and no one can edit or delete it.", e: [wide:B104, wide:W089]}
+tracks:
+  run:
+    states: [{id: queued, start: true}, {id: ready}, {id: failed}, {id: expired, end: true}, {id: cancelled, end: true}]
+    moves:
+      - {do: finish, from: queued, to: ready, who: [system], guard: "file written whole and its hash stored", effect: "link made, valid 7 days; starter emailed", reverse: "delete_file", notify: [export_ready], e: ["judge"]}
+      - {do: fail, from: queued, to: failed, who: [system], guard: "the build fails or times out", effect: "no partial file kept; reason shown", reverse: "retry", notify: [export_failed], e: [judge]}
+      - {do: retry, from: failed, to: queued, who: [owner, accountant], guard: "none", effect: "built again from the start", reverse: "cancel", notify: none, e: ["judge"]}
+      - {do: cancel, from: queued, to: cancelled, who: [owner, accountant], guard: "not yet ready", effect: "nothing is kept", reverse: "none: start a new run", notify: none, e: ["judge"]}
+      - {do: expire, from: ready, to: expired, who: [system], guard: "7 days after creation", effect: "link dies and the file is deleted; the record stays", reverse: "none: run it again as a new run", notify: none, e: [wide:D228, mk-008]}
+      - {do: announce_full_export, from: queued, to: queued, who: [system], guard: "kind is the full-firm export", effect: "every owner is emailed that it was started and by whom", reverse: "none: an email cannot be recalled", notify: [export_full_firm], e: ["judge"]}
+  upload:
+    states: [{id: pending, start: true}, {id: stored}, {id: write_failed, end: true}, {id: deleted, end: true}]
+    moves:
+      - {do: write, from: pending, to: stored, who: [system], guard: "the whole file is written and checked", effect: "bytes kept under the firm's path", reverse: "delete_file", notify: none, e: ["judge"]}
+      - {do: fail_write, from: pending, to: write_failed, who: [system], guard: "the file cannot be finished", effect: "temporary bytes removed", reverse: "none: the run is retried and writes again", notify: none, e: ["judge"]}
+      - {do: delete_file, from: stored, to: deleted, who: [system, owner], guard: "7 days after creation, or the owner asks", effect: "bytes removed, link dead", reverse: "none: run the export again", notify: none, e: [wide:D228, mk-008]}
+fields:
+  - {id: kind, type: choice, required: true, edit: "nobody after start", msg: "Choose what to export."}
+  - {id: format, type: choice, required: true, default: CSV, edit: "nobody after start", msg: "Choose CSV, XLSX, XML or ZIP."}
+  - {id: filters, type: long_text, required: false, limit: 2000, edit: "nobody after start", auto: true}
+  - {id: from_date, type: date, required: false, edit: "nobody after start", msg: "The start date must not be after the end date."}
+  - {id: to_date, type: date, required: false, edit: "nobody after start", msg: "The end date must not be before the start date."}
+  - {id: rows, type: number, required: true, limit: 50000, edit: "nobody", auto: true}
+  - {id: file, type: file, required: false, limit: "1 GB", edit: "nobody", auto: true}
+  - {id: expires_at, type: date, required: false, edit: "nobody", auto: true}
+  - {id: recipient, type: text, required: false, limit: 120, edit: "owner, for the month-end pack", msg: "This email does not look right."}
+fields_e: [wide:W083, wide:D228, mk-050]
+list:
+  filters: [run, upload, kind, started_by, created_at]
+  sorts: [-created_at]
+  default_sort: -created_at
+  columns: [created_at, kind, started_by, rows, run, expires_at]
+  views: [All, Ready, Failed]
+  page: 50
+  e: ["judge"]
+volume: {y1: 4000, y3: 40000}
+queries:
+  - {id: newest, filters: [], sort: [-created_at], index: [tenant, created_at], p95: 150 ms}
+  - {id: by_state, filters: [run], sort: [-created_at], index: [tenant, run, created_at], p95: 150 ms}
+  - {id: by_file, filters: [upload], sort: [-created_at], index: [tenant, upload, created_at], p95: 150 ms}
+  - {id: by_kind, filters: [kind], sort: [-created_at], index: [tenant, kind, created_at], p95: 150 ms}
+  - {id: by_person, filters: [started_by], sort: [-created_at], index: [tenant, started_by, created_at], p95: 150 ms}
+  - {id: to_expire, filters: [run], sort: [expires_at], index: [tenant, run, expires_at], p95: 100 ms}

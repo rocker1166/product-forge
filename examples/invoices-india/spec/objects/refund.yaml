@@ -1,0 +1,60 @@
+id: refund
+name: Refund
+module: collections
+kinds: [money]
+why: cash the firm gave back out of a customer's credit, numbered REF and never above the balance
+links:
+  - {to: credit_ledger, on_delete: "never removed; a reversal writes the amount back as a new credit row"}
+  - {to: customer, on_delete: "a customer with a refund cannot be deleted; archive instead"}
+  - {to: number_series, on_delete: "the REF counter is never reset or removed while a refund exists"}
+refs: []
+abilities:
+  create: {d: now, how: "Owner or accountant presses Refund on the customer's credit; amount, date, mode, reference and paid from are asked, and the number REF/YY-YY/NNNNN is given on save. Refund starts as Reserve: the amount is locked in the ledger so nobody can apply it, the owner pays from the bank, then Confirm paid with the bank reference gives the number (R29). The most that can be refunded per customer is the cash received less cash already refunded.", e: ["wide:D093", "walk:X004", "walk:X001"]}
+  edit: {d: now, how: "Only the reference and the note change after saving; a wrong amount is fixed by reversing and recording again.", e: ["wide:W058"]}
+  search: {d: now, how: "Refund number, customer name and reference.", e: ["wide:D094"]}
+  reverse: {d: now, how: "Owner reverses a refund with a reason of 5 to 200 letters; the amount returns to the customer's credit and the number stays used.", e: ["wide:W059"]}
+  print_pdf: {d: now, how: "Refund page with number, date, customer, amount, mode, reference and the credit note it settles.", e: ["wide:D096"]}
+  export: {d: now, how: "CSV with number, date, customer, amount, mode, reference and reversed, filtered like the list.", e: ["wide:D094"]}
+  notify: {d: now, how: "Every owner is emailed when a refund is reversed; the customer is told nothing by the system.", e: ["judge"]}
+  schedule: {d: no, how: "A refund is recorded after the money has left; nothing is scheduled or retried.", e: ["judge"]}
+  api: {d: later, how: "Read and write come with the public API.", e: ["judge"]}
+  webhook: {d: later, how: "Refund events come with the public API.", e: ["wide:D098"]}
+answers:
+  amount: {a: "Rupees in paise, above 0 and never above the customer's credit balance; refused with the available figure. Two refunds at once cannot together pass the balance, the account is locked while one saves.", e: ["wide:D093"]}
+  settles: {a: "The credit of one customer, taken from the account and not from a single invoice; the print page names the credit note it came from.", e: ["wide:B212", "wide:D096"]}
+  undo: {a: "Only the owner reverses it, with a reason; the amount goes back to the credit account, the number stays used, the row is greyed and left out of totals.", e: ["wide:W059", "wide:D093"]}
+  fail: {a: "A refund is a record of money that already left, so nothing hangs. A save that loses the race to another refund is refused with the new balance.", e: ["judge"]}
+  fee: {a: "No fee is recorded in this wave; a bank charge on the refund is the firm's own bookkeeping.", e: ["judge"]}
+  dispute: {a: "A customer who says the money did not arrive is answered by the reference on the refund; if it was wrong the owner reverses it and records it again.", e: ["wide:D096"]}
+  proof: {a: "A numbered refund page REF/YY-YY/NNNNN from its own gapless counter per firm and financial year, with no tax effect and not a tax document.", e: ["wide:D093", "wide:D096"]}
+  match: {a: "By the reference, mode and the paid-from account; there is no bank import in this wave. The list and the CSV give the accountant one row per refund.", e: ["wide:D094"]}
+tracks:
+  payment:
+    states: [{id: reserved, start: true}, {id: recorded}, {id: reversed, end: true}, {id: released, end: true}]
+    moves:
+      - {do: reverse_refund, from: recorded, to: reversed, who: [owner], guard: "reason of 5 to 200 letters; period not locked", effect: "amount returns to the customer's credit as a new row, the account may leave exhausted, number stays used", reverse: "record the refund again with a new number", notify: [refund_reversed_owner], e: ["wide:W059", "wide:D093"]}
+      - {do: confirm_paid, from: reserved, to: recorded, who: [owner, accountant], guard: "the bank reference is typed; the reserved amount is still in the ledger; an accountant above Rs 10,000.00 needs an owner to confirm", effect: "the number REF/YY-YY/NNNNN is given, the reserved amount leaves the ledger as refunded, history row", reverse: "reverse_refund by the owner", notify: none, e: ["walk:X004","walk:X013"]}
+      - {do: release_reserved, from: reserved, to: released, who: [owner, accountant], guard: "reason of 5 to 200 letters", effect: "the reserved amount is free again in the ledger; no number was used", reverse: "reserve again with a new refund", notify: none, e: ["walk:X004"]}
+fields:
+  - {id: number, type: text, required: true, limit: 16, edit: "nobody", auto: true}
+  - {id: customer, type: link, required: true, edit: "nobody", auto: true}
+  - {id: amount, type: money, required: true, limit: "above 0 and not above the credit balance", edit: "nobody; reverse and record again", msg: "The refund is more than the credit balance; the available credit is shown."}
+  - {id: refunded_at, type: date, required: true, default: today, edit: "nobody; reverse and record again", msg: "The refund date cannot be in the future."}
+  - {id: mode, type: choice, required: true, edit: "nobody", msg: "Choose cash, bank transfer, UPI, cheque or other."}
+  - {id: paid_from, type: choice, required: true, default: firm_bank, edit: "nobody", msg: "Choose the firm's bank account or cash."}
+  - {id: reference, type: text, required: false, limit: 60, edit: "owner and accountant, any time", msg: "Enter the reference, up to 60 letters."}
+  - {id: note, type: text, required: false, limit: 300, edit: "owner and accountant, any time", msg: "The note is longer than 300 letters."}
+  - {id: reversed_reason, type: text, required: false, limit: 200, edit: "nobody", msg: "Write a reason of 5 to 200 letters."}
+fields_e: ["wide:D093", "wide:D096"]
+list:
+  search: [number, customer, reference]
+  filters: [payment, customer, mode, refunded_at]
+  sorts: [-refunded_at, amount, number]
+  default_sort: -refunded_at
+  columns: [number, refunded_at, customer, amount, mode, reference]
+  views: [All, This month, Reversed]
+  export: {rows: [selected, filtered, all], what: [refunds], formats: [CSV], big: "over 1,000 rows comes by email; failure is emailed too"}
+  page: 50
+  e: ["wide:D094"]
+volume: {y1: 60, y3: 400}
+queries: []

@@ -1,0 +1,109 @@
+settings: [number format, terms, reminder days, logo and colours, e-invoice on or off]
+seed: 300 customers and 6,000 invoices in every state, two firms
+support: [find a firm, see its activity, resend an email, view as the firm with a log]
+events: [first invoice issued, first payment recorded, export used, tax failed]
+rollout: five friendly firms, then invite only, then open
+rollback: one command, tried before the first firm
+product:
+  home: "now: money due, overdue and drafts; owner and accountant see the same"
+  views: "no: a list is enough for two objects"
+  quick_entry: "now: new invoice from home, last customer offered first"
+  modes: "later: strict approval before issue for bigger firms"
+  favourites: "later: recent customers on the form only"
+  search_all: "now: one box finds customers and invoices, a number jumps"
+  keyboard: "later: save with Ctrl Enter is in, the rest waits"
+  planning: "no: this product does not forecast"
+  time_off: "no: no date here depends on working days"
+  teams: "no: firms have two to five people"
+  custom_roles: "later: two fixed roles are enough first"
+  signin_company: "later: phone or email code first"
+  preferences: "now: language of the product and date format per person"
+  branding: "now: logo, colours and number format on the paper"
+  templates: "now: invoice email and reminder text can be edited"
+  automation: "later: reminders are the only rule now"
+  recurring: "later: monthly invoices are space only in this wave"
+  reports: "now: sales by month, unpaid by age, tax summary"
+  scheduled_report: "later: month end report by email"
+  public_page: "now: an invoice page with download, says voided when void"
+  portal: "later: one page per customer with all their papers"
+  phone_app: "now: a good web page, no app in this wave"
+  desktop: "no: nothing to add on a desktop"
+  external_sync: "later: Tally and Zoho Books"
+  ai: "later: read a photo of an old invoice"
+  languages: "now: English and Hindi, paper in either"
+  many_companies: "room: one person may join several firms"
+  audit_all: "now: history on each record, one log for the owner"
+  trash_all: "no: drafts are deleted, issued papers never"
+  import_all: "now: customers and open invoices from Excel or Tally"
+  demo: "later: a sample firm with papers in every state"
+  help: "now: help page, email, status page"
+  plans: "now: after the trial all papers stay readable, new ones stop"
+  self_host: "no: hosted by us only"
+  admin_settings: "now: number format, terms, reminder days, logo, e-invoice"
+  privacy: "now: export and deletion request, tax papers stay by law"
+day_one:
+  D1: "tenant on every table and first in every index"
+  D2: "UUID v7 ids; invoice number is separate"
+  D3: "tax rows per line and per invoice"
+  D4: "price lives on the invoice line; a price list comes later"
+  D5: "document, payment and tax run side by side"
+  D6: "issued invoices are never edited; credit notes reverse them"
+  D7: "per firm and financial year, no gaps, locked row"
+  D8: "owner is a person now; the column can hold a team or bot"
+  D9: "saved views per person, owner may share"
+  D10: "terms, reminders, limits and number format are settings"
+  D11: "one JSON column for custom fields; no customer-made objects"
+  D12: "idempotency key on writes, outbox table, UTC, paise, API version header"
+production:
+  P1: "ASVS L1, tracked by id"
+  P2: "secrets from environment only"
+  P3: "test reads another firm's id and gets not found"
+  P4: "every input checked on the server"
+  P5: "every action checked on the server"
+  P6: "daily backup plus point in time"
+  P7: "restore tried every quarter, timed"
+  P8: "trash for 30 days, invoices never"
+  P9: "migrations run on a copy first"
+  P10: "one command, tried"
+  P11: "rolling deploy, no manual step"
+  P12: "scripts in the repo only"
+  P13: "alerts on errors and slow pages, owner named"
+  P14: "hourly check issues a test invoice"
+  P15: "logs searchable for 30 days"
+  P16: "load test at 5 times year one"
+  P17: "limits on sign in and public links"
+  P18: "file 10 MB, import 5,000 rows, export by email"
+  P19: "two instances"
+  P20: "jobs safe to run twice"
+  P21: "failed jobs listed with retry"
+  P22: "exports run as jobs and email the file"
+  P23: "data export in settings"
+  P24: "account deletion says what stays by law"
+  P25: "list of personal data with periods"
+  P26: "DPDP duties reviewed by a lawyer first"
+  P27: "support view with log"
+  P28: "status page and help email"
+  P29: "cost per firm measured, budget alert"
+  P30: "free plan limited to 20 invoices"
+flow:
+  A1: yes
+  A2: yes
+  A3: yes
+  A4: yes
+  A5: yes
+  A6: yes
+  A7: yes
+  A8: yes
+  A9: "no: checked on submit only, so no real-time rule is needed"
+  A10: yes
+  A11: yes
+  A12: yes
+  A13: yes
+  A14: yes
+  A15: yes
+  A16: yes
+  A17: yes
+  A18: yes
+  A22: yes
+  A23: yes
+  A25: yes

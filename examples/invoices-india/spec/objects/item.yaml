@@ -1,0 +1,65 @@
+id: item
+name: Service Item
+module: masters
+kinds: [master]
+why: a saved service whose SAC, unit, rate and tax rate are copied into an invoice line
+links:
+  - {to: invoice, on_delete: "blocked once any document line used it, and the screen says how many documents; archive instead. Lines keep their own copy either way."}
+  - {to: quote, on_delete: "counted with invoices; any quote line that used it blocks delete"}
+  - {to: rate_master, on_delete: "the rate master row is never deleted; an item keeps the SAC and tax rate it was saved with and shows a warning when the table moves on"}
+abilities:
+  delete: {d: now, how: "Only an item no document line ever used; otherwise the screen says how many documents use it and offers archive, which hides it from the picker only.", e: [wide:D026]}
+  duplicate: {d: now, how: "Copies SAC, unit, rate, tax rate and description; the name must be changed because names are unique per firm.", e: [wide:D016]}
+  merge: {d: later, how: "Joining two items needs care about which rate wins; for now archive one.", e: [judge]}
+  saved_view: {d: no, how: "Standard columns suffice for a short list.", e: ["judge"]}
+  columns: {d: no, how: "Fixed columns: name, SAC, unit, rate, tax rate, times used.", e: [wide:D022]}
+  bulk: {d: no, how: "Bulk rate changes are rare; import can update many rows by name.", e: [wide:D024]}
+  export: {d: no, how: "The full firm export carries items.", e: ["judge"]}
+  tag: {d: no, how: "No tags; search by name and SAC.", e: ["judge"]}
+  comment: {d: no, how: "The description field is the only text; no timeline notes on an item.", e: [judge]}
+  attach: {d: later, how: "Files wait for the file feature.", e: ["judge"]}
+  custom_fields: {d: later, how: "Fixed fields cover launch.", e: ["judge"]}
+  api: {d: later, how: "Item read and write come with the API.", e: [judge]}
+  webhook: {d: later, how: "Item events come with the API.", e: [judge]}
+answers:
+  identity: {a: "The name is unique per firm, ignoring upper and lower case. A second item with the same name is refused and the form offers the existing one.", e: [wide:D016]}
+  snapshot: {a: "Picking an item copies name, SAC, unit, rate, tax rate and description into the line. Later catalogue edits never change drafts or issued invoices.", e: [wide:D016]}
+  remove: {a: "Any document line that used it blocks delete, with the number of documents named. Archive hides it from the picker only.", e: [wide:D026]}
+  owner: {a: "The firm owns it. Owner and accountant create and edit items. Staff may use them and create one from a line. Viewer reads.", e: [wide:D018, wide:W075]}
+  contacts: {a: "One SAC, one unit and one rate per item. Different rates per customer are later.", e: [wide:D023]}
+  code: {a: "No separate item code. The unique name is what people search, and the SAC is the tax code, kept as text so leading zeros stay.", e: ["judge"]}
+  inactive: {a: "Archived items leave the picker and stay on old documents. They can be brought back. Drafts already holding the values are untouched.", e: [wide:D026]}
+tracks:
+  lifecycle:
+    states: [{id: active, start: true}, {id: archived}]
+    moves:
+      - {do: put_away, from: active, to: archived, who: [owner, accountant], effect: "hidden from the picker; old documents unchanged", reverse: "bring_back", notify: none, e: ["judge"]}
+      - {do: bring_back, from: archived, to: active, who: [owner, accountant], guard: "no active item has the same name", effect: "returns to the picker", reverse: "put_away", notify: none, e: ["judge"]}
+fields:
+  - {id: name, type: text, required: true, limit: 120, edit: "owner and accountant", msg: "Enter a service name up to 120 letters. This name is already used by another item."}
+  - {id: sac, type: text, required: true, limit: 8, edit: "owner and accountant", msg: "Not a valid SAC. Use 4, 6 or 8 digits from the official list; search by words to find one."}
+  - {id: unit, type: choice, required: true, default: nos, edit: "owner and accountant", msg: "Choose a unit: hours, days, months, nos, sessions, or add one up to 20 characters."}
+  - {id: rate, type: money, required: true, limit: 9999999.99, edit: "owner and accountant", msg: "Rate is 0 to 99,99,999.99 with 2 decimals."}
+  - {id: needs_review, type: choice, required: true, default: no, edit: "system sets yes when staff create it; owner or accountant clears it", msg: "An owner or accountant must approve a service that staff created."}
+  - {id: tax_rate, type: choice, required: true, default: "18", edit: "owner and accountant", msg: "Choose 0, 0.25, 3, 5, 18 or 40 percent. A rate that differs from the SAC's standard rate shows a warning."}
+  - {id: tax_nature, type: choice, required: true, default: taxable, edit: "owner and accountant", msg: "Choose taxable, nil-rated, exempt, non-GST or zero-rated."}
+  - {id: description, type: long_text, required: false, limit: 200, edit: "owner and accountant", msg: "The description is up to 200 characters."}
+  - {id: times_used, type: number, required: false, limit: 1000000, edit: "nobody", auto: true}
+  - {id: last_used, type: date, required: false, edit: "nobody", auto: true}
+fields_e: [wide:D016, wide:A112]
+list:
+  search: [name, sac]
+  filters: [lifecycle, tax_rate, unit]
+  sorts: [name, -times_used, rate]
+  default_sort: name
+  columns: [name, sac, unit, rate, tax_rate, times_used]
+  import: {match: "item name", errors: "the dry run lists rows to create, update and skip; rows with a bad SAC or rate download as an error file", limit: "5 MB, 5,000 rows, UTF-8 or Windows-1252"}
+  page: 50
+  e: [wide:D017, wide:D025]
+volume: {y1: 40000, y3: 400000}
+queries:
+  - {id: by_name, filters: [lifecycle], sort: [name], index: [tenant, lifecycle, name], p95: 100 ms}
+  - {id: by_tax_rate, filters: [lifecycle, tax_rate], sort: [name], index: [tenant, lifecycle, tax_rate, name], p95: 100 ms}
+  - {id: by_unit, filters: [lifecycle, unit], sort: [name], index: [tenant, lifecycle, unit, name], p95: 100 ms}
+  - {id: most_used, filters: [lifecycle], sort: [-times_used], index: [tenant, lifecycle, times_used], p95: 100 ms}
+  - {id: by_rate, filters: [lifecycle], sort: [rate], index: [tenant, lifecycle, rate], p95: 100 ms}

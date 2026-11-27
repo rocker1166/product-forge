@@ -1,0 +1,51 @@
+id: lut
+name: LUT
+module: tax
+kinds: [setting]
+why: the Letter of Undertaking that lets a firm issue export invoices without paying IGST; its number is read and printed on every such invoice
+links:
+  - {to: invoice, on_delete: "blocked once any invoice used it; it expires instead and invoices keep the printed LUT number"}
+  - {to: firm, on_delete: "belongs to the firm; if the firm is deleted it goes with it after the legal keep period"}
+abilities:
+  create: {d: now, how: "Owner or accountant adds the LUT with number, ARN and valid dates. An export under LUT is refused until a LUT covers the invoice date.", e: [wide:A059, wide:A084]}
+  edit: {d: now, how: "Only the owner edits. Once any invoice used it, number and ARN lock; the end date can only be extended.", e: ["judge"]}
+  delete: {d: now, how: "Only while no invoice used it; otherwise it can only expire.", e: ["judge"]}
+  archive: {d: no, how: "An expired LUT stays listed as expired; there is nothing to hide.", e: ["judge"]}
+  restore: {d: no, how: "An expired LUT is not revived; a new one is added for the next period.", e: ["judge"]}
+  duplicate: {d: now, how: "Renew copies the last LUT into the next financial year with new dates and a blank number and ARN, which must be typed.", e: ["judge"]}
+  attach: {d: no, how: "Only number, ARN and dates are kept; the filed form is not stored.", e: ["judge"]}
+  remind: {d: now, how: "A banner and an email warn 30 days before the end date and again when it ends.", e: [judge]}
+  api: {d: later, how: "No outside software reads LUTs.", e: [judge]}
+  webhook: {d: later, how: "LUT events come with the API.", e: [judge]}
+answers:
+  scope: {a: "One LUT per firm per financial year, with number, valid from, valid to and ARN. Wave 1 has one GSTIN; several are room.", e: [wide:A059, wide:A057]}
+  used: {a: "An export invoice under LUT reads the LUT covering its date, copies the number onto the invoice and prints it. The invoice shows exactly the wording of Rule 46 for export under bond or letter of undertaking without payment of integrated tax, with zero tax on every line.", e: [wide:A082, wide:A059]}
+  default: {a: "The LUT whose dates cover the invoice date is used. If none covers it, the export is refused with the reason and the invoice can still be issued as an export with IGST.", e: [wide:A084, wide:A083]}
+  effective: {a: "From valid-from to valid-to by invoice date. An invoice dated before the valid-from date, or after the end, cannot use it.", e: ["judge"]}
+  order: {a: "Newest financial year first.", e: ["judge"]}
+  who: {a: "Owner and accountant add one. Only the owner edits or deletes it. Staff and viewer read the number only.", e: [wide:A059, wide:W075]}
+  limit: {a: "One valid LUT per firm per financial year at a time; the number is up to 40 characters.", e: [wide:A059]}
+tracks:
+  lifecycle:
+    states: [{id: valid, start: true}, {id: expired, end: true}]
+    moves:
+      - {do: warn_expiry, from: valid, to: valid, who: [system], guard: "30 days before the valid-to date, once", effect: "banner on the firm home and on export invoices", reverse: "none: it is only a notice", notify: [lut_expiring], e: [wide:A084]}
+      - {do: expire, from: valid, to: expired, who: [system], guard: "the valid-to date has passed in IST", effect: "export invoices without tax are refused from the next day", reverse: "none: add a new LUT", notify: [lut_expired], e: [wide:A084]}
+      - {do: withdraw, from: valid, to: expired, who: [owner], guard: "reason written; the LUT was cancelled or is wrong", effect: "same as expiry; invoices already issued keep their printed number", reverse: "none: add a new LUT", notify: none, e: ["judge"]}
+fields:
+  - {id: number, type: text, required: true, limit: 40, edit: "owner; locked once an invoice used it", msg: "Enter the LUT number, up to 40 characters."}
+  - {id: arn, type: text, required: true, limit: 40, edit: "owner; locked once an invoice used it", msg: "Enter the ARN from the filed application."}
+  - {id: fy, type: text, required: true, limit: 5, edit: "nobody", auto: true}
+  - {id: valid_from, type: date, required: true, edit: "owner; locked once an invoice used it", msg: "Choose the date the LUT starts."}
+  - {id: valid_to, type: date, required: true, edit: "owner; only later once an invoice used it", msg: "The end date must be after the start date and not later than 31 March of that financial year."}
+fields_e: [wide:A059, wide:A084]
+list:
+  sorts: [-valid_to]
+  default_sort: -valid_to
+  columns: [fy, number, valid_from, valid_to, lifecycle]
+  page: 25
+  e: ["judge"]
+volume: {y1: 600, y3: 6000}
+queries:
+  - {id: newest, filters: [lifecycle], sort: [-valid_to], index: [tenant, lifecycle, valid_to], p95: 50 ms}
+  - {id: covering, filters: [], sort: [-valid_to], index: [tenant, valid_to], p95: 50 ms}

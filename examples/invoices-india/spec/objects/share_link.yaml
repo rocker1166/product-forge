@@ -1,0 +1,62 @@
+id: share_link
+name: Share Link
+module: comms
+kinds: [connection]
+why: the private web page where a customer reads one invoice, quote or credit note, pays by UPI and downloads the PDF without a login
+links:
+  - {to: invoice, on_delete: "invoices are never removed once issued; the link stays and says voided"}
+  - {to: quote, on_delete: "a quote link stays and shows its final state"}
+  - {to: credit_note, on_delete: "credit notes are never removed once issued; the link stays"}
+  - {to: message, on_delete: "mail rows are history; the link they carried keeps its own state"}
+refs: []
+abilities:
+  create: {d: now, how: "Made on first send of an issued invoice, credit note or sent quote, and by Copy link or Send on WhatsApp; owner, accountant and staff may make one. A document has one active link at a time.", e: [wide:W044, wide:D379]}
+  edit: {d: now, how: "Only the expiry day can change, 1 to 365 days from today, by owner or accountant. The token never changes.", e: [wide:W044, mk-043]}
+  view: {d: now, how: "Facts first: document, state, expiry, first and last time opened and the count; owner, accountant and staff also see the link text, a viewer does not.", e: [wide:D341]}
+  search: {d: no, how: "Found from its document, never searched on its own.", e: ["judge"]}
+  filter: {d: no, how: "The only filter people ask for is opened-or-not, and that lives on the invoice list.", e: [wide:B006]}
+  delete: {d: no, how: "A link is never deleted; revoke stops it and keeps the view times for the history.", e: ["judge"]}
+  restore: {d: no, how: "A revoked link never returns; a new link with a new token is made instead.", e: ["judge"]}
+  reverse: {d: no, how: "A page already seen cannot be unseen; revoke stops new visits.", e: ["judge"]}
+  preview: {d: now, how: "Owner sees the page as the customer will, signed in, and a visit by a signed-in member of the firm is not counted as opened.", e: [wide:B011, wide:D341]}
+  remind: {d: no, how: "Sending or reminding renews an expired link by itself, so no expiry warning is needed.", e: [judge]}
+  history: {d: now, how: "Made, renewed, revoked and expired with who and when; opens are kept as first time, last time and a count only.", e: [wide:D341]}
+  link_related: {d: now, how: "Beside a link: its document, its customer and the mail rows that carried it.", e: ["judge"]}
+  notify: {d: later, how: "An alert when a customer first opens it waits; the times show on the invoice now.", e: [wide:B006]}
+  api: {d: later, how: "Creating links by API waits with the API.", e: ["judge"]}
+  webhook: {d: later, how: "Opened and revoked events for other software wait with the API.", e: ["judge"]}
+answers:
+  secret: {a: "A random token of at least 128 bits, with no customer name, number or amount in the address; the page is not indexed and not cached by shared proxies. A link used with another firm's records returns 404 as any wrong token does.", e: [wide:W044, wide:W077, mk-043]}
+  scope: {a: "One document, read-only. The page shows balance due, a Pay with UPI button, a QR on desktop only while a balance is due, and the PDF; never the customer's other invoices and never internal notes. The customer's other documents, statement and quote answers live on the password-protected client page (customer track portal), not on a document link.", e: [judge]}
+  health: {a: "State is active, expired or revoked. A voided document shows 'This invoice was cancelled' with number and date only; a paid one says paid; a PDF not ready shows 'preparing' and retries by itself.", e: [judge]}
+  direction: {a: "Out. The one way in is the I have paid button, which writes a claim marked Pending check on the payment; the owner or accountant confirms it. The page never marks anything paid.", e: [judge]}
+  retry: {a: "Nothing is sent from here. A PDF that fails to render keeps the invoice issued and the page shows 'preparing' while the job retries.", e: [judge]}
+  gone: {a: "Deactivating a user keeps their links working, because they belong to the firm. A read-only or cancelled firm keeps them for at least 8 years. After firm deletion the page says it is no longer available.", e: ["judge"]}
+  limits: {a: "No plan limit on links. Page requests are throttled per address to stop token guessing, and a wrong token looks exactly like a missing page.", e: [judge]}
+  test: {a: "There is no sandbox. The owner previews the page signed in, which is never counted as a customer visit; test mail goes to the owner's own address.", e: ["judge"]}
+  card: {a: "A link shared on WhatsApp previews as a title card with firm name, amount and due date, not a bare address, and the card holds no more than the page does.", e: [wide:C022]}
+tracks:
+  connection:
+    states: [{id: active, start: true}, {id: expired}, {id: revoked, end: true}]
+    moves:
+      - {do: view, from: active, to: active, who: [client], guard: "a visit by someone not signed in to this firm", effect: "first and last viewed time set and count goes up; the message row gets the opened flag", reverse: "none: a visit cannot be undone", notify: none, e: [judge]}
+      - {do: extend, from: active, to: active, who: [owner, accountant], guard: "new day is 1 to 365 days from today. an owner may also set never on a paid or void document", effect: "expiry day changes", reverse: "extend again with another day", notify: none, e: [wide:W044, mk-043, "walk:F032"]}
+      - {do: expire, from: active, to: expired, who: [system], guard: "expiry day has passed in IST", effect: "page says the link has expired and gives the firm's contact", reverse: "renew", notify: none, e: ["judge"]}
+      - {do: renew, from: expired, to: active, who: [owner, accountant, system, client], guard: "system renews it when a send or reminder carries the link. or the client asks for a fresh link on the expired page for any document, paid or not; the mail goes only to the address on file", effect: "same token, new expiry 30 days out unless another day is chosen", reverse: "expire", notify: none, e: [judge, "walk:F032"]}
+      - {do: revoke, from: [active, expired], to: revoked, who: [owner, accountant, staff], guard: "none", effect: "page says the sender withdrew the link, nothing about the document", reverse: "none: make a new link with a new token", notify: [link_revoked], e: ["judge"]}
+      - {do: report_problem, from: active, to: active, who: [client], guard: "a reason is chosen from wrong GSTIN, wrong amount, not ours or already paid; a text of up to 300 letters", effect: "a comment is written for owner and accountant, owners are emailed, reminders on that invoice stop for 7 days and the invoice shows In dispute", reverse: "none: the owner clears In dispute when settled", notify: [client_reports_problem], e: ["walk:F028"]}
+fields:
+  - {id: token, type: text, required: true, limit: 43, edit: "nobody", auto: true}
+  - {id: document, type: link, required: true, edit: "nobody", auto: true}
+  - {id: document_type, type: choice, required: true, edit: "nobody", auto: true}
+  - {id: expires_at, type: date, required: true, default: "today plus 30 days", edit: "owner and accountant, while active or expired", msg: "Choose a day between 1 and 365 days from today."}
+  - {id: first_viewed_at, type: date, required: false, edit: "nobody", auto: true}
+  - {id: last_viewed_at, type: date, required: false, edit: "nobody", auto: true}
+  - {id: view_count, type: number, required: true, limit: 1000000, default: 0, edit: "nobody", auto: true}
+  - {id: revoked_reason, type: text, required: false, limit: 200, edit: "who revokes it, at that moment", msg: "The reason is longer than 200 letters."}
+fields_e: [wide:W044, wide:D341, wide:A193]
+volume: {y1: 9000, y3: 70000}
+queries:
+  - {id: by_token, filters: [token], sort: [], no_index: "looked up by the token alone through its unique index; the firm is read from the row, so tenant cannot lead", p95: 20 ms}
+  - {id: of_document, filters: [document], sort: [-created_at], index: [tenant, document, created_at], p95: 100 ms}
+  - {id: to_expire, filters: [connection], sort: [expires_at], index: [tenant, connection, expires_at], p95: 100 ms}

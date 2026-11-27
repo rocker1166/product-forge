@@ -1,0 +1,73 @@
+id: template
+name: Template
+module: comms
+kinds: [content]
+why: the look and wording of invoices, credit notes, receipts, quotes and their emails, with the firm's logo, colour, footer and terms
+links:
+  - {to: firm, on_delete: "templates go with the firm only after the 8 year book-keeping period"}
+  - {to: invoice, on_delete: "issued documents keep the template version they were printed with"}
+  - {to: message, on_delete: "mail rows keep the template version they were built from"}
+refs: []
+abilities:
+  create: {d: now, how: "Every firm starts with the product's default for each document and email type; the owner makes a custom one by editing it. There is no blank template.", e: [wide:B043, wide:B042]}
+  edit: {d: now, how: "Owner only. Logo, colour, footer, terms, signature, labels and email words change; the legal block (GSTIN, tax split, HSN or SAC, IRN and QR, document title) is locked. Saving makes a new version for new documents only.", e: [wide:B042, wide:D141]}
+  draft: {d: now, how: "Changes stay in the editor with a live preview until Save; a template with a missing or unknown field cannot be saved and the field is named.", e: [judge]}
+  view: {d: now, how: "Editor beside a live preview that uses a sample invoice; the list shows type, style, version and last saved.", e: ["judge"]}
+  search: {d: no, how: "A firm has about a dozen templates on one settings page, grouped by document type.", e: ["judge"]}
+  filter: {d: no, how: "Nothing to narrow on a dozen rows.", e: ["judge"]}
+  sort: {d: no, how: "Fixed order: documents, then emails.", e: ["judge"]}
+  bulk: {d: no, how: "Each template is edited alone because its words differ.", e: ["judge"]}
+  import: {d: no, how: "Templates are not imported; only a logo and signature picture are uploaded.", e: ["judge"]}
+  export: {d: later, how: "Templates leave only inside the full-firm export; copying them between firms is later.", e: ["judge"]}
+  delete: {d: no, how: "A template used by any issued document is never deleted; reset puts the default back instead.", e: ["judge"]}
+  archive: {d: no, how: "Reset replaces archive; old versions stay readable.", e: ["judge"]}
+  restore: {d: now, how: "Open an older version and save it as the newest version; documents already issued are not touched.", e: [judge]}
+  duplicate: {d: later, how: "Copying wording from one type to another waits; one template per document type for now.", e: ["judge"]}
+  version: {d: now, how: "Every Save keeps a numbered version; the number is stored with each PDF and mail made from it, and two versions can be compared.", e: [judge]}
+  share_link: {d: no, how: "Preview exists only inside the signed-in app; no outsider sees a template.", e: ["judge"]}
+  preview: {d: now, how: "Live preview with a sample invoice, in desktop and phone widths, using no invoice number; email templates preview with sample names and amounts.", e: [wide:D141, wide:B011, wide:B045]}
+  approve: {d: no, how: "The owner is the only editor, so there is no review step.", e: ["judge"]}
+  comment: {d: no, how: "Wording changes are explained in the history, not in comments.", e: ["judge"]}
+  attach: {d: now, how: "Logo and signature, PNG or JPG up to 1 MB and 2000 pixels wide; others are refused with those limits stated.", e: [judge]}
+  schedule: {d: no, how: "A saved template applies to the next document at once; there is no timed switch.", e: ["judge"]}
+  history: {d: now, how: "Who saved which version and when, and every reset.", e: ["judge"]}
+  custom_fields: {d: no, how: "Merge tags are the product's fixed list: customer name, number, amount due, due date, link.", e: [wide:B045]}
+  link_related: {d: now, how: "Beside a template: the number of documents and mails that used each version.", e: ["judge"]}
+  notify: {d: no, how: "Only the owner edits, so nobody else needs telling.", e: ["judge"]}
+  api: {d: later, how: "Reading templates by API waits with the API.", e: ["judge"]}
+  webhook: {d: later, how: "Template events for other software wait with the API.", e: ["judge"]}
+answers:
+  states: {a: "Default is the product's copy and custom is the firm's edited copy. There is no draft or published split: Save applies to the next document. Only the owner saves; accountants, staff and viewers read.", e: ["judge"]}
+  address: {a: "A template has no address. It is named by document type and version, for example invoice v3, and old versions stay readable by the documents that used them.", e: ["judge"]}
+  search: {a: "Engines see nothing, because documents sit behind noindex links. A WhatsApp card shows firm name, amount and due date.", e: [judge]}
+  language: {a: "Template words are English in wave 1. Customer names and notes print in Indian scripts with the rupee sign. Amount in words follows the lakh and crore system and is our choice, not law.", e: [wide:A218, wide:A217]}
+  author: {a: "No byline. The firm's legal name and address print as the supplier; the editor is recorded in history only.", e: [judge]}
+  media: {a: "Logo and signature are PNG or JPG, 1 MB, 2000 pixels wide, stored under the firm's folder. The PDF embeds them at issue; email uses a stable public address per version so old mail never shows a broken logo.", e: [judge]}
+  live: {a: "Editing changes a working copy until Save. A document being issued at that moment uses the version it read at issue, and that number is stored with its PDF and hash.", e: [judge]}
+  gone: {a: "A template is never deleted. After a reset the custom versions stay readable, issued PDFs stay as they were, and mail already sent is not changed.", e: [judge]}
+  titles: {a: "The title is chosen by the firm's tax scheme and cannot be edited: a firm with no GST registration prints a plain Invoice with no tax lines; Tax Invoice for a registered firm; Bill of Supply only for a registered composition firm or exempt supplies, with its GSTIN. When a firm registers, documents from the effective date use the tax invoice title and older ones stay plain.", e: [wide:W032, wide:A132]}
+  legal_wording: {a: "Export wording is locked text: under LUT it prints SUPPLY MEANT FOR EXPORT UNDER BOND OR LETTER OF UNDERTAKING WITHOUT PAYMENT OF INTEGRATED TAX with the recipient address, country of destination and the LUT number; an export with tax ends ON PAYMENT OF INTEGRATED TAX. A custom template cannot move or reword it.", e: [wide:A082, wide:A083]}
+tracks:
+  publish:
+    states: [{id: default, start: true}, {id: custom}]
+    moves:
+      - {do: customise, from: default, to: custom, who: [owner], guard: "all merge tags exist and the locked legal block is unchanged", effect: "version 2 is saved; new documents use it", reverse: "reset", notify: none, e: ["judge"]}
+      - {do: save_version, from: custom, to: custom, who: [owner], guard: "all merge tags exist and the locked legal block is unchanged", effect: "next version number saved; documents issued after it use it", reverse: "restore an older version and save it", notify: none, e: [judge]}
+      - {do: reset, from: custom, to: default, who: [owner], guard: "none", effect: "the product default applies to new documents; custom versions stay readable", reverse: "customise again from the kept version", notify: none, e: ["judge"]}
+      - {do: refresh_default, from: default, to: default, who: [system], guard: "a law or layout change by the product", effect: "new default version for new documents only; a custom template shows a banner when the legal block changed", reverse: "none: issued documents keep their version", notify: none, e: [judge]}
+fields:
+  - {id: doc_type, type: choice, required: true, edit: "nobody", auto: true}
+  - {id: style, type: choice, required: true, default: standard, edit: "owner", msg: "Choose plain, standard or modern."}
+  - {id: accent_colour, type: text, required: false, limit: 7, edit: "owner", msg: "Use a colour like #1A5FB4."}
+  - {id: footer, type: long_text, required: false, limit: 300, edit: "owner", msg: "The footer is longer than 300 letters."}
+  - {id: terms, type: long_text, required: false, limit: 1000, edit: "owner; a different text per document type", msg: "Terms are longer than 1,000 letters."}
+  - {id: logo, type: file, required: false, limit: "1 MB, 2000 px wide, PNG or JPG", edit: "owner", msg: "Use a PNG or JPG up to 1 MB and 2000 pixels wide."}
+  - {id: signature, type: file, required: false, limit: "1 MB, 2000 px wide, PNG or JPG", edit: "owner", msg: "Use a PNG or JPG up to 1 MB and 2000 pixels wide."}
+  - {id: subject, type: text, required: false, limit: 250, edit: "owner, email templates only", msg: "The subject uses a tag we do not know; remove it or pick one from the list."}
+  - {id: body, type: long_text, required: false, limit: 5000, edit: "owner, email templates only", msg: "The email uses a tag we do not know; remove it or pick one from the list."}
+  - {id: version, type: number, required: true, limit: 9999, default: 1, edit: "nobody", auto: true}
+fields_e: [wide:D141, wide:D146, wide:B045, mk-021]
+volume: {y1: 3000, y3: 20000}
+queries:
+  - {id: by_type, filters: [doc_type], sort: [-version], index: [tenant, doc_type, version], p95: 50 ms}
+  - {id: of_firm, filters: [], sort: [doc_type], index: [tenant, doc_type], p95: 50 ms}

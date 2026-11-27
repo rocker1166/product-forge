@@ -1,0 +1,100 @@
+id: einvoice
+name: E-invoice Record
+module: tax
+kinds: [document, connection]
+why: "the portal side of one invoice or credit note: IRN, acknowledgement, signed QR and every attempt, behind one provider adapter"
+links:
+  - {to: invoice, on_delete: "the record stays for good; voiding the invoice before any IRN closes it as cancelled"}
+  - {to: credit_note, on_delete: "the record stays for good; voiding the credit note before any IRN closes it as cancelled"}
+abilities:
+  create: {d: now, how: "Made by the system at issue when the firm is flagged and the supply qualifies; a person only presses Generate, Retry or Cancel IRN on the invoice or credit note.", e: ["judge"]}
+  edit: {d: no, how: "Nobody edits it: IRN, acknowledgement and signed QR come from the portal and are written once; a change is a new attempt row.", e: ["judge"]}
+  draft: {d: no, how: "A record exists from issue; there is no half-made record.", e: ["judge"]}
+  delete: {d: no, how: "Never deleted; attempts are the evidence.", e: ["judge"]}
+  archive: {d: no, how: "Cancelled records stay in the list; filters hide them.", e: [judge]}
+  restore: {d: no, how: "Nothing is archived or removed.", e: [judge]}
+  duplicate: {d: no, how: "A copy would copy an IRN; a new document gets its own record.", e: ["judge"]}
+  reverse: {d: now, how: "Cancel IRN with a coded reason, only within 24 hours of generation, only if not in a filed return and no payment or credit note counts against the invoice; after that the answer is a credit note.", e: ["wide:A106", "wide:A147"]}
+  import: {d: no, how: "Opening-balance invoices are migrated and are not e-invoiced; no IRN is imported.", e: ["judge"]}
+  version: {d: no, how: "Each attempt is its own row; the portal's signed answer is never altered.", e: ["judge"]}
+  print_pdf: {d: no, how: "The IRN, acknowledgement and signed QR print on the invoice or credit note PDF, a new PDF version, not a separate file.", e: ["wide:A109"]}
+  share_link: {d: no, how: "Never shared; the customer sees the IRN on the document.", e: ["wide:A010"]}
+  preview: {d: now, how: "Shows the payload and the checks before sending: legal name 100, address line 100, city 3 to 50, item description 300 characters, place of supply, a later date warning.", e: ["wide:A110", "wide:B184", "wide:B187"]}
+  search: {d: now, how: "IRN, document number, customer name.", e: ["judge"]}
+  filter: {d: now, how: "E-invoice state, call state, money counted, days left in the 30-day window.", e: ["wide:D128", "wide:A229"]}
+  sort: {d: now, how: "Days left first, then newest; both ways.", e: ["judge"]}
+  bulk: {d: now, how: "Retry the selected failed or stuck records; each runs alone and the rest are listed with the reason.", e: ["judge"]}
+  assign: {d: later, how: "Owner and accountants all get alerts in wave 1.", e: ["judge"]}
+  tag: {d: no, how: "No free tags are offered in wave 1.", e: [judge]}
+  custom_fields: {d: no, how: "Fixed by the portal.", e: ["judge"]}
+  api: {d: later, how: "Portal records are not opened to other software in wave 1.", e: ["judge"]}
+  webhook: {d: later, how: "No portal events are sent out in wave 1; owners get email alerts.", e: ["judge"]}
+answers:
+  freeze: {a: "The record is append-only: every portal attempt is a row with time, request, answer and error; IRN, ack number, ack date and signed JSON and QR are written once and never edited.", e: ["wide:A109", "wide:A069"]}
+  number: {a: "No number of its own; identity is the IRN of 64 hex characters. The invoice or credit note number must start with a letter or digit 1 to 9, use letters, digits, slash and hyphen, and stay within 16 characters, or the portal rejects it.", e: ["wide:W045", "wide:A077"]}
+  fix: {a: "A wrong IRN is cancelled within 24 hours with a coded reason; later only a credit note. A refused record is retried; data inside the frozen invoice cannot be edited, so a document refused for its own data is voided and re-created.", e: ["wide:A106", "wide:A147", "wide:B191"]}
+  money: {a: "Sent exactly as stored: INR paise per line, the round-off line, and for foreign invoices the INR equivalents at the stored rate; the portal's total is never recomputed.", e: ["wide:A062", "wide:W030"]}
+  paid: {a: "Payment does not depend on the portal: a refused or pending record leaves the invoice payable. The payment track here only mirrors whether money counts, to stop an IRN cancel.", e: ["judge"]}
+  late: {a: "For turnover of Rs 10 crore or more the IRN must be reported within 30 days of the invoice date; a daily job lists records with 3 or fewer days left and later generation is blocked with the reason; creating it on a later date than the invoice date is warned.", e: ["wide:A105", "wide:A229", "wide:B184"]}
+  law: {a: "Applies when turnover crossed Rs 5 crore in any year since 2017-18; B2B, export, SEZ and deemed export only, never B2C; export and SEZ carry their supply type in the request; the IRN, ack number, ack date and signed QR print on the document.", e: ["wide:A104", "wide:A108", "wide:A086", "wide:A109"]}
+  send: {a: "Generation is a queued job, never inline: the invoice is issued and payable first. 5 automatic attempts, then a visible stuck state; Retry by hand any number of times.", e: ["wide:A239", "wide:W046"]}
+  secret: {a: "Provider keys are stored encrypted, never returned to the browser and never written in logs; rotating is by replacing, with no downtime because calls read the newest key.", e: ["wide:C192", "wide:C193"]}
+  scope: {a: "Only what is needed: generate an IRN, cancel an IRN, and fetch an IRN by document details. Nothing else is asked of the provider.", e: ["wide:W045", "wide:A153"]}
+  health: {a: "Each record shows its call state and attempt count on the invoice; owners get an alert on each refusal and when attempts end, and the list filters failed and stuck.", e: ["wide:A215", "wide:A239"]}
+  direction: {a: "Out go our document data; in come IRN, ack and QR. If the portal says the IRN is a duplicate we compare the document number, date, value and buyer GSTIN in the answer with the stored invoice; only when all match do we store the IRN and mark it generated, and any difference marks it failed with the reason, because a number reused after a restore must never print another document's QR.", e: ["wide:A154", "wide:A153", "walk:X021"]}
+  retry: {a: "After a timeout we first ask the portal by document details and reuse any IRN found, before any new call; then 5 automatic attempts with growing pauses; then stuck; manual retry has no limit.", e: ["wide:A153", "wide:A239", "wide:W046"]}
+  gone: {a: "If the provider sign-in is revoked calls stop with a plain message, invoices stay issued and payable, owners are alerted and the 30-day warnings continue.", e: ["wide:A215", "wide:W046"]}
+  limits: {a: "Field limits are checked when the invoice is saved so a bad length never reaches the portal; the provider's own rate limit is handled by the queue.", e: ["judge"]}
+  test: {a: "One provider adapter. A fake adapter with modes succeed, fail and fail 1 in 5 serves tests and the sandbox; its records are marked Test and its IRNs never print on a PDF. The real flag and threshold stay on.", e: ["wide:W045", "wide:A104"]}
+tracks:
+  document:
+    states: [{id: none, start: true}, {id: generated}, {id: failed}, {id: cancelled, end: true}]
+    moves:
+      - {do: portal_ok, from: [none, failed], to: generated, who: [system], guard: "portal returned an IRN or says it already exists", effect: "IRN, ack number, ack date and signed QR stored; PDF version added", reverse: "cancel_irn", notify: none, e: ["wide:A109", "wide:A154"]}
+      - {do: portal_refused, from: [none, failed], to: failed, who: [system], guard: "portal refused or 5 automatic tries ended", effect: "code and message shown on the document, invoice stays payable", reverse: "retry from the call track", notify: [einvoice_failed_alert], e: ["wide:W046", "wide:A215"]}
+      - {do: cancel_irn, from: generated, to: cancelled, who: [owner, accountant], guard: "within 24 hours, no counted payment or credit note, coded reason", effect: "cancelled IRN is never reused; the document can only be voided", reverse: "none: a cancelled IRN cannot come back, make a new document", notify: none, e: ["wide:A106", "wide:A147", "walk:X020"]}
+      - {do: close_unused, from: [none, failed], to: cancelled, who: [system], guard: "the invoice or credit note was voided before any IRN", effect: "record closed, due-by warning stops", reverse: "none: the document is void", notify: none, e: ["wide:A147", "wide:W038"]}
+  payment:
+    states: [{id: no_money, start: true}, {id: money_counted}]
+    moves:
+      - {do: money_arrives, from: no_money, to: money_counted, who: [system], guard: "a payment, TDS, applied credit or write-off now counts on the invoice", effect: "Cancel IRN is disabled with the reason", reverse: "money_leaves", notify: none, e: ["wide:W037", "walk:X003"]}
+      - {do: money_leaves, from: money_counted, to: no_money, who: [system], guard: "nothing counts any more", effect: "Cancel IRN may be offered again if still within 24 hours", reverse: "money_arrives", notify: none, e: ["judge"]}
+  connection:
+    states: [{id: idle, start: true}, {id: calling}, {id: unknown}, {id: waiting_retry}, {id: stuck}]
+    moves:
+      - {do: call_portal, from: [idle, stuck], to: calling, who: [owner, accountant, system], guard: "the document is issued, the 30-day window is open, firm is flagged", effect: "queued call to the one provider adapter", reverse: "none: wait for the answer", notify: none, e: ["wide:W045", "wide:A239"]}
+      - {do: portal_answers, from: calling, to: idle, who: [system], guard: "the portal gave a yes or a no", effect: "the document track records which", reverse: "call_portal", notify: none, e: ["judge"]}
+      - {do: portal_times_out, from: calling, to: unknown, who: [system], guard: "no answer in time", effect: "no new call until the portal is asked by document details", reverse: "found_out", notify: none, e: ["wide:A153"]}
+      - {do: found_out, from: unknown, to: idle, who: [system], guard: "lookup by document details answered", effect: "IRN reused or confirmed missing", reverse: "call_portal", notify: none, e: ["wide:A153"]}
+      - {do: transient_fail, from: calling, to: waiting_retry, who: [system], guard: "network or provider error and fewer than 5 tries", effect: "pause grows, attempt count shown on the document", reverse: "auto_retry", notify: none, e: ["wide:A239"]}
+      - {do: auto_retry, from: waiting_retry, to: calling, who: [system], guard: "pause is over", effect: "next attempt", reverse: "none: the answer decides", notify: none, e: ["judge"]}
+      - {do: give_up, from: [waiting_retry, unknown], to: stuck, who: [system], guard: "5 tries used or the lookup also failed", effect: "owner-visible stuck state and an alert", reverse: "call_portal", notify: [einvoice_failed_alert], e: ["wide:A239", "wide:A215"]}
+fields:
+  - {id: document, type: link, required: true, edit: "nobody; set at creation to one invoice or one credit note", msg: "A record belongs to one invoice or credit note."}
+  - {id: irn, type: text, required: false, limit: 64, edit: "nobody; written by the portal answer", auto: true}
+  - {id: ack_no, type: text, required: false, limit: 20, edit: "nobody; written by the portal answer", auto: true}
+  - {id: ack_at, type: date, required: false, edit: "nobody; written by the portal answer", auto: true}
+  - {id: signed_qr, type: long_text, required: false, limit: 20000, edit: "nobody; written by the portal answer", auto: true}
+  - {id: supply_type, type: choice, required: true, edit: "nobody; copied from the document", auto: true}
+  - {id: due_by, type: date, required: false, edit: "nobody; invoice date plus 30 days", auto: true}
+  - {id: attempts, type: list, required: true, limit: 500, edit: "nobody; one row added per attempt", auto: true}
+  - {id: error_message, type: text, required: false, limit: 500, edit: "nobody; last portal message", auto: true}
+  - {id: cancel_reason, type: choice, required: false, edit: "owner or accountant when cancelling an IRN", msg: "Choose a coded reason; it is required to cancel."}
+  - {id: mode, type: choice, required: true, default: live, edit: "nobody; test for the fake adapter and sandbox", auto: true}
+fields_e: ["wide:A109", "wide:A105", "wide:A106", "wide:A153"]
+list:
+  search: [irn, document_number, customer]
+  filters: [document, payment, connection, due_by]
+  sorts: [due_by, created_at]
+  default_sort: due_by
+  columns: [document_number, customer, document, connection, attempts, due_by]
+  views: [All, Failed, Stuck, Due soon, Cancelled]
+  bulk: [retry]
+  bulk_fail: "Each record retries alone; the rest go through and failed ones are listed with the reason and a Retry."
+  export: {rows: [selected, filtered, date range], what: [e-invoice records, attempts], formats: [CSV], big: "Over 5,000 rows runs as an export job and the link comes by email and lives 7 days."}
+  page: 25
+  e: ["wide:D128", "wide:A229"]
+volume: {y1: 20000, y3: 300000}
+queries:
+  - {id: due_soon, filters: [document, payment, connection], sort: [due_by], index: [tenant, document, payment, connection, due_by], p95: 150 ms}
+  - {id: by_created, filters: [], sort: [created_at], index: [tenant, created_at], p95: 150 ms}

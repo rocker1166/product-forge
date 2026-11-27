@@ -1,0 +1,11 @@
+name: Invoices for Indian service firms
+idea: Invoices and payments for small Indian service firms.
+who: the owner of a service firm of 1 to 20 people (design, IT, legal, consulting, agencies, repair, coaching), who also does the billing
+job: send a correct GST invoice fast, get paid on time, and hand clean books to the accountant each month
+country: India first (GST, e-invoice, TDS, DPDP, UPI); exports of services in foreign currency
+money: monthly or yearly plan per firm, a free plan with a small limit, a trial
+tenants: true
+custom_objects: false
+must_never: [change an issued invoice, reuse or skip an invoice number, show one firm's data to another, lose a firm's books when it stops paying, send a wrong tax without saying so]
+size: L
+max_objects: 27 # owner added a client page and maybe time and expense billing (2026-11-27)

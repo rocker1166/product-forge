@@ -1,0 +1,22 @@
+# Flow rules from mature design systems (research/11). A map answers each: yes, or "no: why".
+A1: {"area":"Index","rule":"Page title is the resource name; one primary \"create\" button top right; no button if creation is impossible.","by":"reviewer","src":"POL patterns/resource-index-layout/variants/default.mdx"}
+A2: {"area":"Index","rule":"Filter, sort and multi-select actions sit above the list; saved views include a locked \"All\" view plus rename/duplicate/delete.","by":"reviewer","src":"same file (view tabs in the example code)"}
+A3: {"area":"Filters","rule":"Choose and state one mode: batch (\"Apply\") or live. Several filter categories are never hidden inside one menu.","by":"reviewer","src":"CAR /patterns/filtering/"}
+A4: {"area":"Search","rule":"Search input debounces about 250 ms; validation about 500 ms.","by":"script","src":"PJ saving-and-feedback"}
+A5: {"area":"Bulk","rule":"List has row checkboxes; selecting shows a bulk bar; selection survives paging; action asks for a reason where money moves.","by":"script","src":"CAR /components/data-table/usage/; Stripe bulk refund, docs.stripe.com/refunds"}
+A6: {"area":"Form","rule":"Required marks use \"(optional)\" text, never asterisks; every question page has a Back link; ask each fact once per journey.","by":"script","src":"GOV patterns/question-pages"}
+A7: {"area":"Form","rule":"Submit button is never disabled to signal invalid input; Cmd/Ctrl+Enter submits from any control.","by":"script","src":"PJ forms"}
+A8: {"area":"Validation","rule":"Error summary at top plus message at each field, summary links to the field; shown on submit, not on blur.","by":"script","src":"GOV components/error-summary, patterns/validation"}
+A9: {"area":"Validation","rule":"Contrast: PJ lets real-time validation run, GOV forbids on-blur validation. Pick one and write it down.","by":"reviewer","src":"PJ forms vs GOV patterns/validation"}
+A10: {"area":"Error text","rule":"One sentence, says what is wrong and the next step, no blame; removed when input becomes valid.","by":"reviewer","src":"POL components/selection-and-input/inline-error.mdx"}
+A11: {"area":"Save","rule":"Unsaved changes trigger a save/discard bar with text \"Unsaved changes\" and verb-only buttons (Save, Discard). One form per page.","by":"script","src":"POL components/internal-only/contextual-save-bar.mdx"}
+A12: {"area":"Save","rule":"Auto-save shows inline \"Saving…\" then \"Change saved\", fires on blur or 3 s after last key, and a failed save keeps an alert with retry until success. Never auto-save a whole multi-field form.","by":"script","src":"PJ saving-and-feedback"}
+A13: {"area":"Leave","rule":"Leaving with unsaved changes warns.","by":"script","src":"PJ saving-and-feedback (\"safety measure\")"}
+A14: {"area":"Destructive","rule":"Hard-to-undo delete uses a modal with a danger-styled confirm button and a cancel that names what is kept; deleting a container with children requires typing its name.","by":"script","src":"PJ destructive-actions"}
+A15: {"area":"Undo","rule":"If an action is reversible, offer undo (Linear: Cmd/Ctrl+Z on moves) and state what undo does not restore.","by":"reviewer","src":"linear.app/docs/select-issues"}
+A16: {"area":"Empty","rule":"Empty state has one primary action, an action-oriented title (about 5 words, no period), a positive tone, and analytics on its views.","by":"script","src":"POL components/layout-and-structure/empty-state.mdx; PJ empty-states; CAR /patterns/empty-states-pattern/"}
+A17: {"area":"Empty","rule":"\"No results\" state differs from \"nothing yet\" and from \"system error\"; no-results explains how to adjust search or filters.","by":"reviewer","src":"CAR empty-states-pattern"}
+A18: {"area":"Loading","rule":"Skeletons only on containers and data components, only for seconds; spinner for whole-page processing; more than a few seconds uses a progress bar.","by":"script","src":"CAR /patterns/loading-pattern/"}
+A22: {"area":"Done","rule":"End of a transaction has a confirmation page with reference, next step, and a URL the user can reopen.","by":"reviewer","src":"GOV patterns/confirmation-pages"}
+A23: {"area":"Review","rule":"Multi-step flows end with a check-answers page with a \"Change\" link per section; Continue returns to it.","by":"script","src":"GOV patterns/check-answers"}
+A25: {"area":"Denied","rule":"\"Not eligible / not allowed\" is a page with next steps, not a validation error.","by":"reviewer","src":"GOV patterns/validation"}

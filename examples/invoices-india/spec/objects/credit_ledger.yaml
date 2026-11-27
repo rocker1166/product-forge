@@ -1,0 +1,67 @@
+id: credit_ledger
+name: Customer Credit
+module: collections
+kinds: [money]
+why: the account of credit a customer holds with the firm, from credit notes, that can be applied to invoices or refunded
+links:
+  - {to: customer, on_delete: "a customer with a credit account cannot be deleted; archive instead"}
+  - {to: credit_note, on_delete: "a credit note whose credit was applied or refunded cannot be voided"}
+  - {to: refund, on_delete: "never removed; a reversed refund puts the amount back as a new row"}
+  - {to: invoice, on_delete: "never removed; an applied row keeps pointing at its invoice"}
+refs: []
+abilities:
+  create: {d: now, how: "Made by the system when a credit note's excess first lands on a customer. Credit is applied to an invoice by the owner or accountant from the invoice or from the customer's page.", e: ["wide:W066", "wide:W067"]}
+  view: {d: now, how: "Each credit in, amount applied, refund and balance after, newest first, each row linking to its document.", e: ["wide:D298"]}
+  search: {d: now, how: "Customer name and credit note number.", e: ["wide:B212"]}
+  edit: {d: no, how: "Rows are appended, never changed; a wrong application is unapplied.", e: ["judge"]}
+  reverse: {d: now, how: "Unapply credit from an invoice returns it to the account and restores the invoice balance, with who and why; a voided credit note takes its credit out only if none was used.", e: ["wide:D300", "wide:W069"]}
+  print_pdf: {d: no, how: "The customer statement and the credit note carry the figures; the account has no paper of its own.", e: ["judge"]}
+  comment: {d: no, how: "The reason on each row is the only note.", e: ["judge"]}
+  schedule: {d: no, how: "Credit is never applied by itself; a person chooses the invoice.", e: ["wide:W067"]}
+  notify: {d: no, how: "Nobody is told about credit rows; the credit note email and the refund alert cover it.", e: ["wide:D379"]}
+  api: {d: later, how: "Waits for the first public API.", e: ["judge"]}
+  webhook: {d: later, how: "Waits for the public API events.", e: ["judge"]}
+  export: {d: now, how: "CSV of every row with customer, kind, amount, balance after and linked document, for the accountant.", e: ["wide:B067"]}
+answers:
+  amount: {a: "Rupees in paise, one account per customer in the customer's currency. The balance is always the sum of the rows and is never below zero; the database refuses a row that would push it under.", e: ["wide:W066", "wide:B212"]}
+  settles: {a: "Credit in comes only from a credit note's excess over its invoice balance. It settles another issued invoice of the same customer, up to the smaller of the balance and that invoice's balance due, or leaves as a refund.", e: ["wide:W067", "wide:W066"]}
+  undo: {a: "Unapply returns the amount to the account and restores the invoice balance, with a reason. A credit note can be voided only if none of its credit was applied or refunded; otherwise the owner first unapplies or reverses the refund.", e: ["wide:D300", "wide:W069"]}
+  fail: {a: "Two people applying the same credit at once: the account row is locked, the second is refused with the new balance. An application larger than the balance is refused with the figure.", e: ["wide:D093"]}
+  fee: {a: "No fee; credit moves between the firm and one customer only.", e: ["judge"]}
+  dispute: {a: "A customer who disputes a credit sees the ledger on the statement; the owner corrects it by unapply or by a new credit note, never by editing a row.", e: ["wide:D298"]}
+  proof: {a: "The credit note is the legal paper; each application is printed on the credit note's page and on the target invoice. The ledger itself is not a tax document.", e: ["wide:W068"]}
+  match: {a: "The nightly integrity check compares every balance with the sum of its rows; the customer page shows unused credit apart from outstanding balance.", e: ["wide:A228", "wide:W011"]}
+tracks:
+  payment:
+    states: [{id: open, start: true}, {id: exhausted}, {id: owed}]
+    moves:
+      - {do: add_credit, from: [open, exhausted], to: open, who: [system], guard: "a credit note was issued and its excess over the invoice balance is above 0", effect: "a credit row written, balance goes up. the credit is the excess less the TDS recorded on the part credited (R29), and an on-account payment adds a row dated with its real receipt date", reverse: "withdraw when the credit note is voided and none of it was used", notify: none, e: ["wide:W066", "walk:X001", "walk:F004"]}
+      - {do: apply, from: open, to: open, who: [owner, accountant], guard: "target invoice is issued or part-paid and of the same customer; amount not above the balance and not above the invoice balance due; period not locked. the amount is not reserved for a refund", effect: "an applied row written, invoice balance and state recalculated", reverse: "unapply", notify: none, e: ["wide:W067", "wide:D298", "walk:X004"]}
+      - {do: unapply, from: [open, exhausted], to: open, who: [owner, accountant], guard: "reason written; period not locked", effect: "the amount returns to the balance, the invoice balance due is restored, who and why are logged", reverse: "apply again", notify: none, e: ["wide:D300"]}
+      - {do: withdraw, from: open, to: open, who: [system], guard: "the credit note was voided by an owner and none of its credit was applied or refunded", effect: "the credit row is reversed, balance goes down, never below zero", reverse: "none: issue a new credit note", notify: none, e: ["wide:W069"]}
+      - {do: use_up, from: open, to: exhausted, who: [system], guard: "balance is exactly 0 after an application, refund or withdrawal", effect: "account shows exhausted and leaves the apply picker", reverse: "add_credit or unapply brings it back", notify: none, e: ["wide:B212"]}
+      - {do: record_shortfall, from: open,exhausted, to: owed, who: [system], guard: "a payment was reversed or bounced after its credit was applied or refunded (R30)", effect: "a debit row is written; the customer page shows Customer owes Rs X and the owner is told", reverse: "none: the debit is cleared by the next credit or written off by an owner", notify: none, e: ["walk:X002"]}
+      - {do: clear_owed, from: owed, to: open, who: [system], guard: "new credit arrives that covers the debit, or the owner wrote it off", effect: "the debit row is set off; what is left is credit again", reverse: "none: a set-off cannot be undone; record the shortfall again by reversing the payment", notify: none, e: ["walk:X002"]}
+      - {do: write_off_owed, from: owed, to: open, who: [owner], guard: "reason of 5 to 200 letters", effect: "the debit is written off as a loss with the reason; history row", reverse: "none: record the amount again as a new debit by hand", notify: none, e: ["walk:X002"]}
+fields:
+  - {id: customer, type: link, required: true, edit: "nobody", auto: true}
+  - {id: currency, type: choice, required: true, default: INR, edit: "nobody", auto: true}
+  - {id: balance, type: money, required: true, limit: "0 to 10 crore", edit: "nobody", auto: true}
+  - {id: credited_total, type: money, required: true, limit: "0 to 10 crore", edit: "nobody", auto: true}
+  - {id: applied_total, type: money, required: true, limit: "0 to 10 crore", edit: "nobody", auto: true}
+  - {id: refunded_total, type: money, required: true, limit: "0 to 10 crore", edit: "nobody", auto: true}
+  - {id: rows, type: list, required: true, edit: "nobody", auto: true}
+  - {id: unapply_reason, type: text, required: false, limit: 200, edit: "nobody", msg: "Write a reason of 5 to 200 letters."}
+fields_e: ["wide:D298", "wide:W066"]
+list:
+  search: [customer, credit_note]
+  filters: [payment, customer]
+  sorts: [-last_activity, balance, customer]
+  default_sort: -last_activity
+  columns: [customer, balance, credited_total, applied_total, refunded_total, last_activity]
+  views: [All, With balance, Exhausted]
+  export: {rows: [filtered, all], what: [accounts, rows], formats: [CSV, XLSX], big: "over 1,000 rows comes by email; failure is emailed too"}
+  page: 50
+  e: ["wide:D298", "wide:B067"]
+volume: {y1: 600, y3: 4000}
+queries: []

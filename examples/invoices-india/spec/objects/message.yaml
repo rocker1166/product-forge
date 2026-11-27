@@ -1,0 +1,107 @@
+id: message
+name: Outbox Message
+module: comms
+kinds: [conversation]
+why: every email the product sends for a firm, kept with its body, attachment, provider answer and what happened to it
+links:
+  - {to: invoice, on_delete: "the row stays; it names the document number it carried"}
+  - {to: customer, on_delete: "customers with documents are archived, never removed, so the row stays readable"}
+  - {to: invite, on_delete: "the row stays; the invite may expire but the sent mail is history"}
+  - {to: share_link, on_delete: "the row stays; the link inside it is revoked or expired, never erased"}
+  - {to: template, on_delete: "the row keeps the template version it was built from"}
+refs: []
+abilities:
+  create: {d: now, how: "Made by a send action on an issued invoice, credit note, quote, receipt, reminder or invite, and by the daily reminder job; nobody writes a row by hand. Draft documents cannot be sent. Extra To, Cc and Bcc addresses on a send are for owners and accountants only, and each user has a daily send cap and each unverified firm a lower one (R63); the customer's accounts address is the default recipient (R61).", e: [wide:W086, wide:W088, "walk:X035", "walk:X029", "walk:F044"]}
+  edit: {d: no, how: "A queued or sent row is never edited. A wrong address is fixed on the customer and sent again as a new row.", e: ["judge"]}
+  draft: {d: no, how: "The send dialog is the draft; a row exists only once queued.", e: [wide:B010]}
+  view: {d: now, how: "A row opens the exact subject, body and attachment name that went out, with recipient, status, attempts, provider id and times.", e: [wide:D309]}
+  search: {d: now, how: "Recipient email, customer name, subject and document number.", e: ["judge"]}
+  filter: {d: now, how: "Status, type (invoice, reminder, receipt, credit note, quote, invite, alert), customer and date.", e: ["judge"]}
+  sort: {d: now, how: "Newest first; nothing else is needed on a list read by recency.", e: ["judge"]}
+  group: {d: no, how: "One flat list; groups would hide failed rows among sent ones.", e: ["judge"]}
+  saved_view: {d: later, how: "Built-in views (Failed, Bounced, Skipped, Reminders) come first; saved views wait until firms ask.", e: ["judge"]}
+  bulk: {d: now, how: "Retry many failed rows or cancel many queued reminders; the rows that cannot change stay selected with the reason.", e: [wide:W087, wide:B052]}
+  export: {d: later, how: "Rows leave only inside the full-firm export; a stand-alone outbox CSV waits for a request.", e: ["judge"]}
+  delete: {d: no, how: "Rows are never deleted; delivery records stay for the life of the document and at least 8 years.", e: ["judge"]}
+  restore: {d: no, how: "Nothing leaves the list, so nothing is restored; a bounced row stays and a corrected address makes a new row.", e: ["judge"]}
+  archive: {d: no, how: "Old rows stay in the list, found by date and filters.", e: ["judge"]}
+  duplicate: {d: no, how: "Sending again is a new row made from the document, never a copy of an old row.", e: ["judge"]}
+  version: {d: no, how: "A row is a log line; it has one body forever.", e: ["judge"]}
+  reverse: {d: no, how: "A sent email cannot be recalled; the owner sends a correction. Revoking the link inside it is done on the share link.", e: [wide:W044]}
+  print_pdf: {d: no, how: "The attachment is already a PDF of the document; the row itself is not printed.", e: ["judge"]}
+  share_link: {d: no, how: "Rows are never shown outside the firm; the link inside the mail is the share link object.", e: ["judge"]}
+  preview: {d: now, how: "The send dialog shows the real email with names, amounts and link filled before it is queued, and a template with a missing field cannot be saved.", e: [wide:B045, wide:B011]}
+  assign: {d: no, how: "No one owns a row; the sender job moves it.", e: ["judge"]}
+  approve: {d: no, how: "Staff send issued documents without a second look; issuing is the approval.", e: ["judge"]}
+  comment: {d: no, how: "Notes belong on the invoice and customer, not on the mail log.", e: [wide:W041]}
+  attach: {d: now, how: "Always the stored PDF of the document, checked against its hash; nobody adds other files.", e: ["judge"]}
+  tag: {d: no, how: "Type and status already label every row.", e: ["judge"]}
+  follow: {d: no, how: "Owners are told by alert on bounce and complaint, not by watching rows.", e: [judge]}
+  remind: {d: no, how: "The reminder is itself a message type; its rules sit on the invoice, not here.", e: ["judge"]}
+  schedule: {d: now, how: "Reminders wait queued until 9 am to 7 pm IST; invoice and receipt mail goes at once. A person cannot pick a send time.", e: [judge]}
+  history: {d: now, how: "Each change of state with its time: queued, sent, delivered, bounced, complained, and the opened flag from the share link.", e: [wide:W089, wide:D309]}
+  custom_fields: {d: no, how: "Fixed fields only; a mail log needs no extra columns.", e: ["judge"]}
+  merge: {d: no, how: "Rows are never joined; one consolidated reminder per customer is made when it is built.", e: [wide:W088]}
+  link_related: {d: now, how: "Beside a row: the document, the customer, the share link it carried and the template version.", e: ["judge"]}
+  notify: {d: now, how: "A banner on the invoice and customer after a bounce, and an email to every owner after a spam complaint; neither can be muted.", e: [wide:A042, wide:A200]}
+  api: {d: later, how: "Reading the outbox by API waits with the API.", e: ["judge"]}
+  webhook: {d: later, how: "Delivery events to other software wait with the API.", e: ["judge"]}
+answers:
+  channel: {a: "Email through one provider, from a product address with the firm's name as sender and its verified address as Reply-To. WhatsApp is click-to-chat: a tap writes a row with channel whatsapp_link, marked sent when WhatsApp opens, never delivered or bounced.", e: [judge]}
+  identity: {a: "The recipient is the address on the row, checked for format and the firm's suppression list before queueing. Extra To, Cc and Bcc for one send never change the customer.", e: [judge]}
+  status: {a: "Queued, sent, delivered, failed, bounced, complained, skipped. A queued row that fails 5 times is failed; a hard bounce blocks the address for the firm; opened is a flag set by a visit to the share link.", e: [wide:A141, wide:A239, wide:A199]}
+  visible: {a: "The customer sees only subject, body and the PDF. Internal notes and Bcc addresses are never in the body; the firm sees the whole row.", e: [wide:W041, wide:B010]}
+  waiting: {a: "Nobody waits on a reply. The only clock is the sender job: a queued row older than 60 seconds shows as late, and a queued reminder waits for 9 am IST.", e: [judge]}
+  route: {a: "A customer's reply goes to the firm's Reply-To address, never to the product. Failed, bounced and skipped rows go to the owner's list of rows to fix.", e: [judge]}
+  edit: {a: "A sent row is never edited or deleted, and the customer cannot tell; a correction is a new row. A bounced row shows a banner asking for a corrected address and the old address is not retried.", e: [judge]}
+  close: {a: "There is no thread to close and no rating. The customer may stop reminders with a link in each one, which is stored on the customer; invoices and receipts still go.", e: [wide:B223]}
+tracks:
+  conversation:
+    states: [{id: queued, start: true}, {id: sent}, {id: delivered}, {id: failed}, {id: bounced}, {id: complained}, {id: skipped, end: true}]
+    moves:
+      - {do: send, from: queued, to: sent, who: [system], guard: "address passes format and suppression checks; reminders only inside 9 am to 7 pm IST", effect: "provider accepts it; provider id stored", reverse: "none: a sent email cannot be recalled", notify: none, e: ["judge"]}
+      - {do: deliver, from: sent, to: delivered, who: [system], guard: "provider reports delivery", effect: "time stored", reverse: "none: delivery is a fact", notify: none, e: [judge]}
+      - {do: fail, from: queued, to: failed, who: [system], guard: "provider refuses it or 5 attempts are used; test recipients ending @fail.test fail at once", effect: "reason shown on the row and in the outbox", reverse: "retry", notify: [email_failed], e: [judge]}
+      - {do: retry, from: failed, to: queued, who: [owner, accountant, system], guard: "the address is not suppressed", effect: "attempt count goes up; the same row is reused", reverse: "none: it is queued again and may fail again", notify: none, e: ["judge"]}
+      - {do: bounce, from: [sent, delivered], to: bounced, who: [system], guard: "provider reports a hard bounce", effect: "address blocked for the firm; banner on the invoice and customer; old address not retried", reverse: "lift_bounce", notify: [email_bounced], e: [wide:A199, wide:A042]}
+      - {do: complain, from: [sent, delivered], to: complained, who: [system], guard: "provider reports a spam complaint", effect: "all reminders to that address stop across the firm", reverse: "lift_complaint", notify: [email_complaint], e: [wide:A200]}
+      - {do: lift_bounce, from: bounced, to: bounced, who: [owner], guard: "reason written; the customer's address was corrected or the customer asked again", effect: "address may be used again; the old row stays as it was", reverse: "none: a new bounce blocks it again", notify: none, e: [wide:A199]}
+      - {do: lift_complaint, from: complained, to: complained, who: [owner], guard: "reason written; the customer asked again to receive reminders", effect: "address may be used again; the old row stays as it was", reverse: "none: a new bounce blocks it again", notify: none, e: [judge]}
+      - {do: skip, from: queued, to: skipped, who: [system, owner, accountant], guard: "no email on the customer, address blocked, reminders off or opted out, or the invoice is paid or void at send time", effect: "reason stored and listed for the owner to call the customer", reverse: "none: send again after fixing the cause, as a new row", notify: none, e: [judge]}
+fields:
+  - {id: to_email, type: text, required: true, limit: 120, edit: "nobody", auto: true}
+  - {id: extra_recipients, type: text, required: false, limit: 500, edit: "while the send dialog is open", msg: "Check the extra To, Cc or Bcc addresses; separate them with commas."}
+  - {id: channel, type: choice, required: true, default: email, edit: "nobody", auto: true}
+  - {id: type, type: choice, required: true, edit: "nobody", auto: true}
+  - {id: reminder_step, type: choice, required: false, edit: "nobody", auto: true}
+  - {id: document, type: link, required: false, edit: "nobody", auto: true}
+  - {id: subject, type: text, required: true, limit: 250, edit: "nobody", auto: true}
+  - {id: body, type: long_text, required: true, limit: 20000, edit: "nobody", auto: true}
+  - {id: attachment_name, type: text, required: false, limit: 120, edit: "nobody", auto: true}
+  - {id: attempts, type: number, required: true, limit: 5, default: 0, edit: "nobody", auto: true}
+  - {id: provider_id, type: text, required: false, limit: 120, edit: "nobody", auto: true}
+  - {id: failure_reason, type: text, required: false, limit: 300, edit: "nobody", auto: true}
+  - {id: skip_reason, type: choice, required: false, edit: "nobody", auto: true}
+  - {id: unique_key, type: text, required: true, limit: 120, edit: "nobody", auto: true}
+  - {id: opened, type: choice, required: false, edit: "nobody", auto: true}
+  - {id: block_lifted_at, type: date, required: false, edit: "owner only, with a reason", msg: "Write why this address may be used again."}
+fields_e: [wide:W086, wide:A195, wide:A065, wide:A196, wide:B010]
+list:
+  search: [to_email, customer, subject, document_number]
+  filters: [conversation, type, customer, created_at]
+  sorts: [-created_at]
+  default_sort: -created_at
+  columns: [created_at, to_email, type, document, conversation, attempts]
+  views: [All, Failed, Bounced, Skipped, Reminders]
+  bulk: [retry, skip]
+  bulk_fail: "Rows that cannot change stay selected with the reason beside each; the others go through."
+  page: 50
+  e: [wide:D309, wide:W087]
+volume: {y1: 18000, y3: 120000}
+queries:
+  - {id: newest, filters: [], sort: [-created_at], index: [tenant, created_at], p95: 150 ms}
+  - {id: by_state, filters: [conversation], sort: [-created_at], index: [tenant, conversation, created_at], p95: 150 ms}
+  - {id: by_type, filters: [type], sort: [-created_at], index: [tenant, type, created_at], p95: 150 ms}
+  - {id: one_customer, filters: [customer], sort: [-created_at], index: [tenant, customer, created_at], p95: 100 ms}
+  - {id: of_document, filters: [document], sort: [-created_at], index: [tenant, document, created_at], p95: 100 ms}
+  - {id: blocked_address, filters: [to_email, conversation], sort: [-created_at], index: [tenant, to_email, conversation, created_at], p95: 50 ms}

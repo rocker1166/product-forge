@@ -1,0 +1,726 @@
+# What a mature first release gives each kind of object. Written from outside products only (2026-11-26).
+# Proof that a product lacks a thing is weak, so every `no` is marked judge. Sources listed from memory are marked in research notes.
+# Library of kinds. What a mature product gives each kind of object. d: now | room | later | no.
+# Abilities are the 37 ids in abilities.yaml. src names outside products; judge = my own call.
+
+master:
+  name: "Master record"
+  when: "A long-lived thing other records point at: customer, product, part. Documents refer to it; it is not a transaction."
+  tracks: [lifecycle]
+  abilities:
+    create: {d: now, how: "Form plus inline create from inside other forms, such as a new customer while making an invoice.", src: [Invoice Ninja, Stripe, Shopify]}
+    edit: {d: now, how: "Always editable. Issued documents keep the values they were issued with, never the new ones.", src: [Stripe, Shopify, ERPNext]}
+    draft: {d: room, how: "Product has draft status before sale. Customer and part need none; keep a status field ready.", src: [Shopify, Saleor]}
+    view: {d: now, how: "Facts first, then linked documents with balance owed, then the activity timeline.", src: [Stripe, Salesforce, Twenty]}
+    search: {d: now, how: "One box finds by name, email, phone, code or id; an exact id jumps to the record.", src: [Stripe, Shopify, Twenty]}
+    filter: {d: now, how: "Status, tag, owner, created date and one or two business facts such as city or stock.", src: [Shopify, Twenty, Chatwoot]}
+    sort: {d: now, how: "Name, newest, and the one money or quantity field people rank by.", src: [Shopify, Salesforce]}
+    group: {d: later, how: "Group by owner, type or category only when a board or tree view is asked for.", src: [Twenty, Plane]}
+    saved_view: {d: now, how: "Filters, columns and order kept by name, with a locked All view.", src: [Shopify, Twenty, Linear]}
+    columns: {d: now, how: "People pick and order columns; the choice is kept per person.", src: [Shopify, Twenty]}
+    bulk: {d: now, how: "Tag, archive, assign and delete many rows; result lists which rows failed and why.", src: [Shopify, Invoice Ninja, Twenty]}
+    import: {d: now, how: "CSV with column mapping, error rows fixable in place, and a match key to avoid duplicates.", src: [Shopify, Twenty, Invoice Ninja]}
+    export: {d: now, how: "CSV of the filtered list; large exports are emailed rather than downloaded.", src: [Shopify, Twenty, Invoice Ninja]}
+    delete: {d: now, how: "Only when nothing refers to it; otherwise the screen says what blocks it and offers archive.", src: [Invoice Ninja, ERPNext, Shopify]}
+    archive: {d: now, how: "Hidden from pickers and default lists but still on old documents and searchable.", src: [Invoice Ninja, Shopify, Plane]}
+    restore: {d: now, how: "Archived or deleted record returns with its links; deleted ones keep a fixed recovery window.", src: [Invoice Ninja, Notion, Twenty]}
+    duplicate: {d: now, how: "Copies fields and tags; never copies id, history, balances or linked documents.", src: [Shopify, Invoice Ninja]}
+    version: {d: room, how: "Keep change history only for fields that matter later, such as price, tax id or address.", src: [Salesforce, Medusa]}
+    reverse: {d: no, how: "A master has nothing to refund or cancel; mistakes are edited, or the record is merged or archived.", src: [judge]}
+    print_pdf: {d: later, how: "Customer statement or product sheet only when asked; the documents already print themselves.", src: [Zoho, Invoice Ninja]}
+    share_link: {d: no, how: "Outsiders see documents or a portal, never the raw master record.", src: [judge]}
+    preview: {d: no, how: "There is no receiver view of a master record; previews belong to documents and content.", src: [judge]}
+    assign: {d: later, how: "Customer gets one owner; product and part rarely need it.", src: [Salesforce, Twenty, Zoho]}
+    approve: {d: later, how: "Only for price or credit-limit changes when a second person must sign off.", src: [Salesforce, ERPNext]}
+    comment: {d: now, how: "Internal notes on the timeline, never visible to the customer.", src: [Shopify, Twenty, Salesforce]}
+    attach: {d: now, how: "Contracts, tax forms or datasheets on the record, with size and type limits shown.", src: [Salesforce, Twenty, ERPNext]}
+    tag: {d: now, how: "Free labels the team invents, filterable and bulk-assignable.", src: [Shopify, Stripe, Chatwoot]}
+    follow: {d: later, how: "Watch a key customer without owning it; add when teams grow past a few people.", src: [Plane, Salesforce]}
+    remind: {d: later, how: "Follow-up or review date with a nudge; add when the team asks for it.", src: [Salesforce, Zoho]}
+    schedule: {d: no, how: "Dates belong to documents and reminders, not to the master record itself.", src: [judge]}
+    history: {d: now, how: "Who changed which field, from what, to what, and when.", src: [Salesforce, Shopify, Twenty]}
+    custom_fields: {d: now, how: "Owner adds their own fields per kind; they show in list, form, import and export.", src: [Shopify, Salesforce, Twenty, ERPNext]}
+    merge: {d: now, how: "Two duplicates join into one; all linked records move over and the loser is kept as redirect.", src: [Shopify, Salesforce, Twenty]}
+    link_related: {d: now, how: "Shows its documents, payments and tickets with totals, each one opening in place.", src: [Stripe, Salesforce, Twenty]}
+    notify: {d: later, how: "Alerts to the owner on key changes; add with roles and follow.", src: [Salesforce, Chatwoot]}
+    api: {d: now, how: "Read, write and search by id and by your own external reference.", src: [Stripe, Shopify, Saleor]}
+    webhook: {d: now, how: "Created, updated and deleted events carry the new values and a stable event id.", src: [Stripe, Shopify, Invoice Ninja]}
+  questions:
+    identity: {q: "Which fact makes two records the same one, and what happens on a duplicate?", case: "Twenty import needs unique email; Shopify merges customers", src: [Twenty, Shopify]}
+    snapshot: {q: "Which values are copied into a document at issue time so later edits do not rewrite it?", case: "Stripe invoices keep customer details at finalise", src: [Stripe, ERPNext]}
+    remove: {q: "What blocks removal, and what takes its place when it is in use?", case: "Invoice Ninja archives rather than deleting used clients", src: [Invoice Ninja, ERPNext]}
+    owner: {q: "Who owns the record, and may another person see it?", case: "Salesforce owner and sharing layers", src: [Salesforce, Twenty]}
+    contacts: {q: "Can one record hold several contacts, addresses or tax ids, and which is the default?", case: "Shopify customer addresses; Stripe customer shipping and billing", src: [Shopify, Stripe]}
+    code: {q: "Is there a human code or sku, who sets it, and is it unique per tenant?", case: "Shopify SKU; ERPNext item code", src: [Shopify, ERPNext]}
+    inactive: {q: "What does inactive mean: hidden from pickers, blocked from new documents, or both?", case: "Shopify product archived vs draft", src: [Shopify, Saleor]}
+
+document:
+  name: "Issued document"
+  when: "Something sent to an outsider that carries a number, money and a legal weight: invoice, order, quote."
+  tracks: [document, payment]
+  abilities:
+    create: {d: now, how: "From scratch, from a quote or order with lines carried over, and by copy of an older one.", src: [Invoice Ninja, ERPNext, Stripe]}
+    edit: {d: now, how: "Only while draft. After issue only note, contact and tags; money and lines lock.", src: [Stripe, ERPNext, Lago]}
+    draft: {d: now, how: "Auto-saved, no number yet, invisible to the customer, deletable without a trace.", src: [Stripe, Lago, Invoice Ninja, Shopify]}
+    view: {d: now, how: "Header with state and amount due, lines and tax, payments, then timeline.", src: [Stripe, Invoice Ninja, Saleor]}
+    search: {d: now, how: "Number, customer name, reference, amount; an exact number jumps straight to it.", src: [Stripe, Invoice Ninja, Saleor]}
+    filter: {d: now, how: "State, customer, date range, overdue, amount range, and payment status shown separately.", src: [Lago, Shopify, Saleor]}
+    sort: {d: now, how: "Issue date newest first by default; also due date, amount, number.", src: [Shopify, Saleor, Invoice Ninja]}
+    group: {d: later, how: "Group by customer or month only when asked; state tabs are enough at start.", src: [Shopify, Odoo]}
+    saved_view: {d: now, how: "Named filters like Unpaid, Overdue, This month, kept per person or shared.", src: [Shopify, ERPNext, Stripe]}
+    columns: {d: now, how: "Pick columns such as number, customer, due, balance; choice is kept.", src: [Shopify, Invoice Ninja]}
+    bulk: {d: now, how: "Send, mark paid, download, archive and cancel many; failures listed row by row.", src: [Invoice Ninja, Stripe, Shopify]}
+    import: {d: later, how: "Opening balances and old invoices on request; tag them imported and keep their old numbers.", src: [Invoice Ninja, Zoho]}
+    export: {d: now, how: "CSV for the accountant by date range; large ranges are emailed, with tax columns.", src: [Shopify, Invoice Ninja, ERPNext]}
+    delete: {d: now, how: "Only drafts. Issued documents are voided or reversed, never deleted; the number stays used.", src: [Stripe, Lago, ERPNext]}
+    archive: {d: now, how: "Hides a settled or voided document from default lists without changing its state.", src: [Invoice Ninja, Shopify]}
+    restore: {d: now, how: "Archived returns to lists; a deleted draft does not come back.", src: [Invoice Ninja, Stripe]}
+    duplicate: {d: now, how: "Makes a new draft without number, dates, payments or sent history.", src: [Invoice Ninja, Stripe, ERPNext]}
+    version: {d: room, how: "Each issue or revision stored as a frozen copy so the sent version can be reproduced.", src: [Medusa, Lago, ERPNext]}
+    reverse: {d: now, how: "Credit note or return document linked to the original; the original stays untouched.", src: [Stripe, ERPNext, Lago, Saleor]}
+    print_pdf: {d: now, how: "PDF that matches the sent copy exactly, with the legal fields; a template choice per tenant.", src: [Stripe, Invoice Ninja, ERPNext, Lago]}
+    share_link: {d: now, how: "Hosted page with pay button; link can expire or be revoked and shows when it was viewed.", src: [Stripe, Invoice Ninja, Shopify]}
+    preview: {d: now, how: "Shows the email and PDF as the customer will get them before sending.", src: [Stripe, Invoice Ninja]}
+    assign: {d: later, how: "Account owner or salesperson on the document; add when teams grow.", src: [Invoice Ninja, Salesforce]}
+    approve: {d: room, how: "Optional sign-off before issue above a limit; leave a state slot between draft and issued.", src: [Saleor, ERPNext, Medusa]}
+    comment: {d: now, how: "Internal notes on the timeline; customer-visible notes are a separate field.", src: [Shopify, Invoice Ninja, Medusa]}
+    attach: {d: now, how: "Supporting files sent with or kept beside the document, with size limit shown.", src: [Invoice Ninja, ERPNext, Shopify]}
+    tag: {d: now, how: "Free labels for filtering and reports; editable even after issue.", src: [Shopify, Invoice Ninja]}
+    follow: {d: later, how: "Watch a document without owning it; add with roles.", src: [Salesforce, Plane]}
+    remind: {d: now, how: "Automatic reminders before and after due date, with a stop once paid.", src: [Invoice Ninja, Lago, Zoho]}
+    schedule: {d: now, how: "Send later, and repeat monthly as a recurring invoice that makes drafts or issues.", src: [Invoice Ninja, Stripe, Zoho]}
+    history: {d: now, how: "Created, sent, viewed, paid, voided, with who and when; cannot be edited.", src: [Invoice Ninja, Saleor, Stripe]}
+    custom_fields: {d: now, how: "Own fields on header and lines that show on the PDF if chosen.", src: [Invoice Ninja, ERPNext, Shopify]}
+    merge: {d: no, how: "Two issued documents are never joined; reverse one and make a new one.", src: [judge]}
+    link_related: {d: now, how: "Shows the source quote or order, payments, credit notes and the customer.", src: [ERPNext, Stripe, Invoice Ninja]}
+    notify: {d: now, how: "Customer email on send and on payment; staff alert on paid, failed, viewed or overdue.", src: [Stripe, Invoice Ninja, Lago]}
+    api: {d: now, how: "Create draft, finalise, void, send, read PDF; writes accept an idempotency key.", src: [Stripe, Lago, Invoice Ninja]}
+    webhook: {d: now, how: "Events for created, finalised, paid, failed, voided, overdue, each with a stable id.", src: [Stripe, Lago, Invoice Ninja]}
+  questions:
+    freeze: {q: "What is frozen after issue, and what may still change?", case: "Stripe locks money fields at finalise; ERPNext allows 21 fields after submit", src: [Stripe, ERPNext]}
+    number: {q: "Who assigns the number, when, and are gaps ever allowed?", case: "Lago per-entity sequence; numbering is legal data", src: [Lago, ERPNext]}
+    fix: {q: "How is a mistake corrected after issue: void, credit note or revise?", case: "Stripe credit notes; ERPNext return against original", src: [Stripe, ERPNext]}
+    money: {q: "Which currency, rounding and tax rules apply, and are amounts whole minor units?", case: "Stripe integer minor units; Saleor net and gross split", src: [Stripe, Saleor, Lago]}
+    paid: {q: "How does payment state relate to document state, and are they separate?", case: "Lago separates status from payment_status; Shopify financial status", src: [Lago, Shopify]}
+    late: {q: "What happens when due date passes: reminder, fee, state change?", case: "Invoice Ninja reminders; Lago dunning campaigns", src: [Invoice Ninja, Lago]}
+    law: {q: "Which legal fields, e-invoice or tax-portal rules apply, and what stops a cancel?", case: "India e-invoice allows cancel only within 24 hours", src: [ERPNext, Zoho]}
+    send: {q: "What counts as issued: saved, emailed or opened by customer?", case: "Invoice Ninja cannot return to draft once sent", src: [Invoice Ninja, Stripe]}
+
+work:
+  name: "Work item"
+  when: "Something a person must do or move forward with an owner and states: ticket, task, deal."
+  tracks: [work]
+  abilities:
+    create: {d: now, how: "Quick add from anywhere with only a title; full form optional; email or API can also create.", src: [Linear, Plane, Chatwoot, Salesforce]}
+    edit: {d: now, how: "Any field, any time, by anyone with access; every change lands in history.", src: [Linear, Plane, Salesforce]}
+    draft: {d: room, how: "Keep unsent drafts locally while typing; no draft state on the item itself.", src: [Linear, Plane]}
+    view: {d: now, how: "Title, state, owner, priority, description, then activity and related items.", src: [Linear, Plane, Salesforce]}
+    search: {d: now, how: "Title, description, id and comments; a typed id opens the item.", src: [Linear, Plane, Chatwoot]}
+    filter: {d: now, how: "State, owner, priority, label, due date, creator, and project or stage.", src: [Plane, Linear, Chatwoot, Twenty]}
+    sort: {d: now, how: "Priority, updated, created, due date, manual order on boards.", src: [Plane, Linear]}
+    group: {d: now, how: "List grouped or board by state, owner or priority; drag to change.", src: [Plane, Linear, Twenty, Salesforce]}
+    saved_view: {d: now, how: "Named filters with layout, shareable with the team.", src: [Linear, Plane, Chatwoot, Twenty]}
+    columns: {d: now, how: "Show or hide due, owner, labels, estimate, in list and table layouts.", src: [Plane, Twenty]}
+    bulk: {d: now, how: "Change state, owner, label or priority on many; result says how many succeeded.", src: [Chatwoot, Plane, Linear, Twenty]}
+    import: {d: now, how: "CSV or from another tracker with state and owner mapping; unknown owners are reported.", src: [Twenty, Linear, Plane, Chatwoot]}
+    export: {d: now, how: "CSV or JSON of filtered items with owner and state names, not ids.", src: [Plane, Twenty, Chatwoot]}
+    delete: {d: now, how: "Soft delete to trash with a recovery window; sub-items and comments follow.", src: [Plane, Linear, Twenty]}
+    archive: {d: now, how: "Done items archive by hand or after N days; they remain searchable and restorable.", src: [Plane, Linear]}
+    restore: {d: now, how: "Archived or deleted item returns with comments and links intact.", src: [Plane, Linear, Twenty]}
+    duplicate: {d: now, how: "New item copies title, labels, project; resets state, owner, comments and dates.", src: [Linear, Plane]}
+    version: {d: room, how: "Description edits keep versions so a bad edit can be recovered.", src: [Plane, Notion]}
+    reverse: {d: no, how: "A work item has no money to undo; reopen it instead.", src: [judge]}
+    print_pdf: {d: no, how: "Work items are read on screen; reports carry any print need.", src: [judge]}
+    share_link: {d: later, how: "Public board or single-item link for customers only when requested.", src: [Plane, Linear]}
+    preview: {d: no, how: "No receiver sees a different form of a work item; customer replies go through conversation.", src: [judge]}
+    assign: {d: now, how: "One owner, optionally several; unassigned view and auto-assign by rule.", src: [Linear, Plane, Chatwoot, Salesforce]}
+    approve: {d: later, how: "Add review or sign-off steps only for deals and changes that need them.", src: [Salesforce, Linear]}
+    comment: {d: now, how: "Threaded comments with mentions; internal vs customer-visible is a deliberate choice.", src: [Linear, Plane, Chatwoot, Shopify]}
+    attach: {d: now, how: "Files and images on description and comments, with size cap and preview.", src: [Linear, Plane, Chatwoot]}
+    tag: {d: now, how: "Labels with colour, groupable, created on the fly by those allowed.", src: [Linear, Plane, Chatwoot]}
+    follow: {d: now, how: "Subscribe without owning; subscribers get state and comment changes.", src: [Plane, Linear, Chatwoot]}
+    remind: {d: now, how: "Due date with a nudge before it; snooze hides the item until a date.", src: [Chatwoot, Linear, Plane]}
+    schedule: {d: later, how: "Recurring items and start dates when asked; due date covers the start.", src: [Plane, Salesforce]}
+    history: {d: now, how: "Every change with who, what, from and to; cannot be edited.", src: [Plane, Linear, Salesforce, Chatwoot]}
+    custom_fields: {d: now, how: "Typed owner-defined fields per project or pipeline, usable in filters.", src: [Chatwoot, Twenty, Salesforce, Plane]}
+    merge: {d: later, how: "Join duplicates, keeping comments from both; common for support tickets and deals.", src: [Zendesk, Salesforce, Linear]}
+    link_related: {d: now, how: "Parent, sub-items, blocks, duplicates and linked records such as customer.", src: [Plane, Linear, Salesforce]}
+    notify: {d: now, how: "Owner told on assign, mention and state change; per-person mute.", src: [Linear, Plane, Chatwoot]}
+    api: {d: now, how: "Full read and write on items, comments and states; filter by updated time.", src: [Linear, Plane, Chatwoot]}
+    webhook: {d: now, how: "Created, updated, state-changed and comment events.", src: [Plane, Chatwoot, Linear]}
+  questions:
+    states: {q: "Which states exist, which are terminal, and which moves are allowed?", case: "Plane state groups; Salesforce stage drives probability", src: [Plane, Salesforce]}
+    owner: {q: "Who owns it, can it be unowned, and what happens when the owner leaves?", case: "Linear triage inbox; Chatwoot auto-assign", src: [Linear, Chatwoot]}
+    due: {q: "Is there a due or target date, and what happens when it passes?", case: "Chatwoot SLA; Plane target date", src: [Chatwoot, Plane]}
+    priority: {q: "What priority levels exist and do they change order or alerts?", case: "Plane 5 priorities; Chatwoot priority and SLA", src: [Plane, Chatwoot]}
+    close: {q: "What does closed mean, who may reopen, and does it ask for a reason?", case: "Salesforce won and lost; Plane completed vs cancelled", src: [Salesforce, Plane]}
+    whom: {q: "Who is it for, and which customer record does it link to?", case: "Twenty opportunity links company and contact", src: [Twenty, Chatwoot]}
+    sub: {q: "Can it have parts or children, and does closing the parent close them?", case: "Plane sub-issues; Linear sub-issues", src: [Plane, Linear]}
+    intake: {q: "Where do items come from besides the form: email, widget, API, import?", case: "Chatwoot channels; Linear Asks", src: [Chatwoot, Linear]}
+
+money:
+  name: "Money movement"
+  when: "A record that moves or claims money, tied to a document: payment, refund, payout."
+  tracks: [payment]
+  abilities:
+    create: {d: now, how: "Made from the document it settles with amount prefilled to the balance due; or by gateway callback.", src: [Stripe, Invoice Ninja, ERPNext]}
+    edit: {d: no, how: "Amount, currency and method never change after recording; correct by reversing and re-entering.", src: [judge]}
+    draft: {d: no, how: "A payment is either recorded or not; pending is a state, not a saved draft.", src: [judge]}
+    view: {d: now, how: "Amount, method, state, fees, the document it settled, and the payer.", src: [Stripe, Shopify, Invoice Ninja]}
+    search: {d: now, how: "Payment id, reference, payer, amount, last four digits.", src: [Stripe, Shopify]}
+    filter: {d: now, how: "State, method, date range, amount range, currency, payer, settled or unsettled.", src: [Stripe, Shopify, Lago]}
+    sort: {d: now, how: "Newest first; also amount and date received.", src: [Stripe, Shopify]}
+    group: {d: later, how: "Group by method or day for reconciliation when asked.", src: [Stripe, Odoo]}
+    saved_view: {d: now, how: "Named filters like Failed, Disputed, This month.", src: [Stripe, Shopify]}
+    columns: {d: now, how: "Pick amount, fee, net, method, payer, settled-on columns.", src: [Stripe, Shopify]}
+    bulk: {d: later, how: "Bulk full refund or mark-as-reconciled; each needs a reason and a failure list.", src: [Stripe, Invoice Ninja]}
+    import: {d: later, how: "Bank statement lines for matching, not payments as such.", src: [Odoo, Zoho, Invoice Ninja]}
+    export: {d: now, how: "CSV with gross, fee, net, currency and payout id for the accountant.", src: [Stripe, Shopify, Invoice Ninja]}
+    delete: {d: no, how: "Never deleted; a wrong payment is reversed so the audit trail survives.", src: [judge]}
+    archive: {d: no, how: "Money records are never hidden; filters cover noise.", src: [judge]}
+    restore: {d: no, how: "Nothing is removed, so nothing returns; a reversal is undone by a new record.", src: [judge]}
+    duplicate: {d: no, how: "Copying a payment would copy money; a new payment is entered fresh.", src: [judge]}
+    version: {d: no, how: "Immutable; each correction is a new linked record instead of a new version.", src: [judge]}
+    reverse: {d: now, how: "Refund full or partial against the original, with reason; sum of refunds cannot pass the payment.", src: [Stripe, Shopify, Saleor, Medusa]}
+    print_pdf: {d: now, how: "Receipt for the payer; official receipt number where the law asks.", src: [Stripe, Zoho, Invoice Ninja]}
+    share_link: {d: later, how: "Payment link or receipt page for the payer; link can expire.", src: [Stripe, Invoice Ninja]}
+    preview: {d: no, how: "There is nothing to preview; receipt email preview is a template setting.", src: [judge]}
+    assign: {d: no, how: "Money records have no owner; the document or customer carries it.", src: [judge]}
+    approve: {d: later, how: "Large refunds or payouts may need a second person; add on request.", src: [Shopify, Stripe]}
+    comment: {d: now, how: "Internal note on the payment, such as bank reference or dispute detail.", src: [Shopify, Stripe]}
+    attach: {d: later, how: "Proof of payment or dispute evidence file.", src: [Stripe, Invoice Ninja]}
+    tag: {d: later, how: "Labels for reconciliation batches.", src: [Stripe, Shopify]}
+    follow: {d: no, how: "Alerts are by event type, not by watching one payment.", src: [judge]}
+    remind: {d: later, how: "Chase failed or pending payments through retries and dunning.", src: [Lago, Invoice Ninja, Stripe]}
+    schedule: {d: now, how: "Retry failed payments on a schedule; scheduled or recurring charges belong to the plan.", src: [Stripe, Lago, Invoice Ninja]}
+    history: {d: now, how: "Every state change with time and gateway message; kept forever.", src: [Stripe, Shopify]}
+    custom_fields: {d: room, how: "A metadata bag for the owner's own references.", src: [Stripe, Shopify]}
+    merge: {d: no, how: "Payments are never joined; each is one real money event.", src: [judge]}
+    link_related: {d: now, how: "Shows the document, customer, refunds, payout and dispute together.", src: [Stripe, Shopify, Lago]}
+    notify: {d: now, how: "Payer receipt; staff alert on failed, refunded, disputed.", src: [Stripe, Shopify, Lago]}
+    api: {d: now, how: "Create, capture, refund and read, each write with an idempotency key.", src: [Stripe, Shopify, Saleor]}
+    webhook: {d: now, how: "Succeeded, failed, refunded, disputed and payout events with stable ids.", src: [Stripe, Lago, Shopify]}
+  questions:
+    amount: {q: "Which currency and unit, and may amounts be partial or over the balance?", case: "Stripe integer minor units; ERPNext overpayment becomes unallocated", src: [Stripe, ERPNext]}
+    settles: {q: "What does it settle, and can one payment cover several documents?", case: "ERPNext payment entry with references; Lago partial payments", src: [ERPNext, Lago]}
+    undo: {q: "How is it undone, how much of it, and until when?", case: "Stripe partial refunds up to the charge; Shopify refund cannot be reversed", src: [Stripe, Shopify]}
+    fail: {q: "What happens when it fails or hangs pending, and who is told?", case: "Lago retry_payment; Invoice Ninja auto-bill retries", src: [Lago, Invoice Ninja]}
+    fee: {q: "Who bears fees, and are they stored beside gross and net?", case: "Stripe balance transactions", src: [Stripe]}
+    dispute: {q: "What happens on a chargeback or dispute?", case: "Lago lose_dispute; Shopify chargeback filter", src: [Lago, Shopify]}
+    proof: {q: "What proof does the payer get, and does the law need a numbered receipt?", case: "Zoho receipt; ERPNext payment entry", src: [Zoho, ERPNext]}
+    match: {q: "How is it matched to a bank line or payout?", case: "Stripe payout reconciliation; Zoho bank feeds", src: [Stripe, Zoho]}
+
+booking:
+  name: "Booking"
+  when: "A claim on a time and a resource for someone: slot, appointment, reservation."
+  tracks: [booking]
+  abilities:
+    create: {d: now, how: "Public booking page with live availability, plus staff entry for walk-ins and phone bookings.", src: [Cal.com, Calendly]}
+    edit: {d: now, how: "Staff may change notes, attendees and location; time changes go through reschedule.", src: [Cal.com]}
+    draft: {d: no, how: "A slot is either held or not; unconfirmed is a state with an expiry, not a draft.", src: [judge]}
+    view: {d: now, how: "When, who, what, where or link, state and payment, then actions that fit the state.", src: [Cal.com, Calendly]}
+    search: {d: now, how: "Attendee name, email and booking id.", src: [Cal.com]}
+    filter: {d: now, how: "Upcoming, past, cancelled, unconfirmed tabs plus service, staff, attendee and date range.", src: [Cal.com]}
+    sort: {d: now, how: "Soonest first for upcoming, latest first for past.", src: [Cal.com]}
+    group: {d: later, how: "Calendar view by day or staff beside the list; add when a person asks.", src: [Cal.com, Calendly]}
+    saved_view: {d: later, how: "Named filters for staff; the five tabs cover first use.", src: [Cal.com]}
+    columns: {d: later, how: "Fixed columns first; pick-your-own only on request.", src: [judge]}
+    bulk: {d: later, how: "Bulk cancel for a closed day; each cancel emails the guest and lists failures.", src: [Cal.com, Calendly]}
+    import: {d: later, how: "Moving old bookings in on request; imported ones must not send emails.", src: [Calendly, Cal.com]}
+    export: {d: now, how: "CSV of bookings by date range with attendee, service and state.", src: [Cal.com]}
+    delete: {d: no, how: "Cancel keeps the record and the reason; nothing is removed so counts stay true.", src: [judge]}
+    archive: {d: no, how: "Past and cancelled bookings leave default tabs by state, not by archive.", src: [judge]}
+    restore: {d: no, how: "A cancelled booking is not revived; make a new one if the slot is free.", src: [judge]}
+    duplicate: {d: later, how: "Repeat booking for the same guest; copy service and staff, never the time.", src: [Cal.com]}
+    version: {d: no, how: "Reschedules keep a link to the earlier time in history instead of versions.", src: [judge]}
+    reverse: {d: now, how: "Cancel with a reason, free the slot, refund by the stated policy.", src: [Cal.com, Calendly]}
+    print_pdf: {d: later, how: "Confirmation PDF or calendar invite file; the .ics invite comes first.", src: [Cal.com, Calendly]}
+    share_link: {d: now, how: "Guest page to view, reschedule or cancel from the email link, no login.", src: [Cal.com, Calendly]}
+    preview: {d: now, how: "Guest sees the booking page and confirmation as the guest will; emails are previewed too.", src: [Cal.com]}
+    assign: {d: now, how: "Staff or resource chosen by rule, round robin, or by guest pick; reassign allowed.", src: [Cal.com, Calendly]}
+    approve: {d: now, how: "Optional host confirm or reject with pending state and expiry.", src: [Cal.com]}
+    comment: {d: later, how: "Internal note on the booking; guest notes are asked on the form.", src: [Cal.com]}
+    attach: {d: later, how: "Guest files only when the service needs them, such as intake forms.", src: [Calendly]}
+    tag: {d: later, how: "Labels for staff reporting.", src: [judge]}
+    follow: {d: later, how: "Team members watching a booking; add with shared calendars.", src: [Cal.com]}
+    remind: {d: now, how: "Guest and host reminders before start by email or text; confirm-or-cancel link included.", src: [Cal.com, Calendly]}
+    schedule: {d: now, how: "Availability rules, buffers, notice and recurrence; reschedule moves the same record.", src: [Cal.com, Calendly]}
+    history: {d: now, how: "Created, confirmed, rescheduled, cancelled, no-show, with who and when.", src: [Cal.com]}
+    custom_fields: {d: now, how: "Questions asked of the guest at booking, required or not, shown on the record.", src: [Cal.com, Calendly]}
+    merge: {d: no, how: "Bookings are not joined; merge the guest records instead.", src: [judge]}
+    link_related: {d: now, how: "Shows guest, service, staff, payment and the calendar event it created.", src: [Cal.com]}
+    notify: {d: now, how: "Guest and host emails on create, reschedule, cancel; calendar invite updated each time.", src: [Cal.com, Calendly]}
+    api: {d: now, how: "Check availability, create, reschedule and cancel by api.", src: [Cal.com, Calendly]}
+    webhook: {d: now, how: "Created, rescheduled, cancelled, rejected, paid and no-show events.", src: [Cal.com, Calendly]}
+  questions:
+    slot: {q: "What exactly is claimed, and can two bookings take the same time?", case: "Cal.com checks availability and buffers", src: [Cal.com]}
+    hold: {q: "Is the slot held while unpaid or unconfirmed, and for how long?", case: "Cal.com pending and awaiting_host states", src: [Cal.com]}
+    change: {q: "Who may reschedule or cancel, how late, and what happens to payment?", case: "Cal.com reschedule request and cancel reason", src: [Cal.com, Calendly]}
+    noshow: {q: "What happens when the guest or host does not come?", case: "Cal.com no-show state and event", src: [Cal.com]}
+    zone: {q: "Whose timezone is shown, and what is stored?", case: "Cal.com stores UTC with attendee timezone", src: [Cal.com]}
+    calendar: {q: "Which outside calendars are read for busy time and written to?", case: "Cal.com and Calendly calendar sync", src: [Cal.com, Calendly]}
+    group: {q: "Can one booking hold several guests or several resources?", case: "Cal.com seats and team events", src: [Cal.com]}
+    guest: {q: "Does the guest need an account, and how do they get back to it?", case: "Cal.com booking/[uid] page without login", src: [Cal.com]}
+
+conversation:
+  name: "Conversation"
+  when: "A back-and-forth between people over time, with messages inside it: thread, message."
+  tracks: [conversation]
+  abilities:
+    create: {d: now, how: "Started by the outsider through a channel, or by staff outbound; email in becomes a thread.", src: [Chatwoot, Intercom]}
+    edit: {d: now, how: "Thread metadata edits freely; a sent message is not edited, or shows edited if it is.", src: [Chatwoot, Slack]}
+    draft: {d: now, how: "Reply drafts kept per person per thread until sent.", src: [Chatwoot, Intercom]}
+    view: {d: now, how: "Message stream with composer, plus side panel of contact, labels and past threads.", src: [Chatwoot, Intercom]}
+    search: {d: now, how: "Message text, contact name, email and thread id.", src: [Chatwoot, Intercom]}
+    filter: {d: now, how: "Status, assignee, team, label, channel, priority and last activity.", src: [Chatwoot, Intercom]}
+    sort: {d: now, how: "Latest activity first; also waiting longest and priority.", src: [Chatwoot, Intercom]}
+    group: {d: now, how: "Inbox lists split by mine, unassigned and all.", src: [Chatwoot, Intercom]}
+    saved_view: {d: now, how: "Saved filters as named folders, shareable with a team.", src: [Chatwoot, Intercom]}
+    columns: {d: no, how: "Inbox is a fixed card list, not a table; filters do the narrowing.", src: [judge]}
+    bulk: {d: now, how: "Set status, assignee, team and labels on many threads; failures listed.", src: [Chatwoot]}
+    import: {d: later, how: "Moving old threads in on request; they arrive closed and notify nobody.", src: [Chatwoot]}
+    export: {d: now, how: "Thread transcript sent by email, plus report CSV by date range.", src: [Chatwoot]}
+    delete: {d: later, how: "Only by admins, for privacy requests; normal path is resolve and archive.", src: [Chatwoot, Intercom]}
+    archive: {d: now, how: "Resolved threads leave the inbox but stay searchable; a new reply reopens.", src: [Chatwoot, Intercom]}
+    restore: {d: now, how: "Reopen a resolved thread, or a new message from the contact does it.", src: [Chatwoot, Intercom]}
+    duplicate: {d: no, how: "A thread is a history; macros and canned replies cover repeat text.", src: [judge]}
+    version: {d: no, how: "Messages are a log; edits and deletes show as events.", src: [judge]}
+    reverse: {d: later, how: "Recall or delete a sent message within a short window where the channel allows.", src: [Slack, Intercom]}
+    print_pdf: {d: later, how: "Transcript as text or PDF for the customer.", src: [Chatwoot]}
+    share_link: {d: later, how: "Customer link to the thread without login, only where a portal exists.", src: [Intercom]}
+    preview: {d: now, how: "Staff see the customer's view while typing, including channel limits.", src: [Chatwoot, Intercom]}
+    assign: {d: now, how: "One owner, team routing and auto-assign by load or rule.", src: [Chatwoot, Intercom]}
+    approve: {d: no, how: "Replies are not approved first; only AI or bot replies may need review.", src: [judge]}
+    comment: {d: now, how: "Private notes inside the thread, visibly different from replies, never sent out.", src: [Chatwoot, Intercom]}
+    attach: {d: now, how: "Files and images in messages, with channel size limits shown to staff.", src: [Chatwoot, Intercom]}
+    tag: {d: now, how: "Labels per thread, used for reports and rules.", src: [Chatwoot, Intercom]}
+    follow: {d: now, how: "Participants watch a thread without owning it.", src: [Chatwoot]}
+    remind: {d: now, how: "Snooze until a date, and SLA clocks for waiting time.", src: [Chatwoot, Intercom]}
+    schedule: {d: later, how: "Scheduled or delayed send on request; auto-resolve after idle days is a setting.", src: [Chatwoot, Intercom]}
+    history: {d: now, how: "Status, assignment and label changes as events inside the stream.", src: [Chatwoot, Intercom]}
+    custom_fields: {d: now, how: "Typed attributes on thread and contact, usable in filters and rules.", src: [Chatwoot, Intercom]}
+    merge: {d: later, how: "Join two threads from one contact; a duplicate arriving by two channels is common.", src: [Zendesk, Intercom]}
+    link_related: {d: now, how: "Contact, past threads, orders or tickets beside the stream.", src: [Chatwoot, Intercom]}
+    notify: {d: now, how: "Assignee, mentions and new replies, per person and channel mutable.", src: [Chatwoot, Intercom]}
+    api: {d: now, how: "Create threads, post messages, change status and read the stream.", src: [Chatwoot, Intercom]}
+    webhook: {d: now, how: "Thread created, status changed, message created and updated events.", src: [Chatwoot, Intercom]}
+  questions:
+    channel: {q: "Which channels carry it, and what does each limit: length, files, edits?", case: "Chatwoot supports 20+ channels", src: [Chatwoot]}
+    identity: {q: "How is the outsider recognised across channels as one contact?", case: "Chatwoot contact merge; Intercom lead to user", src: [Chatwoot, Intercom]}
+    status: {q: "Which states exist, and what reopens or closes it automatically?", case: "Chatwoot open, pending, snoozed, resolved; auto-resolve", src: [Chatwoot]}
+    visible: {q: "Which messages does the outsider never see, such as private notes?", case: "Chatwoot private notes", src: [Chatwoot, Intercom]}
+    waiting: {q: "Who is waiting on whom, and what clock shows it?", case: "Chatwoot waiting_since and SLA policy", src: [Chatwoot]}
+    route: {q: "How does a new thread find its owner or team?", case: "Chatwoot auto-assign and teams", src: [Chatwoot, Intercom]}
+    edit: {q: "May a sent message be edited or deleted, and does the outsider see it?", case: "Slack edited label", src: [Slack, Intercom]}
+    close: {q: "When it closes, may the outsider reply, and what is asked, such as a rating?", case: "Chatwoot CSAT page", src: [Chatwoot]}
+
+content:
+  name: "Content"
+  when: "Words and pictures made to be read by an audience and published: post, page, article."
+  tracks: [publish]
+  abilities:
+    create: {d: now, how: "Blank, from template, or from an existing page; title and slug set early.", src: [WordPress, Notion, Shopify]}
+    edit: {d: now, how: "Editor with autosave; editing a live page changes a working copy until published.", src: [WordPress, Notion, Shopify]}
+    draft: {d: now, how: "Unpublished by default; private preview link; autosave; leave without losing work.", src: [WordPress, Shopify, Notion]}
+    view: {d: now, how: "Editor view and a public view; list shows state, author, date and last edit.", src: [WordPress, Shopify]}
+    search: {d: now, how: "Title and body text; also slug and author.", src: [WordPress, Notion]}
+    filter: {d: now, how: "Status, author, category, tag and date.", src: [WordPress, Shopify]}
+    sort: {d: now, how: "Date, title, last edited, author.", src: [WordPress, Shopify]}
+    group: {d: later, how: "Group by category or section; navigation menus cover most needs.", src: [WordPress, Notion]}
+    saved_view: {d: later, how: "Named filters when the list grows past a screen.", src: [Notion, Shopify]}
+    columns: {d: later, how: "Title, state, author, date first; pick-your-own on request.", src: [WordPress, Notion]}
+    bulk: {d: now, how: "Publish, unpublish, tag, categorise and trash many; failures listed.", src: [WordPress, Shopify]}
+    import: {d: now, how: "From WordPress export, markdown or CSV; images fetched and links kept.", src: [WordPress, Shopify, Notion]}
+    export: {d: now, how: "Full content with images and metadata in an open format.", src: [WordPress, Notion]}
+    delete: {d: now, how: "To trash first, with a recovery window; live deletion sets a redirect or 404 choice.", src: [WordPress, Notion, Shopify]}
+    archive: {d: now, how: "Unpublish but keep; old posts leave listings and stay at their address if wanted.", src: [Shopify, Notion]}
+    restore: {d: now, how: "From trash or archive back to draft, never straight to live.", src: [WordPress, Notion]}
+    duplicate: {d: now, how: "Copy as a new draft with new slug; never copies live state or view counts.", src: [WordPress, Notion, Shopify]}
+    version: {d: now, how: "Revisions kept; compare and restore an older one.", src: [WordPress, Notion]}
+    reverse: {d: no, how: "Publishing is undone by unpublish or restoring a revision, not by a reverse record.", src: [judge]}
+    print_pdf: {d: later, how: "PDF or print stylesheet only for documents like guides; asked on request.", src: [Notion]}
+    share_link: {d: now, how: "Private preview link for unpublished work; public link only after publish.", src: [WordPress, Notion, Shopify]}
+    preview: {d: now, how: "Desktop and phone preview exactly as published, before publishing.", src: [WordPress, Shopify, Notion]}
+    assign: {d: now, how: "Author and optional reviewer; editor roles when more than one writer.", src: [WordPress, Notion]}
+    approve: {d: room, how: "Review step before publish for teams; leave a state between draft and live.", src: [WordPress, Notion]}
+    comment: {d: now, how: "Comments on the draft for editors; reader comments are a separate choice.", src: [Notion, WordPress]}
+    attach: {d: now, how: "Images, files and embeds in the body with alt text; size limits shown.", src: [WordPress, Shopify, Notion]}
+    tag: {d: now, how: "Categories and tags; reader-facing and used for filtering.", src: [WordPress, Shopify]}
+    follow: {d: later, how: "Watch a page for changes; reader subscription is separate.", src: [Notion]}
+    remind: {d: later, how: "Review-by date for stale pages, mostly for help and policy pages.", src: [Notion, Confluence]}
+    schedule: {d: now, how: "Publish and unpublish at a set time, shown in the owner's timezone.", src: [WordPress, Shopify]}
+    history: {d: now, how: "Who edited, published and unpublished, and when.", src: [WordPress, Notion]}
+    custom_fields: {d: now, how: "Extra typed fields per content type, such as author bio or hero image.", src: [WordPress, Shopify, Payload]}
+    merge: {d: no, how: "Pages are not joined; copy text across and redirect the old address.", src: [judge]}
+    link_related: {d: now, how: "Shows what links in and out, related posts, and the pages that use it.", src: [WordPress, Notion]}
+    notify: {d: later, how: "Alert editors on review requests and comments; subscribers on publish.", src: [WordPress, Notion]}
+    api: {d: now, how: "Read published and write drafts through api, with token scope per action.", src: [WordPress, Shopify, Payload]}
+    webhook: {d: now, how: "Published, updated and unpublished events so sites and caches refresh.", src: [Shopify, Payload, Directus]}
+  questions:
+    states: {q: "What are draft, scheduled, published and unpublished, and who may publish?", case: "Shopify product and page published flag; WordPress statuses", src: [Shopify, WordPress]}
+    address: {q: "What is its slug, can it change, and what happens to the old address?", case: "WordPress permalinks and redirects", src: [WordPress, Shopify]}
+    search: {q: "What shows to search engines and social: title, summary, image?", case: "WordPress SEO fields; Shopify page SEO", src: [WordPress, Shopify]}
+    language: {q: "Is content translated, and what shows when a translation is missing?", case: "Directus translations; Payload localisation", src: [Directus, Payload]}
+    author: {q: "Who is the author and does the byline show?", case: "WordPress authors", src: [WordPress]}
+    media: {q: "Where do images live, and what alt text and size rules apply?", case: "WordPress media library", src: [WordPress, Shopify]}
+    live: {q: "What happens to a live page while it is being edited?", case: "Notion edits live; WordPress revisions with update", src: [Notion, WordPress]}
+    gone: {q: "When unpublished or deleted, what do old links and readers see?", case: "WordPress trash and 404; Shopify redirects", src: [WordPress, Shopify]}
+
+file:
+  name: "File"
+  when: "An uploaded thing kept as bytes: file, photo. It has a size, a type and an owner, and usually sits beside another record."
+  tracks: [upload]
+  abilities:
+    create: {d: now, how: "Upload by pick, drag and paste; shows progress, size limit and type rules before sending.", src: [Nextcloud, Immich, Notion]}
+    edit: {d: now, how: "Rename, replace the bytes, and change description; photo edits keep the original.", src: [Nextcloud, Immich]}
+    draft: {d: no, how: "An upload is complete or failed; unfinished uploads resume or clear on their own.", src: [judge]}
+    view: {d: now, how: "Preview in place for images, pdf and text; others show type, size, owner and download.", src: [Nextcloud, Immich, Notion]}
+    search: {d: now, how: "File name, type, uploader, and for photos date, place or content.", src: [Nextcloud, Immich]}
+    filter: {d: now, how: "Type, size, owner, date added, and which record it is attached to.", src: [Nextcloud, Immich]}
+    sort: {d: now, how: "Name, date, size, type.", src: [Nextcloud, Immich]}
+    group: {d: now, how: "By folder, album or date; photos by day and month.", src: [Nextcloud, Immich]}
+    saved_view: {d: later, how: "Smart folders or saved searches on request.", src: [Nextcloud, Immich]}
+    columns: {d: later, how: "Name, size, date by default; pick-your-own on request.", src: [Nextcloud]}
+    bulk: {d: now, how: "Select many to download as zip, move, share, delete; failures listed.", src: [Nextcloud, Immich]}
+    import: {d: now, how: "Bulk upload and folder upload; duplicates detected by content, not name.", src: [Immich, Nextcloud]}
+    export: {d: now, how: "Download one, or many as zip with original names and dates.", src: [Immich, Nextcloud]}
+    delete: {d: now, how: "Goes to trash for a fixed window; permanent delete after it or by empty trash.", src: [Immich, Nextcloud]}
+    archive: {d: now, how: "Photo archive hides it from the timeline while keeping it in albums and search.", src: [Immich]}
+    restore: {d: now, how: "From trash with original place, and any share links come back too.", src: [Immich, Nextcloud]}
+    duplicate: {d: later, how: "Copy a file to another folder on request; the bytes may be shared.", src: [Nextcloud]}
+    version: {d: now, how: "Older bytes kept when replaced, with restore and a visible limit.", src: [Nextcloud]}
+    reverse: {d: no, how: "Mistakes are undone by trash and version restore, not a reverse record.", src: [judge]}
+    print_pdf: {d: no, how: "A file is already its own form; print is the app that opens it.", src: [judge]}
+    share_link: {d: now, how: "Public link with expiry, password and view or download choice, revocable.", src: [Immich, Nextcloud]}
+    preview: {d: now, how: "Thumbnail and large preview; video poster; no preview shown for unknown types.", src: [Immich, Nextcloud]}
+    assign: {d: no, how: "A file has an owner by upload; the record it is attached to carries the work.", src: [judge]}
+    approve: {d: no, how: "Files are not approved themselves; the document they support is.", src: [judge]}
+    comment: {d: later, how: "Comments on a file or photo for teams and family albums.", src: [Nextcloud, Immich]}
+    attach: {d: no, how: "A file is what gets attached; it does not take attachments.", src: [judge]}
+    tag: {d: now, how: "Labels, and for photos people, places and albums.", src: [Immich, Nextcloud]}
+    follow: {d: no, how: "Alerts come through the folder or album share, not a single file.", src: [judge]}
+    remind: {d: no, how: "No reminders on a file; the record it supports owns the date.", src: [judge]}
+    schedule: {d: later, how: "Share expiry and auto-delete after a set age are the only scheduling.", src: [Immich, Nextcloud]}
+    history: {d: now, how: "Who uploaded, changed, shared and downloaded it, and when.", src: [Nextcloud, Immich]}
+    custom_fields: {d: later, how: "Extra labels such as document type on request.", src: [Nextcloud]}
+    merge: {d: no, how: "Files are not merged; duplicates are deleted and the record keeps the one link.", src: [judge]}
+    link_related: {d: now, how: "Shows which records use it and which albums or folders hold it.", src: [Immich, Nextcloud]}
+    notify: {d: later, how: "Alert when shared files are added, changed or opened.", src: [Nextcloud, Immich]}
+    api: {d: now, how: "Upload with size and hash check, read metadata, download by signed link.", src: [Immich, Nextcloud]}
+    webhook: {d: later, how: "Uploaded and deleted events for scanning or sync tools.", src: [Nextcloud]}
+  questions:
+    limits: {q: "Which types and what size are allowed, and what does a refused upload say?", case: "Nextcloud and Shopify CSV limits stated in docs", src: [Nextcloud, Shopify]}
+    who: {q: "Who can open it, and does opening need a login?", case: "Immich share link password and expiry", src: [Immich, Nextcloud]}
+    store: {q: "Where do the bytes live, and are originals kept when a copy is made?", case: "Immich keeps originals and makes thumbnails", src: [Immich]}
+    remove: {q: "When the record that owns it is deleted, what happens to the file?", case: "Nextcloud trash and versions", src: [Nextcloud]}
+    safe: {q: "Is it scanned or type-checked before others open it?", case: "Nextcloud virus scan app", src: [Nextcloud]}
+    dupe: {q: "How are the same bytes uploaded twice handled?", case: "Immich duplicate detection", src: [Immich]}
+    meta: {q: "Which details are read from inside it, and are private ones like location stripped when shared?", case: "Immich metadata and share options", src: [Immich]}
+
+person:
+  name: "Person and access"
+  when: "Someone who can sign in, or a key that acts for them: user, role, invite, api key."
+  tracks: [access]
+  abilities:
+    create: {d: now, how: "Invite by email with role chosen; invite expires; api key made by the owner.", src: [Stripe, Notion, GitHub]}
+    edit: {d: now, how: "Change name, role and access; a key can change its name and scope but never its secret.", src: [Stripe, Notion, GitHub]}
+    draft: {d: no, how: "An invite is pending, not a draft; nothing saved half-done.", src: [judge]}
+    view: {d: now, how: "Name, role, last active, access and, for a key, scope, created and last used.", src: [Stripe, GitHub, Notion]}
+    search: {d: now, how: "Name and email; for keys, name and last four characters.", src: [Stripe, Notion, GitHub]}
+    filter: {d: now, how: "Role, status (active, pending, disabled), team.", src: [Stripe, Notion]}
+    sort: {d: now, how: "Name, last active, role.", src: [Notion, GitHub]}
+    group: {d: later, how: "By team or role when teams exist.", src: [Notion, Salesforce]}
+    saved_view: {d: no, how: "The people list is short and filterable; saved views are noise.", src: [judge]}
+    columns: {d: no, how: "Fixed short list; no column choice needed.", src: [judge]}
+    bulk: {d: later, how: "Invite many by paste, change role or remove many on request.", src: [Notion, GitHub]}
+    import: {d: later, how: "People from a directory or csv on larger accounts.", src: [Notion, Salesforce]}
+    export: {d: later, how: "Member list with roles for audit.", src: [GitHub, Notion]}
+    delete: {d: no, how: "Remove access and keep the name on past records; a key is revoked, not erased.", src: [judge]}
+    archive: {d: now, how: "Disable sign-in while keeping history and owned work.", src: [Notion, Salesforce]}
+    restore: {d: now, how: "Re-enable a disabled person with the role they had; revoked keys stay revoked.", src: [Notion, Salesforce]}
+    duplicate: {d: no, how: "Cloning a login or key would clone a secret or an identity.", src: [judge]}
+    version: {d: no, how: "Role changes live in history, not as versions.", src: [judge]}
+    reverse: {d: now, how: "Revoke an invite or key at once; effect shows immediately.", src: [Stripe, GitHub]}
+    print_pdf: {d: no, how: "No paper form of a login.", src: [judge]}
+    share_link: {d: later, how: "Invite link per team on request; expires and can be revoked.", src: [Notion, Slack]}
+    preview: {d: later, how: "View as a role, to check what it sees.", src: [Salesforce, Shopify]}
+    assign: {d: now, how: "Role and team set per person; one person may hold several roles.", src: [Stripe, Notion, Salesforce]}
+    approve: {d: later, how: "Admin approval for requests to join, on larger accounts.", src: [Notion, Slack]}
+    comment: {d: no, how: "Notes about people belong in HR tools, not here.", src: [judge]}
+    attach: {d: no, how: "Only an avatar image; nothing else is attached.", src: [judge]}
+    tag: {d: later, how: "Groups or teams stand in for tags.", src: [Notion]}
+    follow: {d: no, how: "You do not follow a colleague's login.", src: [judge]}
+    remind: {d: later, how: "Alert admins before an api key or invite expires.", src: [GitHub, Stripe]}
+    schedule: {d: now, how: "Invite and key expiry dates; optional scheduled removal.", src: [GitHub, Stripe]}
+    history: {d: now, how: "Role changes, sign-ins, key creation and use, kept for audit.", src: [Stripe, GitHub, Salesforce]}
+    custom_fields: {d: later, how: "Job title, phone and department on request.", src: [Salesforce, Notion]}
+    merge: {d: no, how: "Two logins are never merged; move work to one and disable the other.", src: [judge]}
+    link_related: {d: now, how: "Shows what the person owns, their teams and recent activity.", src: [Salesforce, Notion]}
+    notify: {d: now, how: "Invite email, sign-in from new place, role change, key about to expire.", src: [Stripe, GitHub, Notion]}
+    api: {d: now, how: "Manage people and keys by api; secrets are shown only once.", src: [Stripe, GitHub, Salesforce]}
+    webhook: {d: later, how: "Member added, removed and role-changed events.", src: [GitHub, Slack]}
+  questions:
+    secret: {q: "Is the key or password shown only once, and how is it stored?", case: "Stripe and GitHub show tokens once at creation", src: [Stripe, GitHub]}
+    scope: {q: "What can this role or key do, down to which actions and records?", case: "Shopify staff permissions; GitHub fine-grained tokens", src: [Shopify, GitHub]}
+    expiry: {q: "When does an invite or key expire, and is expiry required?", case: "Stripe invites expire in 10 days; GitHub token expiry", src: [Stripe, GitHub]}
+    last: {q: "Who is the last owner, and what stops removing them?", case: "Notion sole-admin workspace rule", src: [Notion]}
+    leave: {q: "When a person is removed, what happens to their work and their keys?", case: "Notion member removal; GitHub token revoke", src: [Notion, GitHub]}
+    proof: {q: "How does the person prove who they are: password, link, second step?", case: "Stripe login with two-step", src: [Stripe, GitHub]}
+    layers: {q: "Which layers decide access: account, object, field, record?", case: "Salesforce four permission layers", src: [Salesforce]}
+    audit: {q: "Which actions by this person or key are logged and for how long?", case: "Stripe and GitHub audit logs", src: [Stripe, GitHub]}
+
+setting:
+  name: "Setting"
+  when: "Owner-defined rules and lists that shape how other things behave: plan, tax rate, category, template."
+  tracks: []
+  abilities:
+    create: {d: now, how: "Simple form with the few fields that matter; a list entry can also be added inline.", src: [Shopify, Lago, Invoice Ninja]}
+    edit: {d: now, how: "Editable, but the screen says what a change affects; past records keep what they used.", src: [Lago, Stripe, Shopify]}
+    draft: {d: later, how: "Plans and templates may be drafted and published on request; most settings save at once.", src: [Lago, Stripe]}
+    view: {d: now, how: "Value, where it is used, and when and by whom it last changed.", src: [Lago, Shopify, Invoice Ninja]}
+    search: {d: later, how: "Only when the list passes a screen.", src: [judge]}
+    filter: {d: later, how: "Active, archived and type, once lists grow.", src: [Lago, Stripe]}
+    sort: {d: now, how: "Manual order where order shows to users, otherwise name.", src: [Shopify, Stripe]}
+    group: {d: no, how: "Settings are short lists; grouping is a heading, not an ability.", src: [judge]}
+    saved_view: {d: no, how: "Lists are short and not worth saving views for.", src: [judge]}
+    columns: {d: no, how: "Fixed columns; the list is too short to need choice.", src: [judge]}
+    bulk: {d: later, how: "Bulk archive or reorder on request.", src: [Shopify]}
+    import: {d: later, how: "Tax rates or category trees from csv on request.", src: [Shopify, Zoho]}
+    export: {d: later, how: "Config out for backup or copy between accounts on request.", src: [Salesforce, Shopify]}
+    delete: {d: now, how: "Only if unused; otherwise archive, because old records still point to it.", src: [Lago, Stripe, Invoice Ninja]}
+    archive: {d: now, how: "Hidden from new use, still shown on old records.", src: [Stripe, Lago, Invoice Ninja]}
+    restore: {d: now, how: "Archived entry becomes usable again with the same id.", src: [Stripe, Lago]}
+    duplicate: {d: now, how: "Copy a plan or template as a starting point; name must change.", src: [Shopify, Stripe, Zoho]}
+    version: {d: now, how: "Money-affecting settings keep dated values so old documents compute the same.", src: [Stripe, Lago, Saleor]}
+    reverse: {d: no, how: "A setting is changed forward, not reversed.", src: [judge]}
+    print_pdf: {d: no, how: "Only templates have a printed form, and that belongs to the document.", src: [judge]}
+    share_link: {d: no, how: "Settings are internal.", src: [judge]}
+    preview: {d: now, how: "Templates and tax rules show a sample result before saving.", src: [Stripe, Invoice Ninja, Shopify]}
+    assign: {d: no, how: "A setting belongs to the account, not a person.", src: [judge]}
+    approve: {d: later, how: "Second-person approval for tax or price rule changes on bigger teams.", src: [Salesforce, ERPNext]}
+    comment: {d: no, how: "A description field is enough.", src: [judge]}
+    attach: {d: no, how: "Not a place for files; template images sit in the template itself.", src: [judge]}
+    tag: {d: no, how: "Settings are structure, not things to label.", src: [judge]}
+    follow: {d: no, how: "No one watches a setting.", src: [judge]}
+    remind: {d: later, how: "Alert when a tax rate or contract end date nears.", src: [Zoho]}
+    schedule: {d: now, how: "A new value can start on a set date; old records keep the old one.", src: [Stripe, Lago]}
+    history: {d: now, how: "Who changed which setting, from what to what, and when.", src: [Salesforce, Shopify, Lago]}
+    custom_fields: {d: no, how: "Settings are the structure that custom fields themselves are built from.", src: [judge]}
+    merge: {d: later, how: "Join duplicate categories by moving members to one; the other is archived.", src: [Shopify, Zendesk]}
+    link_related: {d: now, how: "Shows what uses it, such as customers on a plan or products in a category.", src: [Lago, Shopify]}
+    notify: {d: later, how: "Alert admins on changes to sensitive settings.", src: [Salesforce, Shopify]}
+    api: {d: now, how: "Read and write, so teams can keep settings in sync across accounts.", src: [Stripe, Lago, Shopify]}
+    webhook: {d: later, how: "Created, updated and archived events for synced tools.", src: [Stripe, Lago]}
+  questions:
+    scope: {q: "Does it apply to the whole account, one site, one customer or one record?", case: "Lago per-customer plan override; billing entities", src: [Lago]}
+    used: {q: "What already uses it, and what happens to those when it changes?", case: "Stripe prices are immutable once used", src: [Stripe, Lago]}
+    default: {q: "Is there a default, and who can change which one it is?", case: "Shopify default tax and shipping", src: [Shopify, Invoice Ninja]}
+    effective: {q: "From when does a change apply, and can it start later?", case: "Lago plan changes at next period", src: [Lago, Stripe]}
+    order: {q: "Does order matter, and who can reorder?", case: "Stripe price and plan order; Shopify menu order", src: [Stripe, Shopify]}
+    who: {q: "Who may see and change it?", case: "Salesforce setup permissions; Shopify staff permissions", src: [Salesforce, Shopify]}
+    limit: {q: "Is there a count or value limit, and is it set per plan?", case: "Shopify variant limit 2,048; Salesforce governor limits", src: [Shopify, Salesforce]}
+
+connection:
+  name: "Connection"
+  when: "A link from this product to an outside service, holding a secret and a health: payment gateway, email, calendar, accounting, webhook endpoint."
+  tracks: [connection]
+  abilities:
+    create: {d: now, how: "Connect by sign-in screen where the service has one, or by pasting keys; test it before saving.", src: [Shopify, Stripe, Cal.com, Chatwoot]}
+    edit: {d: now, how: "Change name, scope and settings; change the secret by replacing it, never by reading it back.", src: [Stripe, Shopify, Cal.com]}
+    draft: {d: no, how: "It is connected, failed or disconnected; half-saved connections confuse health.", src: [judge]}
+    view: {d: now, how: "Service, account name, state, last success, last error and what it is used for.", src: [Stripe, Shopify, Cal.com]}
+    search: {d: later, how: "Only when many connections exist.", src: [judge]}
+    filter: {d: later, how: "By service and state, when many exist.", src: [Stripe, Shopify]}
+    sort: {d: no, how: "There are few; order by service name.", src: [judge]}
+    group: {d: no, how: "There are few; group by service in the page layout.", src: [judge]}
+    saved_view: {d: no, how: "Not worth saving for a short list.", src: [judge]}
+    columns: {d: no, how: "Fixed short list.", src: [judge]}
+    bulk: {d: no, how: "Each connection has its own secret and risk; none are changed in bulk.", src: [judge]}
+    import: {d: no, how: "Secrets are never imported from a file.", src: [judge]}
+    export: {d: no, how: "Secrets are never exported; settings may be copied without them.", src: [judge]}
+    delete: {d: now, how: "Disconnect revokes at the other end where possible, and says what stops working.", src: [Stripe, Shopify, Cal.com]}
+    archive: {d: no, how: "A disabled connection is the same as paused.", src: [judge]}
+    restore: {d: now, how: "Reconnect the same service again, restoring the mapping and past ids.", src: [Stripe, Cal.com]}
+    duplicate: {d: no, how: "A copy would share or clone a secret.", src: [judge]}
+    version: {d: no, how: "Secrets rotate; there is no version to read.", src: [judge]}
+    reverse: {d: no, how: "Calls made out cannot be recalled; disconnect only stops new ones.", src: [judge]}
+    print_pdf: {d: no, how: "Nothing to print.", src: [judge]}
+    share_link: {d: no, how: "Never shared.", src: [judge]}
+    preview: {d: now, how: "Send a test event or fetch a sample, and show the result.", src: [Stripe, Cal.com]}
+    assign: {d: later, how: "Owner of the connection who gets failure alerts.", src: [Salesforce]}
+    approve: {d: later, how: "Admin approval before a person adds one on larger accounts.", src: [Slack, Salesforce]}
+    comment: {d: no, how: "A description field is enough.", src: [judge]}
+    attach: {d: no, how: "Not for files.", src: [judge]}
+    tag: {d: no, how: "Few records; not needed.", src: [judge]}
+    follow: {d: no, how: "Alerts go by role, not by watching.", src: [judge]}
+    remind: {d: now, how: "Alert before a token expires or when sign-in is revoked at the other end.", src: [GitHub, Shopify, Cal.com]}
+    schedule: {d: later, how: "Sync timing choices such as every hour or daily.", src: [Zoho, Cal.com]}
+    history: {d: now, how: "Connected, tested, failed, rotated, disconnected, with who and when; calls recorded with result.", src: [Stripe, Shopify]}
+    custom_fields: {d: no, how: "Setup is fixed by the service.", src: [judge]}
+    merge: {d: no, how: "One connection per account per service.", src: [judge]}
+    link_related: {d: now, how: "Shows what uses it and the recent calls and failures.", src: [Stripe, Shopify]}
+    notify: {d: now, how: "Admin alert when it fails, expires or is revoked at the other end.", src: [Stripe, Shopify, Cal.com]}
+    api: {d: now, how: "Read state and create or remove connections; secrets are write-only.", src: [Stripe, Shopify]}
+    webhook: {d: now, how: "Connected, failed and disconnected events, plus the connection's own incoming and outgoing deliveries.", src: [Stripe, Shopify, Cal.com]}
+  questions:
+    secret: {q: "Where is the secret kept, who can see it, and can it be rotated without downtime?", case: "Stripe keys can be rolled; Shopify access scopes", src: [Stripe, Shopify]}
+    scope: {q: "What may this link read and write, and is it the least needed?", case: "Shopify has 156 access scopes", src: [Shopify]}
+    health: {q: "How do we know it works, and what is shown when it fails?", case: "Stripe webhook delivery log and retries", src: [Stripe]}
+    direction: {q: "Does data go in, out or both, and which side wins on conflict?", case: "Cal.com calendar sync read and write", src: [Cal.com]}
+    retry: {q: "When a call fails, how often and how long does it retry, and what is shown at the end?", case: "Stripe webhooks retry with backoff", src: [Stripe]}
+    gone: {q: "When the outside service revokes it, what do users see and what stops?", case: "GitHub token expiry; Shopify app uninstall", src: [GitHub, Shopify]}
+    limits: {q: "What rate limit and plan limit does the other side impose?", case: "Salesforce API limits per 24 hours", src: [Salesforce]}
+    test: {q: "Is there a test mode or sandbox, and can it be told from live?", case: "Stripe test mode", src: [Stripe]}
+
+job:
+  name: "Job"
+  when: "Work the system does in the background that takes time and ends with a result: import, export, sync run."
+  tracks: [run]
+  abilities:
+    create: {d: now, how: "Started by a person from an import, export or sync button, or by a schedule or event.", src: [Chatwoot, Shopify, Salesforce]}
+    edit: {d: no, how: "A run is a record of what happened; a new run is made instead.", src: [judge]}
+    draft: {d: now, how: "Import shows a validation step with errors before it starts; the run itself has no draft.", src: [Twenty, Chatwoot, Invoice Ninja]}
+    view: {d: now, how: "State, progress count, started, ended, who started it, errors, and result file or log.", src: [Chatwoot, Shopify, Salesforce]}
+    search: {d: later, how: "Only when runs are many; by name or file.", src: [judge]}
+    filter: {d: now, how: "By type, state, person and date; failed runs first.", src: [Chatwoot, Shopify]}
+    sort: {d: now, how: "Newest first.", src: [Chatwoot, Shopify]}
+    group: {d: no, how: "A flat history is enough.", src: [judge]}
+    saved_view: {d: no, how: "Not worth saving.", src: [judge]}
+    columns: {d: no, how: "Fixed short list.", src: [judge]}
+    bulk: {d: later, how: "Cancel or retry many runs on request.", src: [Salesforce, Shopify]}
+    import: {d: no, how: "A run is not imported; its file is what is imported.", src: [judge]}
+    export: {d: later, how: "Run log as a csv for support.", src: [Chatwoot]}
+    delete: {d: now, how: "Old run logs are cleared by age; results files expire and the screen says so.", src: [Shopify, Salesforce]}
+    archive: {d: no, how: "Old runs age out instead.", src: [judge]}
+    restore: {d: no, how: "Cleared logs do not come back.", src: [judge]}
+    duplicate: {d: now, how: "Run again with the same settings, as a new run.", src: [Chatwoot, Salesforce]}
+    version: {d: no, how: "Each run is its own record.", src: [judge]}
+    reverse: {d: now, how: "Cancel while running; for an import, undo the batch where rows are traceable.", src: [Chatwoot, Shopify]}
+    print_pdf: {d: no, how: "Not a document.", src: [judge]}
+    share_link: {d: later, how: "Expiring link to the result file for the person who asked.", src: [Shopify]}
+    preview: {d: now, how: "Import shows what will be created, changed or skipped before it starts.", src: [Twenty, Chatwoot, Invoice Ninja]}
+    assign: {d: no, how: "It belongs to the person who started it.", src: [judge]}
+    approve: {d: later, how: "Large exports or deletes may need a second person.", src: [Salesforce]}
+    comment: {d: no, how: "A log is not a thread.", src: [judge]}
+    attach: {d: now, how: "Result and rejected-rows file attached to the run.", src: [Chatwoot, Shopify, Twenty]}
+    tag: {d: no, how: "Not needed.", src: [judge]}
+    follow: {d: no, how: "The starter is told; others do not follow runs.", src: [judge]}
+    remind: {d: no, how: "A run asks for no reminder; failures alert.", src: [judge]}
+    schedule: {d: now, how: "Recurring runs with next time shown, and a pause switch.", src: [Salesforce, Zoho]}
+    history: {d: now, how: "Every state, with time and row counts; rejected rows kept.", src: [Chatwoot, Shopify]}
+    custom_fields: {d: no, how: "Fixed fields.", src: [judge]}
+    merge: {d: no, how: "Runs are not merged.", src: [judge]}
+    link_related: {d: now, how: "Shows what it touched, the file, and the connection used.", src: [Chatwoot, Salesforce]}
+    notify: {d: now, how: "Starter told on finish or failure by email or in-app; large exports by email.", src: [Shopify, Chatwoot, Twenty]}
+    api: {d: now, how: "Start a run, poll its state, download the result.", src: [Shopify, Salesforce, Chatwoot]}
+    webhook: {d: now, how: "Finished and failed events so other tools can pick up.", src: [Shopify, Chatwoot]}
+  questions:
+    size: {q: "What is the biggest it can handle, and what happens beyond that?", case: "Twenty exports at most 20,000 records; Shopify emails large exports", src: [Twenty, Shopify]}
+    fail: {q: "If some rows or steps fail, do others go through, and where are failures listed?", case: "Chatwoot rejected_rows; Salesforce bulk results", src: [Chatwoot, Salesforce]}
+    again: {q: "Is running it twice safe, and what stops duplicates?", case: "Twenty import needs unique email; Stripe idempotency keys", src: [Twenty, Stripe]}
+    progress: {q: "What shows while it runs, and can it be stopped?", case: "Chatwoot data_imports start and abandon", src: [Chatwoot]}
+    who: {q: "Who may start it, and which records does it see?", case: "Twenty needs Export CSV permission", src: [Twenty]}
+    result: {q: "Where is the result kept and for how long?", case: "Shopify bulk results expire in a week", src: [Shopify]}
+    limit: {q: "How many may run at once?", case: "Shopify allows 5 bulk queries per app per shop", src: [Shopify]}
+    timing: {q: "What if it runs while people edit the same records?", case: "Salesforce bulk and locking limits", src: [Salesforce]}
+
+report:
+  name: "Report"
+  when: "A read-only view that counts, sums or lists other records over time: report, log, metric."
+  tracks: []
+  abilities:
+    create: {d: now, how: "Pick from a catalogue of ready reports; custom ones come by saving filters and columns.", src: [Stripe, Shopify, Invoice Ninja]}
+    edit: {d: now, how: "Change filters, grouping and columns of a saved report; ready ones are copied first.", src: [Salesforce, Shopify]}
+    draft: {d: no, how: "A report is run or not; nothing is saved half done.", src: [judge]}
+    view: {d: now, how: "Figure or table, period choice, comparison to the last period, and the rows behind each figure.", src: [Stripe, Shopify, Lago]}
+    search: {d: later, how: "Search inside a long log; report list by name.", src: [Stripe, Shopify]}
+    filter: {d: now, how: "Date range, and the main dimensions such as customer, product, staff.", src: [Stripe, Shopify, Invoice Ninja]}
+    sort: {d: now, how: "Click column heads; default is the figure people rank by.", src: [Shopify, Invoice Ninja]}
+    group: {d: now, how: "Group by day, week, month or a dimension.", src: [Shopify, Stripe, Salesforce]}
+    saved_view: {d: now, how: "Save as a named report, shareable.", src: [Shopify, Salesforce, Stripe]}
+    columns: {d: now, how: "Choose and order columns.", src: [Shopify, Invoice Ninja, Salesforce]}
+    bulk: {d: no, how: "Nothing to change in bulk; the report only reads.", src: [judge]}
+    import: {d: no, how: "A report is not imported.", src: [judge]}
+    export: {d: now, how: "CSV and PDF of exactly what is on screen, with date and filters printed.", src: [Stripe, Shopify, Invoice Ninja]}
+    delete: {d: now, how: "Saved custom reports can be removed; ready ones cannot.", src: [Salesforce, Shopify]}
+    archive: {d: no, how: "Delete it or leave it; there is no middle state.", src: [judge]}
+    restore: {d: no, how: "Saved report is re-made from filters.", src: [judge]}
+    duplicate: {d: now, how: "Copy a saved report to change it.", src: [Salesforce, Shopify]}
+    version: {d: no, how: "The figures change with data; old figures come back by choosing the date.", src: [judge]}
+    reverse: {d: no, how: "Nothing to reverse.", src: [judge]}
+    print_pdf: {d: now, how: "PDF with title, period, filters and run time on it.", src: [Stripe, Invoice Ninja, ERPNext]}
+    share_link: {d: later, how: "Expiring link to a report for an outsider such as an accountant.", src: [Shopify, Stripe]}
+    preview: {d: no, how: "A report on screen is already the preview.", src: [judge]}
+    assign: {d: no, how: "A saved report has a creator; no one is assigned.", src: [judge]}
+    approve: {d: no, how: "Nothing to approve; reports only read.", src: [judge]}
+    comment: {d: no, how: "Comments belong on the record, not on the figures.", src: [judge]}
+    attach: {d: no, how: "Not for files.", src: [judge]}
+    tag: {d: later, how: "Folders or tags for many saved reports.", src: [Salesforce]}
+    follow: {d: later, how: "Subscribe to a report by email; it is the usual form of following.", src: [Shopify, Salesforce]}
+    remind: {d: later, how: "Alert when a figure crosses a line, on request.", src: [Stripe, Lago]}
+    schedule: {d: now, how: "Email a report daily, weekly or monthly to chosen people.", src: [Salesforce, Shopify, Stripe]}
+    history: {d: now, how: "Who ran, exported or changed a saved report; for a log, every event.", src: [Salesforce, Invoice Ninja]}
+    custom_fields: {d: later, how: "Owner fields appear as columns and filters once they exist.", src: [Shopify, Salesforce]}
+    merge: {d: no, how: "Reports are not merged.", src: [judge]}
+    link_related: {d: now, how: "Every figure opens the rows behind it.", src: [Stripe, Shopify, Lago]}
+    notify: {d: later, how: "Scheduled mail only; no other alerts.", src: [judge]}
+    api: {d: now, how: "Run a report and read rows or figures through api.", src: [Stripe, Salesforce, Shopify]}
+    webhook: {d: later, how: "Report-ready event for large reports run in the background.", src: [Stripe]}
+  questions:
+    definition: {q: "How is each figure worked out, and where is that stated on screen?", case: "Stripe and Shopify show definitions beside figures", src: [Stripe, Shopify]}
+    period: {q: "What default period, which timezone, and how are boundaries counted?", case: "Shopify shop timezone; Lago billing periods", src: [Shopify, Lago]}
+    fresh: {q: "How old can the data be, and is that shown?", case: "Stripe Sigma data freshness note", src: [Stripe]}
+    drill: {q: "Does each figure open the rows behind it, and do those rows add up to it?", case: "Stripe report rows; Lago invoices", src: [Stripe, Lago]}
+    who: {q: "Who may see which figures, such as money or other staff's work?", case: "Salesforce report folders and sharing", src: [Salesforce]}
+    big: {q: "What happens when the report is huge: limit, background run, emailed file?", case: "Shopify emails exports over 50 rows", src: [Shopify]}
+    money: {q: "Which currency and tax treatment do the sums use?", case: "Stripe reports by currency; Invoice Ninja tax summary", src: [Stripe, Invoice Ninja]}
+    log: {q: "For logs, how long are they kept, and can they be edited?", case: "Stripe and Salesforce audit retention", src: [Stripe, Salesforce]}
+
+other:
+  name: "Other"
+  when: "Does not fit any other kind. Write the kind plainly and answer every ability yourself."
+  tracks: []
+  abilities:
+    create: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    edit: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    draft: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    view: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    search: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    filter: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    sort: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    group: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    saved_view: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    columns: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    bulk: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    import: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    export: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    delete: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    archive: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    restore: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    duplicate: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    version: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    reverse: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    print_pdf: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    share_link: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    preview: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    assign: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    approve: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    comment: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    attach: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    tag: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    follow: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    remind: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    schedule: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    history: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    custom_fields: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    merge: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    link_related: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    notify: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    api: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+    webhook: {d: room, how: "Decide it for this object; leave space in the design until it is answered.", src: [judge]}
+  questions:
+    what: {q: "What is it in one plain line, and who uses it?", case: "none; no outside example", src: [judge]}
+    states: {q: "Does it go through states, and which are final?", case: "none", src: [judge]}
+    remove: {q: "What happens when it is removed?", case: "none", src: [judge]}
+    who: {q: "Who may see and change it?", case: "none", src: [judge]}
+    kind: {q: "Which of the other kinds is it closest to, and which of its answers differ?", case: "none", src: [judge]}

@@ -1,0 +1,78 @@
+id: expense
+name: Expense
+module: billing
+kinds: [master]
+why: money a firm spent for a customer and bills back on an invoice line. MAYBE WAVE 1, the owner decides before the build (question Q5); every answer below is marked room until then
+links:
+  - {to: customer, on_delete: "blocked while any expense is billable to the customer; archive the customer instead"}
+  - {to: invoice, on_delete: "a billed expense points at the invoice that holds its line; voiding the invoice or deleting its draft returns it to billable"}
+abilities:
+  edit: {d: room, how: "An expense is edited until it is billed; a billed expense is locked.", e: [wide:D043]}
+  archive: {d: no, how: "Nothing is archived; an open entry is deleted and a billed one is locked.", e: [judge]}
+  restore: {d: no, how: "Nothing is archived, so nothing is restored; a deleted row is gone after its confirm.", e: [judge]}
+  link_related: {d: room, how: "Beside a row: its customer, its invoice and the history of who changed it.", e: [judge]}
+  import: {d: no, how: "Rows are typed in one at a time; a spreadsheet import of old hours or old spend is not offered.", e: [judge]}
+  delete: {d: room, how: "Only an expense that is not billed, by owner or accountant after a confirm; a billed expense cannot be deleted.", e: [wide:D037]}
+  duplicate: {d: no, how: "Copying an expense is minor; the form remembers the last vendor and category.", e: [judge]}
+  merge: {d: no, how: "Expenses are never joined.", e: [judge]}
+  saved_view: {d: no, how: "Filters by category, vendor, date and billable are enough.", e: [wide:D031]}
+  columns: {d: no, how: "Fixed columns: date, vendor, category, amount, customer, state.", e: [wide:D031]}
+  bulk: {d: no, how: "Bulk expense edits are bookkeeping, not billing.", e: [wide:D036]}
+  export: {d: no, how: "The full firm export carries expenses.", e: [judge]}
+  tag: {d: no, how: "Expenses carry no tags because the category and the customer already group them.", e: [judge]}
+  comment: {d: no, how: "The notes field is the only text.", e: [judge]}
+  attach: {d: room, how: "A receipt of JPG, PNG or PDF up to 5 MB, 3 files per expense, stored under the firm's path and shown only to the firm unless the line says Show receipt.", e: [wide:D034, wide:B200]}
+  custom_fields: {d: no, how: "The fixed fields cover re-billing and nothing else is asked for.", e: [judge]}
+  api: {d: later, how: "Expenses by API come with the API.", e: [judge]}
+  webhook: {d: later, how: "Expense events come with the API.", e: [judge]}
+answers:
+  identity: {a: "No uniqueness; the same vendor, amount and date twice shows a warning with a link to the earlier row and does not block.", e: [wide:D031]}
+  snapshot: {a: "When billed, the line copies the description, amount, markup and tax treatment; later edits are refused because a billed expense is locked.", e: [wide:D037]}
+  remove: {a: "A billed expense cannot be deleted; an unbilled one is deleted after a confirm.", e: [wide:D037]}
+  owner: {a: "The firm owns it. Owner and accountant create, mark billable and bill; staff may add their own and cannot mark them billable; a viewer sees none.", e: [judge]}
+  contacts: {a: "One vendor name as text, not a vendor record; vendor books belong to the accountant.", e: [wide:D040]}
+  code: {a: "No code; an expense is found by vendor, date and customer.", e: [judge]}
+  inactive: {a: "Expenses of an archived customer stay readable and can still be billed on a draft.", e: [judge]}
+tracks:
+  lifecycle:
+    states: [{id: active, start: true}, {id: archived}]
+    moves:
+      - {do: put_away, from: active, to: archived, who: [owner, accountant], effect: "leaves the default list", reverse: "bring_back", notify: none, e: [judge]}
+      - {do: bring_back, from: archived, to: active, who: [owner, accountant], effect: "returns to the list", reverse: "put_away", notify: none, e: [judge]}
+  billing:
+    states: [{id: recorded, start: true}, {id: billable}, {id: billed}]
+    moves:
+      - {do: mark_billable, from: recorded, to: billable, who: [owner, accountant], guard: "a customer chosen, amount above 0, a receipt attached", effect: "appears under Expenses to bill for that customer", reverse: "unmark_billable", notify: none, e: [wide:D032, wide:A028]}
+      - {do: unmark_billable, from: billable, to: recorded, who: [owner, accountant], guard: "not billed", effect: "leaves the customer's unbilled list", reverse: "mark_billable", notify: none, e: [wide:D032]}
+      - {do: bill, from: billable, to: billed, who: [owner, accountant, staff], guard: "added to a draft invoice of the same customer by Add expenses; a line is taxable at the service's rate unless the three pure-agent ticks are all on (R68)", effect: "locked and shows the invoice number; billed twice is refused", reverse: "release", notify: none, e: [wide:A028, wide:A118, wide:A119, wide:D033, wide:D037]}
+      - {do: release, from: billed, to: billable, who: [system], guard: "the invoice is voided or its draft is deleted", effect: "back to billable and free to bill again", reverse: "bill", notify: none, e: [wide:D037]}
+fields:
+  - {id: date, type: date, required: true, edit: "owner and accountant while not billed", msg: "Choose the day you paid, not in the future."}
+  - {id: vendor, type: text, required: true, limit: 120, edit: "owner and accountant while not billed", msg: "Enter who you paid, up to 120 letters."}
+  - {id: category, type: choice, required: false, edit: "owner and accountant while not billed", msg: "Choose travel, software, printing, government fees or other."}
+  - {id: amount, type: money, required: true, limit: 9999999.99, edit: "owner and accountant while not billed", msg: "Amount is above 0 and up to 99,99,999.99 with 2 decimals."}
+  - {id: gst_paid, type: money, required: false, limit: 9999999.99, edit: "owner and accountant while not billed", msg: "GST paid is 0 or more and not above the amount."}
+  - {id: customer, type: link, required: false, edit: "owner and accountant while not billed", msg: "Choose the customer to bill."}
+  - {id: markup_percent, type: number, required: false, limit: 100, default: 0, edit: "owner and accountant while not billed", msg: "Markup is 0 to 100 percent, and must be 0 for a pure agent line."}
+  - {id: pure_agent_receipt, type: bool, required: false, default: false, edit: "owner and accountant while not billed", msg: "Tick only if the supplier's receipt is kept."}
+  - {id: pure_agent_authorised, type: bool, required: false, default: false, edit: "owner and accountant while not billed", msg: "Tick only if the customer authorised you to pay on their behalf."}
+  - {id: pure_agent_no_markup, type: bool, required: false, default: false, edit: "owner and accountant while not billed", msg: "Tick only if you bill the exact cost with no markup."}
+  - {id: notes, type: long_text, required: false, limit: 300, edit: "owner and accountant", msg: "Notes are up to 300 characters."}
+  - {id: invoice, type: link, required: false, edit: "nobody", auto: true}
+fields_e: [wide:D031, wide:A119, wide:D033]
+list:
+  search: [vendor, notes]
+  filters: [lifecycle, billing, customer, category]
+  sorts: [-date, vendor, -amount]
+  default_sort: -date
+  columns: [date, vendor, category, amount, customer, state]
+  page: 50
+  e: [wide:D031]
+volume: {y1: 60000, y3: 600000}
+queries:
+  - {id: active_newest, filters: [lifecycle], sort: [-date], index: [tenant, lifecycle, date], p95: 100 ms}
+  - {id: by_date, filters: [billing], sort: [-date], index: [tenant, billing, date], p95: 100 ms}
+  - {id: by_category, filters: [billing, category], sort: [-date], index: [tenant, billing, category, date], p95: 100 ms}
+  - {id: by_vendor, filters: [billing], sort: [vendor], index: [tenant, billing, vendor], p95: 100 ms}
+  - {id: biggest, filters: [billing], sort: [-amount], index: [tenant, billing, amount], p95: 100 ms}
+  - {id: by_customer, filters: [billing, customer], sort: [-date], index: [tenant, billing, customer, date], p95: 100 ms}

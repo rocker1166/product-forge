@@ -1,0 +1,14 @@
+# Fixed lists the checker uses.
+moments: {first_hour: "first hour", daily: "a normal day", busy: "a busy day", mistake: "a mistake to fix", month_end: "month end", handover: "handing over to a colleague", leaving: "leaving with the data"}
+areas: {signin: "sign-in and accounts", payments: "taking or paying money", messaging: "email, chat, phone", accounting: "books and tax", move_in: "bringing old data in", move_out: "taking data out", api: "other software"}
+# own: text must be written for that screen. Others may come from screens.yaml defaults.
+screen_states:
+  list:   {own: [first_use, no_match], shared: [loading, error, denied, read_only, plan_locked, big, phone]}
+  detail: {own: [], shared: [loading, error, denied, not_found, read_only, phone]}
+  form:   {own: [done], shared: [invalid, saving, failed, leave, denied, phone]}
+  other:  {own: [], shared: [loading, error, denied, phone]}
+# Kinds that disagree on these need a written decision. For the rest the fuller answer wins.
+decide: [edit, delete, restore, archive, merge, reverse, duplicate, import]
+# Only a long list needs these.
+big_list_only: [saved_view, columns, group, bulk]
+limits: {objects: 25, pages: 60, judge: 0.25, big_list: 5000}

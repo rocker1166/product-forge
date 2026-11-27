@@ -1,0 +1,39 @@
+# Every object answers every ability. The kind gives the default; the object writes only what differs.
+# on: where a person does it. list, detail and form screens cover their own abilities.
+create:        {on: form,   ask: "Who makes one, and from where?"}
+edit:          {on: form,   ask: "What can change, when, by whom?"}
+draft:         {on: form,   ask: "Can it be saved half done?"}
+view:          {on: list,   ask: "What does the record page show first?"}
+search:        {on: list,   ask: "Which words find it?"}
+filter:        {on: list,   ask: "How do people narrow a long list?"}
+sort:          {on: list,   ask: "Which orders are needed, and which is default?"}
+group:         {on: list,   ask: "Is it read in groups or as a board?"}
+saved_view:    {on: list,   ask: "Can a useful filter be kept and shared?"}
+columns:       {on: list,   ask: "Can people choose columns?"}
+bulk:          {on: list,   ask: "What is done to many at once, and what if some fail?"}
+import:        {on: list,   ask: "How do old records come in, and how are bad rows fixed?"}
+export:        {on: list,   ask: "Which rows, which columns, which format, what if it is large?"}
+delete:        {on: detail, ask: "May it be removed, and what stops it?"}
+archive:       {on: detail, ask: "How is it put away without losing it?"}
+restore:       {on: detail, ask: "How does it come back, and until when?"}
+duplicate:     {on: detail, ask: "What is copied and what is not?"}
+version:       {on: detail, ask: "Are old versions kept and readable?"}
+reverse:       {on: detail, ask: "How is a mistake cancelled, refunded or undone?"}
+print_pdf:     {on: detail, ask: "Is there a paper or PDF form?"}
+share_link:    {on: detail, ask: "Can an outsider open it, and for how long?"}
+preview:       {on: detail, ask: "Can it be seen as the receiver will see it?"}
+assign:        {on: detail, ask: "Who owns it now: person, team or bot?"}
+approve:       {on: detail, ask: "Does someone have to say yes first?"}
+comment:       {on: detail, ask: "Where do people talk about it, and who can read that?"}
+attach:        {on: detail, ask: "Can files be added, which, how big?"}
+tag:           {on: detail, ask: "Can people label it their own way?"}
+follow:        {on: detail, ask: "Can someone watch it without owning it?"}
+remind:        {on: detail, ask: "What reminder is needed before it is late?"}
+schedule:      {on: detail, ask: "Can it happen later or repeat?"}
+history:       {on: detail, ask: "Who did what and when?"}
+custom_fields: {on: detail, ask: "Can a customer add their own fields?"}
+merge:         {on: detail, ask: "How are duplicates joined?"}
+link_related:  {on: detail, ask: "Which records are shown beside it?"}
+notify:        {on: message, ask: "Who must be told, where, and how do they mute it?"}
+api:           {on: connection, ask: "Can other software read and write it?"}
+webhook:       {on: connection, ask: "Can other software be told when it changes?"}

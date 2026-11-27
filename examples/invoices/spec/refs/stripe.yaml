@@ -1,0 +1,272 @@
+product: stripe
+source: https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json
+format: openapi
+read: 2026-11-25
+objects:
+  credit_note:
+    fields:
+      amount: integer
+      amount_shipping: integer
+      created: integer
+      currency: string
+      customer: any
+      customer_account: string
+      customer_balance_transaction: any
+      discount_amount: integer
+      discount_amounts: array
+      effective_at: integer
+      id: string
+      invoice: any
+      lines: object
+      livemode: boolean
+      memo: string
+      metadata: object
+      number: string
+      object: string
+      out_of_band_amount: integer
+      pdf: string
+      post_payment_amount: integer
+      pre_payment_amount: integer
+      pretax_credit_amounts: array
+      reason: string
+      refunds: array
+      shipping_cost: any
+      status: string
+      subtotal: integer
+      subtotal_excluding_tax: integer
+      total: integer
+      total_excluding_tax: integer
+      total_taxes: array
+      type: string
+      voided_at: integer
+    states:
+      status:
+        - issued
+        - void
+  customer:
+    fields:
+      address: any
+      balance: integer
+      business_name: string
+      cash_balance: any
+      created: integer
+      currency: string
+      customer_account: string
+      default_source: any
+      delinquent: boolean
+      description: string
+      discount: any
+      email: string
+      id: string
+      individual_name: string
+      invoice_credit_balance: object
+      invoice_prefix: string
+      invoice_settings: invoice_setting_customer_setting
+      livemode: boolean
+      metadata: object
+      name: string
+      next_invoice_sequence: integer
+      object: string
+      phone: string
+      preferred_locales: array
+      shipping: any
+      sources: object
+      subscriptions: object
+      tax: customer_tax
+      tax_exempt: string
+      tax_ids: object
+      test_clock: any
+    states: {}
+  invoice:
+    fields:
+      account_country: string
+      account_name: string
+      account_tax_ids: array
+      amount_due: integer
+      amount_overpaid: integer
+      amount_paid: integer
+      amount_paid_off_stripe: integer
+      amount_remaining: integer
+      amount_shipping: integer
+      application: any
+      attempt_count: integer
+      attempted: boolean
+      auto_advance: boolean
+      automatic_tax: automatic_tax
+      automatically_finalizes_at: integer
+      billing_reason: string
+      collection_method: string
+      confirmation_secret: any
+      created: integer
+      currency: string
+      custom_fields: array
+      customer: any
+      customer_account: string
+      customer_address: any
+      customer_email: string
+      customer_name: string
+      customer_phone: string
+      customer_shipping: any
+      customer_tax_exempt: string
+      customer_tax_ids: array
+      default_payment_method: any
+      default_source: any
+      default_tax_rates: array
+      description: string
+      discounts: array
+      due_date: integer
+      effective_at: integer
+      ending_balance: integer
+      footer: string
+      from_invoice: any
+      hosted_invoice_url: string
+      id: string
+      invoice_pdf: string
+      issuer: connect_account_reference
+      last_finalization_error: any
+      latest_revision: any
+      lines: object
+      livemode: boolean
+      metadata: object
+      next_payment_attempt: integer
+      number: string
+      object: string
+      on_behalf_of: any
+      parent: any
+      payment_settings: invoices_payment_settings
+      payments: object
+      period_end: integer
+      period_start: integer
+      post_payment_credit_notes_amount: integer
+      pre_payment_credit_notes_amount: integer
+      receipt_number: string
+      rendering: any
+      shipping_cost: any
+      shipping_details: any
+      starting_balance: integer
+      statement_descriptor: string
+      status: string
+      status_details: invoices_resource_status_details
+      status_transitions: invoices_resource_status_transitions
+      subtotal: integer
+      subtotal_excluding_tax: integer
+      test_clock: any
+      threshold_reason: invoice_threshold_reason
+      total: integer
+      total_discount_amounts: array
+      total_excluding_tax: integer
+      total_pretax_credit_amounts: array
+      total_taxes: array
+      webhooks_delivered_at: integer
+    states:
+      status:
+        - draft
+        - open
+        - paid
+        - uncollectible
+        - void
+actions:
+  - "GET /v1/billing/credit_balance_summary ?customer,customer_account,expand,filter"
+  - "GET /v1/billing/credit_balance_transactions ?credit_grant,customer,customer_account,ending_before,expand,limit,starting_after"
+  - "GET /v1/billing/credit_grants ?customer,customer_account,ending_before,expand,limit,starting_after"
+  - "GET /v1/billing/meters/{id}/event_summaries ?customer,end_time,ending_before,expand,limit,start_time,starting_after,value_grouping_window"
+  - "GET /v1/charges ?created,customer,ending_before,expand,limit,payment_intent,starting_after,transfer_group"
+  - "GET /v1/checkout/sessions ?created,customer,customer_account,customer_details,ending_before,expand,limit,payment_intent,payment_link,starting_after,status,subscription"
+  - "GET /v1/credit_notes ?created,customer,customer_account,ending_before,expand,invoice,limit,starting_after"
+  - POST /v1/credit_notes
+  - "GET /v1/credit_notes/preview ?amount,credit_amount,effective_at,email_type,expand,invoice,lines,memo,metadata,out_of_band_amount,reason,refund_amount,refunds,shipping_cost"
+  - "GET /v1/credit_notes/preview/lines ?amount,credit_amount,effective_at,email_type,ending_before,expand,invoice,limit,lines,memo,metadata,out_of_band_amount,reason,refund_amount,refunds,shipping_cost,starting_after"
+  - "GET /v1/credit_notes/{credit_note}/lines ?ending_before,expand,limit,starting_after"
+  - "GET /v1/credit_notes/{id} ?expand"
+  - "POST /v1/credit_notes/{id}"
+  - "POST /v1/credit_notes/{id}/void"
+  - POST /v1/customer_sessions
+  - "GET /v1/customers ?created,email,ending_before,expand,limit,starting_after,test_clock"
+  - POST /v1/customers
+  - "GET /v1/customers/search ?expand,limit,page,query"
+  - "DELETE /v1/customers/{customer}"
+  - "GET /v1/customers/{customer} ?expand"
+  - "POST /v1/customers/{customer}"
+  - "GET /v1/customers/{customer}/balance_transactions ?created,ending_before,expand,invoice,limit,starting_after"
+  - "POST /v1/customers/{customer}/balance_transactions"
+  - "GET /v1/customers/{customer}/balance_transactions/{transaction} ?expand"
+  - "POST /v1/customers/{customer}/balance_transactions/{transaction}"
+  - "GET /v1/customers/{customer}/bank_accounts ?ending_before,expand,limit,starting_after"
+  - "POST /v1/customers/{customer}/bank_accounts"
+  - "DELETE /v1/customers/{customer}/bank_accounts/{id}"
+  - "GET /v1/customers/{customer}/bank_accounts/{id} ?expand"
+  - "POST /v1/customers/{customer}/bank_accounts/{id}"
+  - "POST /v1/customers/{customer}/bank_accounts/{id}/verify"
+  - "GET /v1/customers/{customer}/cards ?ending_before,expand,limit,starting_after"
+  - "POST /v1/customers/{customer}/cards"
+  - "DELETE /v1/customers/{customer}/cards/{id}"
+  - "GET /v1/customers/{customer}/cards/{id} ?expand"
+  - "POST /v1/customers/{customer}/cards/{id}"
+  - "GET /v1/customers/{customer}/cash_balance ?expand"
+  - "POST /v1/customers/{customer}/cash_balance"
+  - "GET /v1/customers/{customer}/cash_balance_transactions ?ending_before,expand,limit,starting_after"
+  - "GET /v1/customers/{customer}/cash_balance_transactions/{transaction} ?expand"
+  - "DELETE /v1/customers/{customer}/discount"
+  - "GET /v1/customers/{customer}/discount ?expand"
+  - "POST /v1/customers/{customer}/funding_instructions"
+  - "GET /v1/customers/{customer}/payment_methods ?allow_redisplay,ending_before,expand,limit,starting_after,type"
+  - "GET /v1/customers/{customer}/payment_methods/{payment_method} ?expand"
+  - "GET /v1/customers/{customer}/sources ?ending_before,expand,limit,object,starting_after"
+  - "POST /v1/customers/{customer}/sources"
+  - "DELETE /v1/customers/{customer}/sources/{id}"
+  - "GET /v1/customers/{customer}/sources/{id} ?expand"
+  - "POST /v1/customers/{customer}/sources/{id}"
+  - "POST /v1/customers/{customer}/sources/{id}/verify"
+  - "GET /v1/customers/{customer}/subscriptions ?ending_before,expand,limit,starting_after"
+  - "POST /v1/customers/{customer}/subscriptions"
+  - "DELETE /v1/customers/{customer}/subscriptions/{subscription_exposed_id}"
+  - "GET /v1/customers/{customer}/subscriptions/{subscription_exposed_id} ?expand"
+  - "POST /v1/customers/{customer}/subscriptions/{subscription_exposed_id}"
+  - "DELETE /v1/customers/{customer}/subscriptions/{subscription_exposed_id}/discount"
+  - "GET /v1/customers/{customer}/subscriptions/{subscription_exposed_id}/discount ?expand"
+  - "GET /v1/customers/{customer}/tax_ids ?ending_before,expand,limit,starting_after"
+  - "POST /v1/customers/{customer}/tax_ids"
+  - "DELETE /v1/customers/{customer}/tax_ids/{id}"
+  - "GET /v1/customers/{customer}/tax_ids/{id} ?expand"
+  - "GET /v1/entitlements/active_entitlements ?customer,ending_before,expand,limit,starting_after"
+  - "GET /v1/identity/verification_sessions ?client_reference_id,created,ending_before,expand,limit,related_customer,related_customer_account,starting_after,status"
+  - "GET /v1/invoice_payments ?created,ending_before,expand,invoice,limit,payment,starting_after,status"
+  - "GET /v1/invoice_payments/{invoice_payment} ?expand"
+  - "GET /v1/invoice_rendering_templates ?ending_before,expand,limit,starting_after,status"
+  - "GET /v1/invoice_rendering_templates/{template} ?expand,version"
+  - "POST /v1/invoice_rendering_templates/{template}/archive"
+  - "POST /v1/invoice_rendering_templates/{template}/unarchive"
+  - "GET /v1/invoiceitems ?created,customer,customer_account,ending_before,expand,invoice,limit,pending,starting_after"
+  - POST /v1/invoiceitems
+  - "DELETE /v1/invoiceitems/{invoiceitem}"
+  - "GET /v1/invoiceitems/{invoiceitem} ?expand"
+  - "POST /v1/invoiceitems/{invoiceitem}"
+  - "GET /v1/invoices ?collection_method,created,customer,customer_account,due_date,ending_before,expand,limit,starting_after,status,subscription"
+  - POST /v1/invoices
+  - POST /v1/invoices/create_preview
+  - "GET /v1/invoices/search ?expand,limit,page,query"
+  - "DELETE /v1/invoices/{invoice}"
+  - "GET /v1/invoices/{invoice} ?expand"
+  - "POST /v1/invoices/{invoice}"
+  - "POST /v1/invoices/{invoice}/add_lines"
+  - "POST /v1/invoices/{invoice}/attach_payment"
+  - "POST /v1/invoices/{invoice}/finalize"
+  - "GET /v1/invoices/{invoice}/lines ?ending_before,expand,limit,starting_after"
+  - "POST /v1/invoices/{invoice}/lines/{line_item_id}"
+  - "POST /v1/invoices/{invoice}/mark_uncollectible"
+  - "POST /v1/invoices/{invoice}/pay"
+  - "POST /v1/invoices/{invoice}/remove_lines"
+  - "POST /v1/invoices/{invoice}/send"
+  - "POST /v1/invoices/{invoice}/update_lines"
+  - "POST /v1/invoices/{invoice}/void"
+  - "GET /v1/payment_intents ?created,customer,customer_account,ending_before,expand,limit,starting_after"
+  - "POST /v1/payment_intents/{intent}/apply_customer_balance"
+  - "GET /v1/payment_methods ?allow_redisplay,customer,customer_account,ending_before,expand,limit,starting_after,type"
+  - "GET /v1/promotion_codes ?active,code,coupon,created,customer,customer_account,ending_before,expand,limit,starting_after"
+  - "GET /v1/quotes ?customer,customer_account,ending_before,expand,limit,starting_after,status,test_clock"
+  - "GET /v1/setup_intents ?attach_to_self,created,customer,customer_account,ending_before,expand,limit,payment_method,starting_after"
+  - "GET /v1/subscription_schedules ?canceled_at,completed_at,created,customer,customer_account,ending_before,expand,limit,released_at,scheduled,starting_after"
+  - "GET /v1/subscriptions ?automatic_tax,collection_method,created,current_period_end,current_period_start,customer,customer_account,ending_before,expand,limit,price,starting_after,status,test_clock"
+  - "POST /v1/test_helpers/customers/{customer}/fund_cash_balance"
+  - "GET /v1/treasury/outbound_payments ?created,customer,ending_before,expand,financial_account,limit,starting_after,status"
+events: []

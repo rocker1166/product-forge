@@ -1,0 +1,77 @@
+id: time_entry
+name: Time Entry
+module: billing
+kinds: [master]
+why: hours a person spent for a customer; when approved they become invoice lines. MAYBE WAVE 1, the owner decides before the build (question Q5); every answer below is marked room until then
+links:
+  - {to: customer, on_delete: "blocked while any entry exists for the customer; archive the customer instead"}
+  - {to: invoice, on_delete: "a billed entry points at the invoice that holds its line; voiding the invoice or deleting its draft frees the entry"}
+  - {to: item, on_delete: "an entry keeps the task name it was saved with; an archived service stays on old entries"}
+  - {to: user, on_delete: "a person who leaves keeps their entries under their name"}
+abilities:
+  edit: {d: room, how: "Its maker edits an open entry; an approved or billed entry is changed only after it is unapproved or freed.", e: [wide:D043]}
+  archive: {d: no, how: "Nothing is archived; an open entry is deleted and a billed one is locked.", e: [judge]}
+  restore: {d: no, how: "Nothing is archived, so nothing is restored; a deleted row is gone after its confirm.", e: [judge]}
+  link_related: {d: room, how: "Beside a row: its customer, its invoice and the history of who changed it.", e: [judge]}
+  import: {d: no, how: "Rows are typed in one at a time; a spreadsheet import of old hours or old spend is not offered.", e: [judge]}
+  delete: {d: room, how: "Only an open entry, by its maker or an owner or accountant; a billed entry cannot be deleted.", e: [wide:D043, wide:D047]}
+  duplicate: {d: no, how: "Copying an entry is minor; the form remembers the last customer and task.", e: [judge]}
+  merge: {d: no, how: "Entries are never joined; the bill step groups them.", e: [judge]}
+  saved_view: {d: no, how: "Filters by person, customer, week, billable and billed state are enough.", e: [wide:D048]}
+  columns: {d: no, how: "Fixed columns: date, person, customer, task, hours, rate, state.", e: [wide:D048]}
+  bulk: {d: room, how: "Approve and bill several selected entries at once; the result says how many were done and lists the rows it skipped with the reason.", e: [wide:A027, wide:D050]}
+  export: {d: room, how: "A CSV with date, person, customer, task, hours, rate, amount and invoice number.", e: [wide:D050]}
+  tag: {d: no, how: "Entries carry no tags because the customer and the task already group them.", e: [judge]}
+  comment: {d: no, how: "The note field is the only text.", e: [judge]}
+  attach: {d: no, how: "No files on an entry.", e: [judge]}
+  custom_fields: {d: no, how: "The fixed fields cover billing hours and nothing else is asked for.", e: [judge]}
+  api: {d: later, how: "Time entries by API come with the API.", e: [judge]}
+  webhook: {d: later, how: "Entry events come with the API.", e: [judge]}
+answers:
+  identity: {a: "No two entries are joined; two entries of the same person, customer and day are allowed, and one person may not log more than 24 hours on one day.", e: [wide:D043]}
+  snapshot: {a: "The rate is stamped when an entry is approved: the customer's rate, else the person's rate, else the service's rate, and the line shows which was used. Later rate edits do not change approved or billed entries.", e: [wide:D046]}
+  remove: {a: "A billed entry cannot be deleted. An open entry is deleted by its maker, owner or accountant after a confirm.", e: [wide:D047]}
+  owner: {a: "The firm owns it. Staff see and edit only their own entries while open; owner and accountant see all, approve and bill; a viewer sees none.", e: [wide:D049]}
+  contacts: {a: "One person, one customer and one task per entry.", e: [wide:D043]}
+  code: {a: "No code; an entry is found by person, customer and date.", e: [judge]}
+  inactive: {a: "Entries of an archived customer stay readable and can still be billed on a draft; an archived service stays on old entries.", e: [judge]}
+tracks:
+  lifecycle:
+    states: [{id: active, start: true}, {id: archived}]
+    moves:
+      - {do: put_away, from: active, to: archived, who: [owner, accountant], effect: "leaves the default list", reverse: "bring_back", notify: none, e: [judge]}
+      - {do: bring_back, from: archived, to: active, who: [owner, accountant], effect: "returns to the list", reverse: "put_away", notify: none, e: [judge]}
+  billing:
+    states: [{id: open, start: true}, {id: approved}, {id: billed}]
+    moves:
+      - {do: approve, from: open, to: approved, who: [owner, accountant], guard: "billable, hours above 0 in 0.25 steps and a customer chosen; rate is stamped and rounded to the firm's step", effect: "joins Unbilled time for that customer", reverse: "unapprove", notify: none, e: [wide:A138, wide:D046, wide:B225]}
+      - {do: unapprove, from: approved, to: open, who: [owner, accountant], guard: "not billed", effect: "the maker may edit it again", reverse: "approve", notify: none, e: [wide:A138]}
+      - {do: bill, from: approved, to: billed, who: [owner, accountant, staff], guard: "added to a draft invoice of the same customer by Add unbilled time; each group becomes one line with hours as quantity", effect: "locked and shows the invoice number; billed twice is refused", reverse: "release", notify: none, e: [wide:A027, wide:D045, wide:D047]}
+      - {do: release, from: billed, to: open, who: [system], guard: "the invoice is voided or its draft is deleted", effect: "the entry is open again and can be approved and billed on another invoice", reverse: "bill", notify: none, e: [wide:A138, wide:D047]}
+fields:
+  - {id: date, type: date, required: true, edit: "its maker while open; owner and accountant", msg: "Choose the day the work was done, not in the future."}
+  - {id: person, type: link, required: true, edit: "nobody; the maker, or an owner or accountant for someone else", auto: true}
+  - {id: customer, type: link, required: true, edit: "its maker while open", msg: "Choose the customer."}
+  - {id: task, type: text, required: false, limit: 120, edit: "its maker while open", msg: "The task is up to 120 letters."}
+  - {id: hours, type: number, required: true, limit: 24, edit: "its maker while open", msg: "Hours are in 0.25 steps, above 0 and not over 24 a day for one person."}
+  - {id: billable, type: bool, required: true, default: true, edit: "its maker while open", msg: "Choose billable or not."}
+  - {id: rate, type: money, required: false, limit: 9999999.99, edit: "owner and accountant while open, stamped at approval", msg: "Rate is 0 to 99,99,999.99 with 2 decimals."}
+  - {id: note, type: long_text, required: false, limit: 300, edit: "its maker while open", msg: "The note is up to 300 characters."}
+  - {id: invoice, type: link, required: false, edit: "nobody", auto: true}
+fields_e: [wide:D043, wide:A070, wide:D046]
+list:
+  search: [task, note]
+  filters: [lifecycle, billing, person, customer, billable]
+  sorts: [-date, customer, person]
+  default_sort: -date
+  columns: [date, person, customer, task, hours, state]
+  export: {rows: [filtered, all], what: [time entries], formats: [CSV], big: "over 5,000 rows runs in the background and the link comes by email"}
+  page: 50
+  e: [wide:D048, wide:D050]
+volume: {y1: 150000, y3: 1500000}
+queries:
+  - {id: active_newest, filters: [lifecycle], sort: [-date], index: [tenant, lifecycle, date], p95: 100 ms}
+  - {id: by_week, filters: [billing], sort: [-date], index: [tenant, billing, date], p95: 100 ms}
+  - {id: by_customer, filters: [billing, customer], sort: [-date], index: [tenant, billing, customer, date], p95: 100 ms}
+  - {id: billable_only, filters: [billing, billable], sort: [-date], index: [tenant, billing, billable, date], p95: 100 ms}
+  - {id: by_person, filters: [billing, person], sort: [-date], index: [tenant, billing, person, date], p95: 100 ms}

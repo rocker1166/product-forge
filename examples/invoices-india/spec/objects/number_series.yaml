@@ -1,0 +1,56 @@
+id: number_series
+name: Number Series
+module: tax
+kinds: [setting]
+why: the gapless counter, by firm, GSTIN, document type, prefix and financial year, that gives each document its number
+links:
+  - {to: invoice, on_delete: "a series is never deleted once any number was taken from it; it closes instead and its documents keep their numbers"}
+  - {to: credit_note, on_delete: "same: a series with any credit note is closed, not deleted"}
+  - {to: payment, on_delete: "same for receipt numbers"}
+  - {to: quote, on_delete: "same for quote and proforma numbers"}
+abilities:
+  create: {d: now, how: "The system opens each series on the first issue of a financial year and at the 1 April rollover. The owner does not add series in wave 1; a second series is room.", e: [wide:W019, wide:W017]}
+  edit: {d: now, how: "The owner may change the prefix only while no document in the series is issued in this financial year. The next number can be raised only before the first document of the financial year exists in the series, never below the last used and never afterwards, so a hole can never open; the prefix may not equal another document type's prefix (R35).", e: [wide:W071, "walk:X017", "walk:X019", "walk:F001"]}
+  delete: {d: no, how: "A series is closed, never deleted, so the numbers in use stay explainable.", e: ["judge"]}
+  archive: {d: no, how: "A closed series stays visible as it is.", e: [judge]}
+  restore: {d: no, how: "A closed financial year is not reopened; the next year has its own series.", e: [judge]}
+  duplicate: {d: no, how: "A second counter with the same keys would break the unique rule.", e: ["judge"]}
+  schedule: {d: now, how: "The only date is the automatic rollover at 00:05 IST on 1 April, which opens new counters at 00001 and keeps pending drafts.", e: [judge]}
+  api: {d: later, how: "No outside software sets numbers.", e: [judge]}
+  webhook: {d: later, how: "Series events come with the API.", e: [judge]}
+  history: {d: now, how: "Every change to a prefix or next number records who, when, old and new, and the system records each rollover.", e: ["judge"]}
+answers:
+  scope: {a: "One counter per firm, GSTIN, document type, prefix and financial year. The database enforces that the same number cannot be stored twice in one series. Wave 1 has one GSTIN and room for more.", e: [wide:W019, wide:W020]}
+  used: {a: "Invoice (plain Invoice, Tax Invoice and Bill of Supply share one counter), credit note, receipt, quote, proforma and refund each have their own series. Their prefixes are INV, CN, REC, QT, PI and REF.", e: [wide:W064, wide:W056, wide:A023]}
+  default: {a: "Prefix defaults are INV, CN, REC, QT, PI and REF. Only the owner changes a prefix, before the first number of the year is taken.", e: [wide:W071, wide:W018]}
+  effective: {a: "The year runs 1 April to 31 March by IST issue date and the counter starts at 00001 each year. A new next number applies to the next issue only.", e: [wide:W017, wide:W019]}
+  order: {a: "The list shows newest year first, then document type. Nobody reorders it.", e: [judge]}
+  who: {a: "Only the owner changes prefix or next number. Accountant and viewer read. Staff and client do not see it. Support sees it only through approved access.", e: ["judge"]}
+  limit: {a: "A prefix is 1 to 4 uppercase letters or digits and the whole number is at most 16 characters, in the form PREFIX/YY-YY/NNNNN with a 5-digit sequence.", e: [wide:W018, wide:A077]}
+tracks:
+  lifecycle:
+    states: [{id: open, start: true}, {id: closed, end: true}]
+    moves:
+      - {do: close_series, from: open, to: closed, who: [system, owner], guard: "the financial year has ended and the period lock date is past it, or the owner confirms the firm has moved to a new GSTIN or prefix and a replacement is open", effect: "no new number is taken from it; its documents stay readable", reverse: "none: a closed series is not reopened; the next one carries on", notify: none, e: [judge]}
+fields:
+  - {id: doc_type, type: choice, required: true, edit: "nobody after the first number", msg: "Choose the document type: invoice, credit note, receipt, quote, proforma or refund."}
+  - {id: prefix, type: text, required: true, limit: 4, edit: "owner, only while no document of this series is issued in this financial year", msg: "A prefix is 1 to 4 capital letters or digits. It cannot change after a number was issued this year."}
+  - {id: fy, type: text, required: true, limit: 5, edit: "nobody", auto: true}
+  - {id: gstin, type: text, required: false, limit: 15, edit: "nobody", auto: true}
+  - {id: next_number, type: number, required: true, limit: 99999, edit: "owner; up only and never below the last number used", msg: "The next number must be above the last one used and at most 99999. You can lower it until the first document of this year is issued."}
+  - {id: last_number, type: number, required: false, limit: 99999, edit: "nobody", auto: true}
+  - {id: last_issued_on, type: date, required: false, edit: "nobody", auto: true}
+fields_e: [wide:W018, wide:W019, wide:W071]
+list:
+  filters: [lifecycle, doc_type, fy]
+  sorts: [-fy, doc_type]
+  default_sort: -fy
+  columns: [doc_type, prefix, fy, next_number, last_number, last_issued_on]
+  page: 25
+  e: [judge]
+volume: {y1: 15000, y3: 120000}
+queries:
+  - {id: by_year, filters: [lifecycle], sort: [-fy], index: [tenant, lifecycle, fy], p95: 50 ms}
+  - {id: by_type, filters: [lifecycle, doc_type], sort: [-fy], index: [tenant, lifecycle, doc_type, fy], p95: 50 ms}
+  - {id: by_type_name, filters: [doc_type], sort: [doc_type], index: [tenant, doc_type], p95: 50 ms}
+  - {id: for_year, filters: [fy], sort: [doc_type], index: [tenant, fy, doc_type], p95: 50 ms}

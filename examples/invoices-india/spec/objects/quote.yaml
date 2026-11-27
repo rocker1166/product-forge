@@ -1,0 +1,90 @@
+id: quote
+name: Quote
+module: sales
+kinds: [document]
+why: the offer or proforma a firm sends before work starts; it carries its own number but is never a tax document
+links:
+  - {to: customer, on_delete: "the quote keeps its own snapshot of name and address; a customer with quotes is archived, not deleted"}
+  - {to: invoice, on_delete: "the quote and the draft it made point at each other; deleting that draft frees the quote again, an issued invoice locks the link for good"}
+  - {to: share_link, on_delete: "the link stays and says expired or cancelled; it is never deleted"}
+abilities:
+  create: {d: now, how: "From scratch, by copy of an older quote, as a quote or as a proforma invoice; the customer picker opens first and terms and currency fill from the customer.", e: ["judge"]}
+  edit: {d: now, how: "A draft allows every field. A sent quote can be revised by owner or accountant (lines, validity, notes): the number stays, a revision counter goes up and the older PDF is kept. Accepted, declined, expired, converted and cancelled quotes are frozen except the internal note.", e: ["wide:D001", "wide:D010"]}
+  draft: {d: now, how: "Autosaved every 30 seconds, no number until the first send, never visible to the customer.", e: ["wide:D001", "wide:D346"]}
+  delete: {d: now, how: "Only draft quotes, after a confirm; a sent quote is cancelled with a reason of 5 to 200 characters and its number stays used.", e: ["wide:D010"]}
+  archive: {d: no, how: "Lists and views carry the old quotes; nothing is put away.", e: [judge]}
+  restore: {d: no, how: "Only drafts are deleted and they do not come back; an expired quote is reopened by extending its date.", e: ["wide:D010"]}
+  reverse: {d: no, how: "A quote is not reversed: cancel it with a reason or let it expire. A converted quote is freed only by deleting the draft invoice it made.", e: ["wide:D010"]}
+  search: {d: now, how: "Quote number, customer name and customer GSTIN, substring from 2 characters.", e: ["judge"]}
+  filter: {d: now, how: "Status, customer, validity date range, and quote or proforma.", e: ["wide:D006"]}
+  sort: {d: now, how: "Date, total and validity date, both ways; newest first by default.", e: ["wide:D006"]}
+  bulk: {d: later, how: "No bulk quote action is asked for; each quote is sent or cancelled alone.", e: [judge]}
+  import: {d: later, how: "Old quotes are not imported; open ones are typed again.", e: [judge]}
+  print_pdf: {d: now, how: "PDF and page carry the words Not a tax invoice, or Proforma, not a tax invoice, and no tax-invoice number; the terms text of up to 1,000 characters prints at the foot.", e: ["wide:D008", "wide:A023", "wide:D146"]}
+  share_link: {d: now, how: "Read-only page for this quote only, 30 days by default (owner picks 1 to 365), revocable; shows viewed times. There is no Accept button in wave 1: the owner records the answer.", e: ["wide:W044", "wide:A193"]}
+  remind: {d: later, how: "No automatic nudge before a quote expires; the Expiring in 7 days view serves.", e: [judge]}
+  schedule: {d: no, how: "A quote is sent when the person sends it; it does not repeat.", e: [judge]}
+  tag: {d: no, how: "No free tags in wave 1.", e: [judge]}
+  custom_fields: {d: no, how: "Fixed fields only.", e: [judge]}
+  api: {d: later, how: "Quotes are not exposed to other software in wave 1.", e: ["judge"]}
+  webhook: {d: later, how: "No quote events are sent out in wave 1.", e: ["judge"]}
+answers:
+  freeze: {a: "A quote number is taken at first send and a sent quote stays editable only by revision, with the older PDF kept. Once accepted it is frozen. A quote is never a tax document and reaches no GST register.", e: ["wide:D001", "wide:D008"]}
+  number: {a: "QT/YY-YY/NNNNN for quotes and PI/YY-YY/NNNNN for proforma invoices, each gapless per firm and year, taken at first send; the invoice counter is never touched; a cancelled quote keeps its number.", e: ["wide:D001", "wide:A023"]}
+  fix: {a: "Revise while sent. After accepted or later, cancel with a reason and copy it into a new draft, which takes a new number at send. A declined quote is final; copy it to offer again.", e: ["wide:D010", "wide:A023"]}
+  money: {a: "Same arithmetic as an invoice: whole paise, line tax half-up, total to the rupee with a round-off line, foreign currency with rate; shown for information only. On conversion tax is recomputed at the rates in force on the invoice date.", e: ["wide:W030", "wide:A121", "wide:A113"]}
+  paid: {a: "A quote takes no money in wave 1 and advances are refused. Its payment track only says whether it has been billed: not billed until a converted invoice exists.", e: ["judge"]}
+  late: {a: "A sent quote becomes expired the day after its validity date, in IST; expired can be reopened by extending the date. An accepted quote never expires and appears in the Accepted not billed view.", e: ["wide:A022", "wide:A021"]}
+  law: {a: "No tax invoice number, no IRN, no register row. A proforma says Proforma, not a tax invoice and creates no tax liability; it converts to a tax invoice draft once.", e: ["wide:A023", "wide:D008"]}
+  send: {a: "Sending is the move: it takes the number, locks the first PDF and emails it through the outbox, or opens WhatsApp with the share link. A quote needs at least one line with a rate and a validity date on or after the quote date.", e: ["wide:D001", "wide:A191", "wide:W086"]}
+tracks:
+  document:
+    states: [{id: draft, start: true}, {id: sent}, {id: accepted}, {id: declined, end: true}, {id: expired}, {id: converted}, {id: cancelled, end: true}]
+    moves:
+      - {do: send, from: draft, to: sent, who: [owner, accountant], guard: "customer chosen, at least one line with a rate, validity date on or after the quote date", effect: "number taken from the quote or proforma series, PDF stored with hash, email queued", reverse: "cancel", notify: [quote_email], e: ["wide:D001", "wide:A191", "wide:A023"]}
+      - {do: revise, from: sent, to: sent, who: [owner, accountant], guard: "not yet accepted", effect: "revision counter goes up, new PDF stored, older PDF kept, share link shows the newest", reverse: "revise again", notify: none, e: ["judge"]}
+      - {do: accept, from: sent, to: accepted, who: [owner, accountant, client], guard: "validity date not passed; name of who agreed and the date typed. a client may press it only on the client page after signing in, never from a plain document link, and types their own name", effect: "leaves the open view and joins Accepted not billed", reverse: "cancel", notify: [quote_answered_alert], e: ["wide:D003", "judge"]}
+      - {do: decline, from: sent, to: declined, who: [owner, accountant, client], guard: "optional reason up to 300 characters. a client may press it only on the client page after signing in", effect: "closed for good", reverse: "none: copy it into a new draft to offer again", notify: [quote_declined_alert], e: ["wide:D003", "judge"]}
+      - {do: expire, from: sent, to: expired, who: [system], guard: "validity date has passed in IST", effect: "share link says expired", reverse: "extend", notify: none, e: ["wide:A022", "wide:A021"]}
+      - {do: extend, from: expired, to: sent, who: [owner, accountant], guard: "new validity date is today or later", effect: "link works again; revision counter goes up", reverse: "expire happens again when the new date passes", notify: none, e: ["wide:A021", "wide:A022"]}
+      - {do: convert, from: [sent, accepted], to: converted, who: [owner, accountant], guard: "at least one line, not converted before", effect: "a draft invoice is made with customer and lines, linked both ways; tax is recomputed at issue; the payment track says billed", reverse: "unconvert", notify: none, e: ["wide:A021", "wide:A023"]}
+      - {do: unconvert, from: converted, to: accepted, who: [system], guard: "the linked draft invoice was deleted and no invoice from it was issued", effect: "the quote is free again and may be converted once more", reverse: "convert", notify: none, e: ["wide:W039", "wide:A021"]}
+      - {do: cancel, from: [sent, accepted, expired], to: cancelled, who: [owner, accountant], guard: "reason of 5 to 200 characters", effect: "number stays used, share link says cancelled", reverse: "none: copy it into a new draft", notify: none, e: ["wide:D010"]}
+  payment:
+    states: [{id: not_billed, start: true}, {id: billed}]
+    moves:
+      - {do: mark_billed, from: not_billed, to: billed, who: [system], guard: "the quote was converted into an invoice draft", effect: "shows the invoice and its payment state read-only", reverse: "mark_unbilled", notify: none, e: ["wide:A021"]}
+      - {do: mark_unbilled, from: billed, to: not_billed, who: [system], guard: "the draft invoice was deleted", effect: "back to not billed", reverse: "mark_billed", notify: none, e: ["judge"]}
+fields:
+  - {id: kind, type: choice, required: true, default: quote, edit: "while draft", msg: "Choose quote or proforma invoice."}
+  - {id: number, type: text, required: true, limit: 16, edit: "nobody; given at first send", auto: true}
+  - {id: customer, type: link, required: true, edit: "while draft", msg: "Choose a customer."}
+  - {id: quote_date, type: date, required: true, default: today, edit: "while draft", msg: "Enter a real date."}
+  - {id: valid_until, type: date, required: true, default: "quote date plus 15 days", edit: "while draft, by revise or extend", msg: "Validity date must be on or after the quote date."}
+  - {id: currency, type: choice, required: true, default: "the customer's currency", edit: "while draft", msg: "Choose a currency from the firm's list."}
+  - {id: lines, type: list, required: true, limit: 50, edit: "while draft or by revise", msg: "Add 1 to 50 lines, each with a rate."}
+  - {id: total, type: money, required: true, limit: 9999999999, edit: "nobody", auto: true}
+  - {id: terms, type: long_text, required: false, limit: 1000, default: "the firm's terms for quotes", edit: "while draft or by revise", msg: "The terms are longer than 1,000 letters."}
+  - {id: customer_note, type: long_text, required: false, limit: 500, edit: "while draft or by revise", msg: "The note is longer than 500 letters."}
+  - {id: internal_note, type: long_text, required: false, limit: 1000, edit: "owner and accountant, any time", msg: "The note is longer than 1,000 letters."}
+  - {id: revision, type: number, required: true, limit: 99, edit: "nobody", auto: true}
+  - {id: accepted_by, type: text, required: false, limit: 100, edit: "when the quote is accepted", msg: "Type who agreed, up to 100 letters."}
+  - {id: cancel_reason, type: text, required: false, limit: 200, edit: "when the quote is cancelled", msg: "Give a reason of 5 to 200 letters."}
+  - {id: converted_to, type: link, required: false, edit: "nobody; set by convert", auto: true}
+fields_e: ["judge"]
+list:
+  search: [number, customer, gstin]
+  filters: [document, payment, customer, valid_until, kind]
+  sorts: [quote_date, total, valid_until]
+  default_sort: -quote_date
+  columns: [number, quote_date, customer, kind, total, valid_until, document]
+  views: [All, Drafts, Open, Accepted not billed, Expiring in 7 days, Expired]
+  export: {rows: [selected, filtered, date range], what: [quotes, lines], formats: [CSV, XLSX], big: "Over 5,000 rows runs as an export job and the link comes by email and lives 7 days."}
+  page: 25
+  e: ["wide:D006"]
+volume: {y1: 120000, y3: 1500000}
+queries:
+  - {id: newest, filters: [document, payment, kind], sort: [-quote_date], index: [tenant, document, payment, kind, quote_date], p95: 150 ms}
+  - {id: one_customer, filters: [customer], sort: [-quote_date], index: [tenant, customer, quote_date], p95: 100 ms}
+  - {id: expiring, filters: [], sort: [valid_until], index: [tenant, valid_until], p95: 150 ms}
+  - {id: by_total, filters: [], sort: [total], index: [tenant, total], p95: 200 ms}

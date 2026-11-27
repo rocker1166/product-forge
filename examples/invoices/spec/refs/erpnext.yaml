@@ -1,0 +1,188 @@
+product: erpnext
+source: https://raw.githubusercontent.com/frappe/erpnext/develop/erpnext/accounts/doctype/sales_invoice/sales_invoice.json
+format: doctype
+read: 2026-11-25
+objects:
+  Sales Invoice:
+    fields:
+      naming_series: Select
+      customer: Link
+      customer_name: Small Text
+      tax_id: Data
+      project: Link (editable after submit)
+      is_pos: Check
+      pos_profile: Link
+      is_return: Check
+      company: Link
+      cost_center: Link (editable after submit)
+      posting_date: Date
+      posting_time: Time
+      set_posting_time: Check
+      due_date: Date
+      amended_from: Link
+      return_against: Link
+      update_billed_amount_in_sales_order: Check
+      po_no: Data (editable after submit)
+      po_date: Date (editable after submit)
+      customer_address: Link
+      address_display: Text Editor
+      contact_person: Link
+      contact_display: Small Text
+      contact_mobile: Small Text
+      contact_email: Data
+      territory: Link
+      shipping_address_name: Link
+      shipping_address: Text Editor
+      shipping_contact_person: Link
+      shipping_contact_display: Small Text
+      shipping_contact_mobile: Small Text
+      shipping_contact_email: Data
+      company_address: Link
+      company_address_display: Text Editor
+      currency: Link
+      conversion_rate: Float
+      selling_price_list: Link
+      price_list_currency: Link
+      plc_conversion_rate: Float
+      ignore_pricing_rule: Check
+      set_warehouse: Link
+      update_stock: Check
+      scan_barcode: Data
+      items: Table
+      pricing_rules: Table
+      packed_items: Table
+      timesheets: Table
+      total_billing_amount: Currency
+      total_qty: Float
+      base_total: Currency
+      base_net_total: Currency
+      total: Currency
+      net_total: Currency
+      total_net_weight: Float
+      taxes_and_charges: Link
+      shipping_rule: Link
+      tax_category: Link
+      taxes: Table
+      other_charges_calculation: Text Editor
+      base_total_taxes_and_charges: Currency
+      total_taxes_and_charges: Currency
+      loyalty_points: Int
+      loyalty_amount: Currency
+      redeem_loyalty_points: Check
+      loyalty_program: Link
+      loyalty_redemption_account: Link (editable after submit)
+      loyalty_redemption_cost_center: Link
+      apply_discount_on: Select
+      base_discount_amount: Currency
+      additional_discount_percentage: Float
+      discount_amount: Currency
+      base_grand_total: Currency
+      base_rounding_adjustment: Currency
+      base_rounded_total: Currency
+      base_in_words: Small Text
+      grand_total: Currency
+      rounding_adjustment: Currency
+      rounded_total: Currency
+      in_words: Small Text
+      total_advance: Currency
+      outstanding_amount: Currency
+      allocate_advances_automatically: Check
+      advances: Table
+      payment_terms_template: Link
+      payment_schedule: Table
+      cash_bank_account: Link (editable after submit)
+      payments: Table
+      base_paid_amount: Currency
+      paid_amount: Currency
+      base_change_amount: Currency
+      change_amount: Currency
+      account_for_change_amount: Link (editable after submit)
+      write_off_amount: Currency
+      base_write_off_amount: Currency
+      write_off_outstanding_amount_automatically: Check
+      write_off_account: Link (editable after submit)
+      write_off_cost_center: Link
+      tc_name: Link
+      terms: Text Editor
+      letter_head: Link (editable after submit)
+      group_same_items: Check (editable after submit)
+      language: Link
+      select_print_heading: Link (editable after submit)
+      inter_company_invoice_reference: Link
+      customer_group: Link
+      is_discounted: Check
+      status: Select
+      debit_to: Link
+      party_account_currency: Link
+      is_opening: Select
+      remarks: Small Text
+      sales_partner: Link
+      commission_rate: Float
+      total_commission: Currency
+      sales_team: Table (editable after submit)
+      from_date: Date (editable after submit)
+      to_date: Date (editable after submit)
+      auto_repeat: Link (editable after submit)
+      against_income_account: Small Text
+      is_consolidated: Check
+      is_internal_customer: Check
+      company_tax_id: Data
+      unrealized_profit_loss_account: Link (editable after submit)
+      represents_company: Link
+      set_target_warehouse: Link
+      is_debit_note: Check
+      disable_rounded_total: Check
+      additional_discount_account: Link (editable after submit)
+      dispatch_address_name: Link (editable after submit)
+      dispatch_address: Text Editor (editable after submit)
+      ignore_default_payment_terms_template: Check
+      total_billing_hours: Float
+      amount_eligible_for_commission: Currency
+      subscription: Link
+      is_cash_or_non_trade_discount: Check
+      incoterm: Link
+      named_place: Data
+      only_include_allocated_payments: Check
+      use_company_roundoff_cost_center: Check
+      update_billed_amount_in_delivery_note: Check
+      dont_create_loyalty_points: Check
+      coupon_code: Link
+      update_outstanding_for_self: Check
+      utm_medium: Link
+      utm_content: Data
+      utm_campaign: Link
+      utm_source: Link
+      company_contact_person: Link
+      is_created_using_pos: Check
+      pos_closing_entry: Link
+      last_scanned_warehouse: Data
+      has_subcontracted: Check
+      item_wise_tax_details: Table
+      apply_tds: Check
+      tax_withholding_group: Link
+      tax_withholding_entries: Table
+      ignore_tax_withholding_threshold: Check
+      override_tax_withholding_entries: Check
+      title: Data (editable after submit)
+    states:
+      status:
+        - Draft
+        - Return
+        - Credit Note Issued
+        - Submitted
+        - Paid
+        - Partly Paid
+        - Unpaid
+        - Unpaid and Discounted
+        - Partly Paid and Discounted
+        - Overdue and Discounted
+        - Overdue
+        - Cancelled
+        - Internal Transfer
+    permissions:
+      - Accounts Manager
+      - Accounts User
+      - Accounts Manager
+      - All
+actions: []
+events: []

@@ -1,0 +1,42 @@
+id: customer
+name: Customer
+module: billing
+kinds: [master]
+why: the firm or person an invoice is sent to
+links: [{to: invoice, on_delete: "blocked while any issued invoice exists; archive instead"}]
+refs: [stripe/customer]
+answers:
+  identity: {a: "Same GSTIN, or same email when there is no GSTIN. The form offers the existing customer instead of a second one.", e: [stripe-005, twenty-002]}
+  snapshot: {a: "Name, address and GSTIN are copied into the invoice when it is issued.", e: [erp-001, "S:stripe/invoice.customer_name"]}
+  remove: {a: "Issued invoices block removal. Archive takes its place.", e: ["S:stripe/customer.metadata", erp-002]}
+  owner: {a: "The firm owns it. Every role in the firm may see it.", e: [judge]}
+  contacts: {a: "Many contacts and addresses, one default of each, one GSTIN per address.", e: ["S:stripe/customer.address", erp-001]}
+  code: {a: "Optional short code set by the owner, unique in the firm.", e: [judge]}
+  inactive: {a: "Hidden from pickers, old invoices stay readable, can be brought back.", e: [erp-002, stripe-003]}
+tracks:
+  lifecycle:
+    states: [{id: active, start: true}, {id: archived}]
+    moves:
+      - {do: put_away, from: active, to: archived, who: [owner], effect: "leaves pickers and default lists", reverse: "bring_back", notify: none, e: [erp-002, stripe-003]}
+      - {do: bring_back, from: archived, to: active, who: [owner], reverse: "put_away", notify: none, e: [erp-002, stripe-003]}
+fields:
+  - {id: name, type: text, required: true, limit: 120, edit: "owner and accountant, any time", msg: "Enter the customer's name, up to 120 letters."}
+  - {id: gstin, type: text, required: false, limit: 15, edit: "owner and accountant; new invoices only", msg: "A GSTIN has 15 characters. Check it or leave it empty."}
+  - {id: email, type: text, required: false, limit: 254, edit: "owner and accountant", msg: "This email does not look right."}
+  - {id: state, type: choice, required: true, default: "the firm's state", edit: "owner and accountant; new invoices only", msg: "Choose the state. It decides the tax."}
+  - {id: terms_days, type: number, required: false, limit: 365, default: 15, edit: "owner", msg: "Terms are 0 to 365 days."}
+fields_e: ["S:stripe/customer.email", erp-001]
+list:
+  search: [name, gstin, email]
+  filters: [lifecycle, state]
+  sorts: [name, created_at]
+  default_sort: name
+  columns: [name, gstin, balance, last_invoice]
+  views: [All, With balance, Archived]
+  bulk: [archive, tag, export]
+  bulk_fail: "Failed rows stay selected with the reason beside each."
+  export: {rows: [selected, filtered, all], what: [customers, contacts], formats: [CSV, XLSX], big: "over 1,000 rows comes by email"}
+  import: {match: "columns are matched by name, then by hand", errors: "bad rows turn yellow and can be fixed or skipped", limit: "5,000 rows"}
+  page: 50
+  e: [shop-001, twenty-001]
+volume: {y1: 300, y3: 2000}

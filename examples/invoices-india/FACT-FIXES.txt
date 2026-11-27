@@ -1,0 +1,16 @@
+Corrected after the fact check; these sentences win over any earlier copy of NOW.txt:
+W032: A firm with no GST registration issues a plain document titled "Invoice", with no tax lines, no HSN or SAC requirement and no tax columns. "Bill of Supply" is used only by a registered firm on the composition scheme or for exempt supplies, and shows its GSTIN.
+A132: No tax line can appear on documents of an unregistered firm; when it registers it gives the GSTIN and an effective date, documents from that date use the tax invoice title, and older ones stay plain invoices.
+A082: An export under LUT prints exactly "SUPPLY MEANT FOR EXPORT UNDER BOND OR LETTER OF UNDERTAKING WITHOUT PAYMENT OF INTEGRATED TAX", recipient name and address, country of destination, and tax of zero on every line; the LUT number prints too, as our choice.
+A083: An export with tax charges IGST at the normal rate, prints the Rule 46 ending "ON PAYMENT OF INTEGRATED TAX" and the country of destination, and flags the invoice for refund tracking.
+A120: A cash receipt that would reach Rs 2,00,000 from one person in a day, for one transaction, or for one event is blocked with the warning of section 186 of the Income-tax Act 2025 (old 269ST).
+A096: TDS on fees is stored by section 393(1) serial number of the Income-tax Act 2025 for payments from 1 April 2026 (Sl.6(iii) old 194J, Sl.6(i) old 194C), shown with the old number as an alias; the user can type another rate.
+A098: The TDS table holds section 393(1) serial number, old alias, rate and yearly threshold with effective dates; the product owner edits it, never a firm. Fees threshold is Rs 50,000.
+A100: TDS recorded on a payment appears in a receivable ledger by customer, section and financial year, with a flag for certificate received: Form 131 for payments from 1 April 2026, Form 16A before.
+A101: A TDS-by-customer report for the year lists deducted amounts by quarter so the owner can match them with Form 168 (old 26AS) or AIS.
+W065: A credit note issue date cannot be before the original invoice date, in the future, or after 30 November following the end of the original invoice's financial year; if the firm records that its annual return was filed earlier, that date is the limit.
+A117: A credit note dated after the limit (30 November, or the annual return date if earlier) is refused with the exact date, unless the owner records it as a commercial, non-GST credit with no tax effect.
+W061: A credit note needs one reason from sales return, post-sale discount, invoice correction or deficiency in service, plus an optional note of up to 300 characters; for a post-sale discount it reminds that the customer must reverse matching input tax.
+A256: Firm deletion is owner-only with typed firm name, a 30-day cooling period and a final export link; books are kept at least 8 years (GST law needs 72 months after the annual return), then may be removed.
+A061: State list carries GST codes including 38 Ladakh and 97 Other Territory, and a foreign option for exports (the portal code must be confirmed); 99 Centre Jurisdiction is not offered for customers.
+Amount in words on an invoice is our choice, not law. DPDP answers: legal limit 90 days. Unsure until a CA confirms: foreign state code 96, GSTR-1 due dates 11th and 13th, mobile and bank account formats.

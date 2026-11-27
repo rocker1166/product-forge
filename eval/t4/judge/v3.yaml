@@ -1,0 +1,30 @@
+- {id: W061, p: "right", pn: "Reason required, 4 values; note 300 ok, 301 refused", q: "right", qn: "Same; wording off on bad decimals"}
+- {id: W062, p: "right", pn: "Lines copy; remaining and +1p exact, also across drafts", q: "right", qn: "Same results"}
+- {id: W063, p: "right", pn: "Per-line rate, IGST/CGST kept after customer state change, paisa-exact", q: "right", qn: "Same results"}
+- {id: W064, p: "right", pn: "Gapless per firm/FY, year from issue date, drafts unnumbered", q: "right", qn: "Same results"}
+- {id: W065, p: "right", pn: "Before invoice, future, after 30-11 refused; edges accepted", q: "right", qn: "Same results"}
+- {id: W066, p: "right", pn: "Balance lowered, excess becomes credit to the paisa", q: "right", qn: "Same results"}
+- {id: W067, p: "right", pn: "Limit and +1p right; roles right; other customer refused", q: "right", qn: "Same results"}
+- {id: W068, p: "right", pn: "Title, number, dates, reason, lines, tax split, total shown", q: "right", qn: "Same content present"}
+- {id: W069, p: "right", pn: "Locked once issued; owner-only void; blocked if credit applied", q: "right", qn: "Same results"}
+- {id: W070, p: "right", pn: "Name 120/121, GSTIN prefix and checksum, owner-only", q: "right", qn: "Same results"}
+- {id: W071, p: "right", pn: "Format, default, lock after issue in FY all right", q: "right", qn: "Same results"}
+- {id: W072, p: "right", pn: "0-90, 500, 300 limits; defaults flow to invoices and print", q: "right", qn: "Same results"}
+- {id: W073, p: "right", pn: "Roles, unique across firms, 7 day expiry, outbox link", q: "right", qn: "Same results"}
+- {id: W074, p: "right", pn: "Last owner refused for demote and deactivate", q: "right", qn: "Same results"}
+- {id: W075, p: "right", pn: "Viewer and accountant 403 matrix right", q: "right", qn: "Matrix right; viewer cannot see history"}
+- {id: W076, p: "right", pn: "5 fails lock 15 min, 8 h idle, hashed", q: "right", qn: "Same results"}
+- {id: W077, p: "right", pn: "All routes, lists, search, export 404 or empty; UI shows Loading only", q: "wrong", qn: "Other firm's customer in invoice create gives 400, not 404"}
+- {id: W078, p: "right", pn: "Columns, 25 per page, drafts first, newest first", q: "right", qn: "Same results"}
+- {id: W079, p: "right", pn: "All six statuses, customer, dates combine with AND", q: "right", qn: "Same results"}
+- {id: W080, p: "right", pn: "Case-insensitive substring from 2 chars, combines with filters", q: "right", qn: "Same results"}
+- {id: W081, p: "right", pn: "Name, GSTIN, phone; archived only when switched on", q: "right", qn: "Same results"}
+- {id: W082, p: "right", pn: "Five columns sort both ways, kept in URL", q: "right", qn: "Same results"}
+- {id: W083, p: "right", pn: "BOM, ISO dates, 2 decimals; 50,001 rows cut silently to 50,000", q: "right", qn: "BOM, ISO, 2 decimals; 50,001 refused with message"}
+- {id: W084, p: "right", pn: "One row per line, CN negative, void excluded", q: "right", qn: "Same results"}
+- {id: W085, p: "wrong", pn: "3 to 10 px sideways scroll on invoice, customer lists and prints", q: "wrong", qn: "24 to 30 px sideways scroll on every page at 375"}
+- {id: W086, p: "right", pn: "One queued row with link; draft and bad email refused", q: "right", qn: "Same results"}
+- {id: W087, p: "right", pn: "Newest first; @fail.test fails; Retry requeues", q: "right", qn: "Same results"}
+- {id: W088, p: "right", pn: "Exactly days 1, 7, 15; max 3; none if paid, void, no email", q: "wrong", qn: "Sends on days 2 and 16 too; catch-up breaks 1, 7, 15 rule"}
+- {id: W089, p: "right", pn: "Old and new values stored and shown to all roles", q: "wrong", qn: "Viewer sees no history; many entries have null old values"}
+- {id: W090, p: "wrong", pn: "Failed load shows Loading forever, no error, no Retry", q: "wrong", qn: "Invoices, customers, outbox right; credit note and payment lists blank"}

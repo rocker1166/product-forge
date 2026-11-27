@@ -1,0 +1,41 @@
+journeys:
+  - id: J1
+    role: owner
+    moment: first_hour
+    goal: send the first real invoice
+    steps:
+      - {screen: home, do: invoice.create, sees: "a form with date, terms and number ready", fails: "opens again with the draft kept"}
+      - {screen: invoice_form, do: customer.create, sees: "a small form inside the page", fails: "message at the field"}
+      - {screen: invoice_form, do: invoice.issue, sees: "preview, then the number", fails: "says what is missing and where"}
+    budget: {steps: 4, fields: 6, ref: "Stripe, about 6 steps", ref_steps: 6, e: [stripe-004]}
+    done: the customer gets the invoice and the owner sees Sent
+  - id: J2
+    role: owner
+    moment: mistake
+    goal: correct an invoice sent with the wrong amount
+    steps:
+      - {screen: invoices, do: invoice.search, sees: "the invoice by number", fails: "no match text"}
+      - {screen: invoice, do: invoice.reverse, sees: "credit note with lines filled", fails: "says the amount is over the balance"}
+    budget: {steps: 3, fields: 1, ref: "Stripe credit note", e: [stripe-002]}
+    done: a credit note is linked and both papers are readable
+  - id: J3
+    role: accountant
+    moment: month_end
+    goal: hand over the month to the books
+    steps:
+      - {screen: invoices, do: invoice.filter, sees: "This month", fails: "no match text"}
+      - {screen: invoices, do: invoice.export, sees: "choice of rows, what and format", fails: "emailed with the reason"}
+    budget: {steps: 3, fields: 3, ref: "Shopify export", e: [shop-001]}
+    done: a file with invoices, lines and tax summary
+skip:
+  - {role: owner, moment: daily, why: "sample map, same as J1"}
+  - {role: owner, moment: busy, why: "a busy day for one owner is the same list with more rows"}
+  - {role: owner, moment: month_end, why: "sample map, see J3"}
+  - {role: owner, moment: handover, why: "the sample has no user object, so nobody can be handed work"}
+  - {role: owner, moment: leaving, why: "moving out is one connection, export by email"}
+  - {role: accountant, moment: first_hour, why: "the owner sets the firm up, the accountant joins later"}
+  - {role: accountant, moment: daily, why: "an accountant of such a firm comes once a month"}
+  - {role: accountant, moment: busy, why: "their busy day is month end, see J3"}
+  - {role: accountant, moment: mistake, why: "sample map, see J2"}
+  - {role: accountant, moment: handover, why: "their entries keep their name, nothing to hand over"}
+  - {role: accountant, moment: leaving, why: "access stops at once, the owner does it"}

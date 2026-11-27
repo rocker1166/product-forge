@@ -1,0 +1,20 @@
+- {id: H21, p: "pass", pn: "Status, customer, search, sort, page in URL; reload restored same rows", q: "pass", qn: "All filters, sort and page in URL; reload restored identical rows"}
+- {id: H22, p: "pass", pn: "Back returned to same filters and page 2 with same rows", q: "pass", qn: "Back returned to same filters and page 2 with same rows"}
+- {id: H23, p: "fail", pn: "No leave guard at all: no warning on link, Back or tab close", q: "fail", qn: "Warns on menu link and tab close, but Back button leaves dirty form silently"}
+- {id: H24, p: "pass", pn: "Enter in field submits once; textarea Enter adds newline, no request", q: "pass", qn: "Enter in field submits once; textarea Enter adds newline, no request"}
+- {id: H25, p: "fail", pn: "Focus not moved to first wrong field, no scroll; aria-invalid set but no describedby", q: "fail", qn: "Focus not moved to first wrong field; error summary links only; describedby and aria-invalid set"}
+- {id: H26, p: "fail", pn: "Unknown id shows Loading about 10s then Retry box, no link back to list", q: "pass", qn: "Not-found message in app layout with Back link; API returns 404 JSON"}
+- {id: H27, p: "fail", pn: "Unknown route returns HTTP 200; unknown API path returns HTML 200", q: "fail", qn: "Unknown page route returns HTTP 200 (API unknown path is 404 JSON)"}
+- {id: H28, p: "pass", pn: "Signed-out invoice link shows login; after sign-in lands on invoice; evil param ignored", q: "pass", qn: "Signed-out invoice link shows login; after sign-in lands on invoice; evil param ignored"}
+- {id: H29, p: "pass", pn: "Deactivated user got session-ended login on action; API 401; relogin says wrong password", q: "fail", qn: "Deactivated user stays in app shell with Sign in first error; not sent to login"}
+- {id: H30, p: "fail", pn: "Long names wrap, but 3px horizontal scroll at 375 on lists, detail, view; 1280 clean", q: "fail", qn: "Names wrap, but page overflows 24px at 375 and 40px at 1280 on every page"}
+- {id: H31, p: "pass", pn: "Save, Issue, payment: busy and disabled at once; one record and one number", q: "pass", qn: "Save, Issue, payment: one request, one record, one number"}
+- {id: H32, p: "fail", pn: "Toasts role=status and fade, but recording a payment shows no confirmation", q: "fail", qn: "Inline persistent messages; delete draft, delete customer, archive give no named confirmation; none dismissible"}
+- {id: H33, p: "fail", pn: "Only plain 123456.50 read; 1,23,456.50 and rupee paste rejected or read as 0", q: "fail", qn: "Payment amount rejects grouped and rupee text; rate field reads grouped only, not rupee paste"}
+- {id: H34, p: "pass", pn: "Direction mark and aria-sort on Total; rows reverse; third click clears marks", q: "pass", qn: "Direction mark and aria-sort on Total; rows reverse; no stale marks"}
+- {id: H35, p: "fail", pn: "No filter chips; only a Clear filters button", q: "fail", qn: "No filter chips; only a Clear filters button"}
+- {id: H36, p: "fail", pn: "Customer form offline: stuck on Working with no message (paused mutation); invoice form fine", q: "pass", qn: "Invalid GSTIN and offline show messages; fields kept; save works after fix"}
+- {id: H37, p: "fail", pn: "Dialog takes no focus, Tab leaves it, Esc does not return focus to opener", q: "fail", qn: "Dialog takes no focus, Tab leaves it, Esc does not return focus to opener"}
+- {id: H38, p: "pass", pn: "All inputs labelled, buttons named, th headers, status as text", q: "pass", qn: "All inputs labelled, buttons named, th headers, status as text"}
+- {id: H39, p: "fail", pn: "Every page, including login and unknown route, titled Invoices; no change on navigation", q: "fail", qn: "Every page, including login and unknown route, titled Invoices; no change on navigation"}
+- {id: H40, p: "pass", pn: "Chrome hidden; 30-line print fits A4, rows intact, header repeats; receipt one page", q: "pass", qn: "Chrome hidden; 30 lines fit A4 without cut rows; receipt prints extra blank page"}

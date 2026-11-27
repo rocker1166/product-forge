@@ -1,0 +1,61 @@
+id: allocation
+name: Allocation
+module: collections
+kinds: [money]
+why: the split of one payment across the invoices it settles, so every rupee received points at an invoice
+links:
+  - {to: payment, on_delete: "never removed; a reversed payment turns its allocations reversed"}
+  - {to: invoice, on_delete: "never removed; an invoice with allocations cannot be voided"}
+refs: []
+abilities:
+  create: {d: now, how: "Written by Record payment, one row per invoice; the split screen defaults to oldest due first and must add up to the payment. Nobody adds a row on its own.", e: ["wide:W048"]}
+  edit: {d: no, how: "Amounts never change; a wrong split moves to another invoice through reassign, or the payment is reversed.", e: ["wide:W058"]}
+  reverse: {d: now, how: "Reassign by the owner with a reason, or reversed together with its payment by the system.", e: ["judge"]}
+  print_pdf: {d: no, how: "Printed inside the receipt of its payment, which lists each allocation.", e: ["judge"]}
+  comment: {d: no, how: "The payment's note is the only comment.", e: ["judge"]}
+  schedule: {d: no, how: "Nothing repeats; rows are written when a payment is recorded.", e: ["judge"]}
+  notify: {d: no, how: "Nobody is told about a row; the receipt and the owner alert belong to the payment.", e: ["judge"]}
+  api: {d: later, how: "Waits for the public API.", e: ["judge"]}
+  webhook: {d: later, how: "Waits for the public API and its events.", e: ["judge"]}
+  search: {d: now, how: "Receipt number, invoice number and customer name.", e: ["judge"]}
+  export: {d: now, how: "CSV of payment, invoice, amount and TDS per row, for the accountant's receipts check.", e: ["wide:A251"]}
+answers:
+  amount: {a: "Rupees in paise, above 0, and the rows of one payment add up exactly to its amount; the database refuses a row that would make the sum pass the payment. Each row also holds its own income-tax and GST TDS shares, and the rows add up to the payment's TDS.", e: ["judge"]}
+  settles: {a: "One invoice per row, all of one customer. An invoice accepts a row only up to its balance due; a payment and a credit note posted at the same moment cannot together pass it because the invoice row is locked.", e: ["wide:W048", "wide:W037"]}
+  undo: {a: "Reversed with its payment, or reassigned by the owner to another invoice of the same customer with a reason; the old row stays reversed and a new row is written, the payment and receipt do not change.", e: ["judge"]}
+  fail: {a: "A row that no longer fits because the invoice was credited or voided at the same moment is refused, the whole payment is not saved, and the person sees the new balance due.", e: ["judge"]}
+  fee: {a: "No fee; bank charge and exchange gain or loss stay on the payment, not on a row.", e: ["wide:D160"]}
+  dispute: {a: "Nothing to dispute on a row; a wrong split is reassigned, a wrong payment is reversed.", e: ["judge"]}
+  proof: {a: "The receipt of the payment lists every row with invoice number and the amount it settled.", e: ["wide:W057"]}
+  match: {a: "The nightly integrity check compares the allocation sum of every payment with its amount and every invoice balance with its payments and credits.", e: ["wide:A228"]}
+tracks:
+  payment:
+    states: [{id: active, start: true}, {id: reversed, end: true}]
+    moves:
+      - {do: reassign, from: active, to: reversed, who: [owner, accountant], guard: "reason of 5 to 200 letters; new invoice is of the same customer, issued or part-paid, and its balance due covers the amount; period not locked. the TDS on the row moves with it and is refused when it is above 20 percent of the new invoice's taxable value; invoice-wise TDS is marked 'changed' for the accountant, because the customer's certificate no longer matches", effect: "this row reversed, a new active row written for the other invoice, both invoices recalculated, receipt stays", reverse: "reassign again", notify: none, e: ["judge", "walk:F009", "walk:X052"]}
+      - {do: release, from: active, to: reversed, who: [system], guard: "its payment was reversed", effect: "invoice balance and state recalculated", reverse: "none: record the payment again as a new payment", notify: none, e: ["wide:W059"]}
+fields:
+  - {id: payment, type: link, required: true, edit: "nobody", auto: true}
+  - {id: invoice, type: link, required: true, edit: "nobody", auto: true}
+  - {id: amount, type: money, required: true, limit: "above 0, never more than the invoice balance due", edit: "nobody", msg: "This is more than the balance due on the invoice."}
+  - {id: tds_amount, type: money, required: false, limit: "0 to the invoice taxable value", default: 0, edit: "nobody", msg: "TDS cannot be more than the taxable value of the invoice."}
+  - {id: gst_tds_amount, type: money, required: false, limit: "0 to 2 percent of the taxable value of the invoice", default: 0, edit: "nobody", msg: "GST TDS cannot be more than 2 percent of the taxable value."}
+  - {id: reassign_reason, type: text, required: false, limit: 200, edit: "nobody", msg: "Write a reason of 5 to 200 letters."}
+fields_e: ["wide:K043", "wide:W053"]
+list:
+  search: [receipt_number, invoice, customer]
+  filters: [payment, invoice, customer, created_at]
+  sorts: [-created_at, amount]
+  default_sort: -created_at
+  columns: [created_at, receipt_number, invoice, customer, amount, tds_amount, payment]
+  views: [All, Reversed, This month]
+  export: {rows: [filtered, date range], what: [allocations], formats: [CSV], big: "over 1,000 rows comes by email; failure is emailed too"}
+  page: 50
+  e: ["wide:D357"]
+volume: {y1: 7000, y3: 48000}
+queries:
+  - {id: newest, filters: [payment], sort: [-created_at], index: [tenant, payment, created_at], p95: 150 ms}
+  - {id: one_invoice, filters: [invoice], sort: [-created_at], index: [tenant, invoice, created_at], p95: 100 ms}
+  - {id: one_customer, filters: [customer], sort: [-created_at], index: [tenant, customer, created_at], p95: 150 ms}
+  - {id: in_range, filters: [created_at], sort: [-created_at], index: [tenant, created_at], p95: 150 ms}
+  - {id: by_amount, filters: [], sort: [amount], index: [tenant, amount], p95: 200 ms}

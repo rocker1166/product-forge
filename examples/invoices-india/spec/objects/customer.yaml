@@ -1,0 +1,105 @@
+id: customer
+name: Customer
+module: masters
+kinds: [master]
+why: the business or person a firm bills; its facts are copied onto every document when it is issued
+links:
+  - {to: invoice, on_delete: "blocked while any invoice exists, issued or void; archive instead. A customer with only drafts or nothing may be deleted after a confirm, and its drafts go with it."}
+  - {to: quote, on_delete: "blocked while any quote exists; archive instead"}
+  - {to: payment, on_delete: "blocked while any payment exists; archive instead"}
+  - {to: credit_ledger, on_delete: "blocked while any credit row exists, even at zero balance; archive instead"}
+abilities:
+  delete: {d: now, how: "Only when the customer has no invoice, quote, payment or credit row; the screen then asks to confirm, the delete leaves one history row, and there is no trash. Otherwise it names what blocks it and offers archive.", e: [wide:W010, wide:D318]}
+  restore: {d: now, how: "Archived customers come back with one tap. A deleted customer does not come back. Restore is refused while another active customer holds the same GSTIN.", e: [wide:W009, wide:W004]}
+  duplicate: {d: no, how: "A copy would carry a GSTIN that must stay unique, and copying a customer is minor next to adding one with only a name.", e: [wide:D319]}
+  merge: {d: later, how: "Two customers can be joined once the money rules for moving payments and credit are designed; until then a possible duplicate only shows a warning with a link to the other one.", e: [judge]}
+  saved_view: {d: no, how: "The list has the views All, With balance and Archived as fixed filters; named saved views are not offered.", e: [wide:K165, wide:D255]}
+  columns: {d: no, how: "Columns are fixed: name, GSTIN, state, outstanding, oldest due.", e: [wide:D311]}
+  bulk: {d: no, how: "Bulk change of customers is rare; archive and edit happen one at a time. Import covers many rows.", e: [wide:K166, wide:D315]}
+  tag: {d: no, how: "No tags in wave 1; search by name, GSTIN, phone and email is enough.", e: ["judge"]}
+  attach: {d: later, how: "Agreements and KYC files wait for the file feature; a note field holds a reference until then.", e: [wide:D287, wide:D321]}
+  custom_fields: {d: no, how: "Fixed fields cover launch; the brief has no custom objects.", e: ["judge"]}
+  print_pdf: {d: now, how: "A customer statement: pick customer and period, see opening balance, invoices, credit notes and payments with a running balance, then print or email it.", e: [judge]}
+  share_link: {d: now, how: "No separate statement link: the customer's statement is a page inside the password-protected client page (track portal), with a PDF, for a period the client picks.", e: [wide:D326, wide:B080]}
+  api: {d: later, how: "Read and write by id or external reference waits for the API build; events for customers follow it.", e: [wide:D325]}
+  webhook: {d: later, how: "Customer created, updated and archived events come with the API.", e: [wide:D325]}
+answers:
+  identity: {a: "One GSTIN belongs to one active customer in a firm; another firm may use it. A customer without a GSTIN is matched on name with state or on phone: the form shows a warning with a link to the existing one but does not block. Import matches on GSTIN, else email, else name plus pincode.", e: [wide:W004]}
+  snapshot: {a: "At issue these are copied onto the document: name, billing address, state, GSTIN, PAN, tax type and currency. Edits change drafts and future invoices only; issued invoices and credit notes keep the old copy.", e: [wide:W008, wide:A050]}
+  remove: {a: "Any invoice, quote, payment or credit row blocks delete and the screen says which. Archive takes its place. A customer with none can be deleted after a confirm.", e: [wide:W010, wide:W009]}
+  owner: {a: "The firm owns it and users reach only their own firm's customers. Owner, accountant and staff create and edit it, viewer reads. Staff and viewer do not see the outstanding and oldest-due columns. A client never sees the record; after signing in to the client page with the customer's password the client sees only that customer's own documents, payments with receipts, quotes and statement.", e: [wide:W077, wide:B005]}
+  contacts: {a: "Wave 1 holds one billing address, one email, one phone and one GSTIN per customer. Several addresses, contacts and GSTINs are room, with the schema ready. A contact can be erased on request; name, email and phone go and the financial records stay.", e: [wide:D165, wide:W005, wide:A255]}
+  code: {a: "No short code in wave 1. Customers are told apart by name with GSTIN and state. A code is room and would be unique per firm.", e: [judge]}
+  inactive: {a: "Archived customers leave the picker and the default list, and every old document stays readable. A draft already open can still be issued with a notice. A recurring run skips them with a logged reason. Their GSTIN is free for a new customer.", e: [wide:W009]}
+tracks:
+  lifecycle:
+    states: [{id: active, start: true}, {id: archived}]
+    moves:
+      - {do: put_away, from: active, to: archived, who: [owner, accountant], effect: "leaves the picker and default list; recurring runs for it skip with a logged reason; its GSTIN may be used by another customer", reverse: "bring_back", notify: none, e: [wide:W009]}
+      - {do: bring_back, from: archived, to: active, who: [owner, accountant], guard: "no other active customer in the firm holds the same GSTIN", effect: "returns to the picker and lists", reverse: "put_away", notify: none, e: [wide:W009, wide:W004]}
+  portal:
+    states: [{id: off, start: true}, {id: on}, {id: locked}, {id: expired}]
+    moves:
+      - {do: open_portal, from: off, to: on, who: [owner, accountant], guard: "a password of 10 to 64 characters is typed or made by Make one for me; the customer has an email or a phone to send the link to", effect: "a client-page token of at least 128 bits is made, the password is stored as a hash only, the link is good for 90 days; the page opens at /c/ and the token", reverse: "close_portal", notify: none, e: [wide:B081, wide:D172, wide:W201]}
+      - {do: set_password, from: [on, locked, expired], to: on, who: [owner, accountant], guard: "10 to 64 characters; owner or accountant presses Make one for me or types it", effect: "the old hash is replaced, every open session ends, wrong-try count goes to 0, a locked page unlocks at once", reverse: "set_password again", notify: none, e: [wide:D172, wide:W201, wide:W204]}
+      - {do: send_portal_link, from: [on, expired], to: on, who: [owner, accountant, staff], guard: "an email or phone is on the customer; the page is on or expired", effect: "link sent by email or by WhatsApp click-to-chat with no password in it; an expired link is renewed for 90 days; Email the password sends the password in a separate email", reverse: "close_portal", notify: [portal_link_sent, portal_password_sent], e: [wide:W202, wide:W205]}
+      - {do: sign_in, from: on, to: on, who: [client], guard: "the right password, page not locked or expired", effect: "a session starts that ends after 2 hours without a click or 24 hours in all; last sign-in time set, open count goes up; the client sees only this customer's documents", reverse: "none: a visit cannot be undone, the client signs out", notify: none, e: [wide:D177, wide:D176, wide:W207]}
+      - {do: wrong_password, from: on, to: on, who: [client], guard: "a wrong password; fewer than 5 wrong tries in the last 15 minutes", effect: "the try is counted and the page says Wrong password, then shows how many tries are left; the same words for any customer, so nothing is learned about other pages", reverse: "sign_in with the right password", notify: none, e: [wide:W204, wide:W207]}
+      - {do: lock_portal, from: on, to: locked, who: [system], guard: "the 5th wrong password inside 15 minutes", effect: "the page refuses every password for 30 minutes and says so with the time it opens again", reverse: "unlock_portal", notify: [portal_locked_alert], e: [wide:W204]}
+      - {do: unlock_portal, from: locked, to: on, who: [system], guard: "30 minutes have passed since the lock", effect: "tries count goes to 0 and the page takes passwords again", reverse: "lock_portal", notify: none, e: [wide:W204]}
+      - {do: reset_password, from: [on, locked], to: on, who: [client], guard: "the link from Forgot password is used within 60 minutes and once; the new password is 10 to 64 characters", effect: "the new hash is stored, every open session ends, a lock is lifted; the same answer We sent a link is shown whether or not the email is on file", reverse: "set_password by the firm", notify: [portal_reset_link], e: [wide:W203]}
+      - {do: expire_portal, from: on, to: expired, who: [system], guard: "90 days have passed since the last send", effect: "the page says This link has expired and offers Send me a fresh link to the email on file; sessions end", reverse: "send_portal_link", notify: none, e: [wide:W205]}
+      - {do: renew_portal, from: expired, to: on, who: [client], guard: "the client presses Send me a fresh link; mail goes only to the email on file, once an hour", effect: "a fresh link is mailed and good for 90 days; the password is unchanged", reverse: "expire_portal", notify: [portal_link_sent], e: [wide:W205]}
+      - {do: close_portal, from: [on, locked, expired], to: off, who: [owner, accountant], guard: "none; also happens by itself when the customer is archived", effect: "every session ends at once, the page says This page is not available, the password hash is kept so turning it on again needs a new one; document links already sent keep working", reverse: "open_portal", notify: none, e: [wide:D175, wide:W210]}
+fields:
+  - {id: name, type: text, required: true, limit: 100, edit: "owner, accountant and staff while no document is issued; later changes reach new documents only", msg: "Enter the customer's name, 1 to 100 letters."}
+  - {id: type, type: choice, required: true, default: business, edit: "owner and accountant; new documents only", msg: "Choose business or individual."}
+  - {id: tax_type, type: choice, required: true, default: unregistered, edit: "owner and accountant; new documents only", msg: "Choose registered, composition, SEZ, unregistered, overseas or UIN holder. It must agree with whether a GSTIN is given."}
+  - {id: gstin, type: text, required: false, limit: 15, edit: "owner and accountant; new documents only", msg: "Invalid GSTIN. It has 15 characters, a correct check character and starts with the state's two-digit code."}
+  - {id: billing_contacts, type: text, required: false, limit: "up to 3 emails, 120 characters each", edit: "owner, accountant and staff", msg: "Give up to 3 billing emails; mark one as accounts."}
+  - {id: gstin_checked_on, type: date, required: false, edit: "owner and accountant, by hand", msg: "The date you checked the GSTIN on the portal, not in the future."}
+  - {id: pan, type: text, required: false, limit: 10, edit: "owner and accountant; filled from the GSTIN when one is given", msg: "PAN has five letters, four digits, one letter, and must match the GSTIN."}
+  - {id: state, type: choice, required: true, default: "the firm's state", edit: "owner and accountant; new documents only", msg: "Choose the state from the GST list. It decides the tax."}
+  - {id: address_line1, type: text, required: false, limit: 150, edit: "owner, accountant and staff", msg: "Address line 1 is 1 to 150 letters. It is needed once an invoice for this customer needs it."}
+  - {id: address_line2, type: text, required: false, limit: 150, edit: "owner, accountant and staff", msg: "Address line 2 is up to 150 letters."}
+  - {id: city, type: text, required: false, limit: 60, edit: "owner, accountant and staff", msg: "City is 1 to 60 letters."}
+  - {id: pincode, type: text, required: false, limit: 6, edit: "owner, accountant and staff", msg: "A pincode has exactly 6 digits and does not start with 0. If it does not fit the state you get a warning, not a block."}
+  - {id: email, type: text, required: false, limit: 120, edit: "owner, accountant and staff", msg: "This email address does not look right. It can be up to 120 characters."}
+  - {id: phone, type: text, required: false, limit: 10, edit: "owner, accountant and staff", msg: "Give a 10-digit mobile number starting with 6, 7, 8 or 9. A +91 or 0 in front is dropped."}
+  - {id: terms_days, type: number, required: false, limit: 90, edit: "owner and accountant", msg: "Payment terms are a whole number of days from 0 to 90. Leave empty to use the firm's terms."}
+  - {id: currency, type: choice, required: true, default: INR, edit: "owner and accountant; locked once any invoice exists", msg: "The currency cannot change after the first invoice for this customer."}
+  - {id: default_tax_treatment, type: choice, required: false, default: regular, edit: "owner and accountant", msg: "Choose regular, SEZ, export or unregistered."}
+  - {id: default_tds_section, type: choice, required: false, edit: "owner and accountant", msg: "Choose a section from the TDS list, or leave it empty."}
+  - {id: portal_password, type: text, required: false, limit: 64, edit: "owner and accountant, write only; never shown again, stored as a hash", msg: "The password is 10 to 64 characters."}
+  - {id: portal_token, type: text, required: false, limit: 43, edit: "nobody", auto: true}
+  - {id: portal_link_expires_at, type: date, required: false, edit: "system, by a send", auto: true}
+  - {id: portal_failed_tries, type: number, required: false, limit: 5, default: 0, edit: "nobody", auto: true}
+  - {id: portal_locked_until, type: date, required: false, edit: "nobody", auto: true}
+  - {id: portal_last_sign_in, type: date, required: false, edit: "nobody", auto: true}
+  - {id: portal_open_count, type: number, required: false, limit: 1000000, default: 0, edit: "nobody", auto: true}
+  - {id: reminders_off, type: bool, required: false, default: false, edit: "owner, accountant; set automatically when the customer uses the opt-out link", msg: "Reminders to this customer are off."}
+  - {id: notes, type: long_text, required: false, limit: 1000, edit: "owner, accountant and staff", msg: "Notes are up to 1000 characters and are never printed or shared."}
+  - {id: outstanding, type: money, required: false, limit: 99999999999, edit: "nobody", auto: true}
+  - {id: oldest_due, type: date, required: false, edit: "nobody", auto: true}
+  - {id: has_balance, type: bool, required: false, edit: "nobody", auto: true}
+fields_e: [wide:W201, wide:W207, wide:W001, wide:W002, wide:W006, wide:W007, wide:B208, wide:B209]
+list:
+  search: [name, gstin, phone, email]
+  filters: [lifecycle, portal, state, tax_type, has_balance]
+  sorts: [name, -created_at, -outstanding, oldest_due]
+  default_sort: name
+  columns: [name, gstin, state, outstanding, oldest_due]
+  export: {rows: [filtered, all], what: [customers], formats: [CSV, XLSX], big: "over 5,000 rows runs in the background and the link comes by email; it dies after 7 days"}
+  import: {match: "GSTIN, else email, else name plus pincode; one choice per file to update or skip a match", errors: "nothing imports until the dry run is confirmed; bad rows download as CSV with row, field and reason; old state spellings map to the GST list", limit: "5 MB, 5,000 rows, UTF-8 or Windows-1252"}
+  page: 25
+  e: [wide:W081, wide:D311]
+volume: {y1: 60000, y3: 600000}
+queries:
+  - {id: by_name, filters: [lifecycle], sort: [name], index: [tenant, lifecycle, name], p95: 100 ms}
+  - {id: by_portal, filters: [lifecycle, portal], sort: [name], index: [tenant, lifecycle, portal, name], p95: 100 ms}
+  - {id: by_state, filters: [lifecycle, state], sort: [name], index: [tenant, lifecycle, state, name], p95: 100 ms}
+  - {id: by_tax_type, filters: [lifecycle, tax_type], sort: [name], index: [tenant, lifecycle, tax_type, name], p95: 100 ms}
+  - {id: newest, filters: [lifecycle], sort: [-created_at], index: [tenant, lifecycle, created_at], p95: 100 ms}
+  - {id: owes_most, filters: [lifecycle, has_balance], sort: [-outstanding], index: [tenant, lifecycle, has_balance, outstanding], p95: 150 ms}
+  - {id: oldest_due, filters: [lifecycle, has_balance], sort: [oldest_due], index: [tenant, lifecycle, has_balance, oldest_due], p95: 150 ms}
+  - {id: by_gstin, filters: [gstin], sort: [], index: [tenant, gstin], p95: 50 ms}

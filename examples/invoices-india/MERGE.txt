@@ -1,0 +1,1421 @@
+A001 now
+A002 fix now: A staff role creates and edits drafts only and cannot open Reports or Settings; issue, payment, credit note and settings actions are hidden and return 403.
+A003 now
+A004 now
+A005 now
+A006 now
+A007 now
+A008 now
+A009 fix now: Owner can set the next invoice number for a series during onboarding or in settings, only upward and only before any document in that series exists this year.
+A010 fix now: Share link visitors see only the one document it was made for, never the customer's other invoices; a statement link is wave 2.
+A011 now
+A012 now
+A013 now
+A014 later: public API follows the web product
+A015 now
+A016 now
+A017 now
+A018 now
+A019 now
+A020 now
+A021 fix now: Quote flow: states draft, sent, accepted, declined, expired and converted; converted and declined are final, expired can be reopened by extending the date; Convert to invoice copies lines and customer into a draft and links both ways.
+A022 now
+A023 fix now: A proforma invoice has its own series PI/YY-YY/NNNNN, prints 'Proforma, not a tax invoice', creates no tax liability and is left out of GST registers; it converts to a tax invoice draft once, then locks as Converted and links the invoice.
+A024 dup D099
+A025 later: needs receipt vouchers built first
+A026 fix now: A recurring schedule bills a fixed fee each period and fills the service period text on the draft, for example 'May 2026'.
+A027 later: hours tracking is its own module
+A028 later: reimbursements stay plain invoice lines meanwhile
+A029 now
+A030 room
+A031 now
+A032 later: gateway link comes after the QR
+A033 later: customer replies need share-page actions
+A034 fix now: Owner can record an expected payment date (promise to pay) on an invoice; its reminders pause until the day after that date, and the date is kept apart from the due date.
+A035 now
+A036 room
+A037 fix now: Owner or accountant can lock a period up to a date and only an owner can move the date back, with a reason; no document with issue date on or before it can be created, edited, voided or reversed, and the error names the lock date.
+A038 later: auto-issue needs proven schedules
+A039 fix now: Onboarding takes signup, firm name, state and optional GSTIN, then lands on a new invoice screen; a first invoice is issuable within five minutes and at most 12 taps on a phone.
+A040 fix now: Cancelling the subscription turns the firm read-only after the paid period; invoices, payments, share links and exports stay reachable for as long as books must be kept (at least 8 years), and paying again restores full use at once.
+A041 fix now: Customer statement: pick customer and period, see opening balance, invoices, payments and credit notes with running balance and the closing balance, then print or send.
+A042 now
+A043 now
+A044 dup D337
+A045 dup A228
+A046 now
+A047 now
+A048 now
+A049 dup A228
+A050 now
+A051 room
+A052 room
+A053 fix now: Customer stores an optional PAN, pre-filled from GSTIN characters 3 to 12 and checked against it.
+A054 now
+A055 now
+A056 now
+A057 room
+A058 fix now: Firm stores one bank account (bank name, account number, IFSC, optional SWIFT) and a UPI ID; each invoice prints them; several accounts are wave 2.
+A059 now
+A060 now
+A061 now
+A062 now
+A063 now
+A064 now
+A065 fix now: Message log stores channel, template id, provider message id, status and timestamps for every email sent.
+A066 now
+A067 now
+A068 now
+A069 now
+A070 later: timesheets wait for time billing
+A071 now
+A072 now
+A073 now
+A074 now
+A075 later: duplicate copy is a print nicety
+A076 now
+A077 now
+A078 now
+A079 now
+A080 now
+A081 now
+A082 now
+A083 now
+A084 now
+A085 now
+A086 now
+A087 fix now: Reverse-charge supply: the supplier's invoice shows no tax and 'Tax payable on reverse charge: Yes'; a firm-level RCM category list pre-sets it, and an invoice cannot mix reverse-charge and normal lines.
+A088 now
+A089 now
+A090 later: turnover tax report is composition-only
+A091 now
+A092 dup D099
+A093 now
+A094 later: interest rules need legal review
+A095 now
+A096 fix now: TDS on professional fees is recorded with the section name from the Income-tax Act 2025 table, with the old numbers (194J at 10 percent for professional, 2 percent for technical, 194C at 1 or 2 percent) shown as aliases; the user can type another rate.
+A097 now
+A098 now
+A099 later: owner rarely lacks a PAN
+A100 now
+A101 now
+A102 fix now: TDS on a payment has a type, income-tax or GST TDS at 2 percent from government customers; each shows on its own line and both settle the invoice.
+A103 later: TCS is rare for services
+A104 now
+A105 now
+A106 now
+A107 now
+A108 now
+A109 now
+A110 now
+A111 now
+A112 now
+A113 fix now: A Council rate or SAC change takes effect by date of supply; drafts saved earlier are rechecked at issue, and the issue screen shows old and new tax and needs a click before issuing.
+A114 now
+A115 now
+A116 later: debit notes follow credit notes
+A117 fix now: A credit note dated after the 30 November cutoff is refused with the exact deadline date, unless the owner records it as a commercial, non-GST credit with no tax effect.
+A118 fix now: Reimbursed expense lines are taxable at the main service's rate; pure-agent treatment is wave 2.
+A119 later: pure-agent tests need a ruling
+A120 now
+A121 now
+A122 now
+A123 now
+A124 now
+A125 now
+A126 now
+A127 now
+A128 later: write-off closes the gap meanwhile
+A129 dup A072
+A130 later: contract dates need a contract record
+A131 dup W026
+A132 fix now: No tax line can appear on documents of an unregistered firm; when the firm registers it gives the GSTIN and an effective date, documents issued from that date use the tax invoice title, and older ones stay as Bill of Supply.
+A133 room
+A134 dup A021
+A135 fix now: Subscription states are trial, free, active, past_due, grace, read_only and cancelled; each state names exactly which actions stay allowed.
+A136 later: strict clearing is an option
+A137 now
+A138 later: time entries wait for time billing
+A139 later: link states follow payment links
+A140 later: disputes follow share-page actions
+A141 now
+A142 now
+A143 dup D228
+A144 room
+A145 now
+A146 later: undo needs period lock proven
+A147 now
+A148 fix now: Recurring and imported drafts carry a 'needs review' mark that the user clears before issuing them.
+A149 now
+A150 later: webhooks arrive with the gateway
+A151 later: amount checks belong to gateway
+A152 later: signature check belongs to gateway
+A153 now
+A154 now
+A155 later: needs a GSTIN status lookup
+A156 now
+A157 dup A113
+A158 now
+A159 now
+A160 now
+A161 later: bulk issue is not in launch
+A162 now
+A163 now
+A164 now
+A165 now
+A166 now
+A167 later: imported schedules are not offered
+A168 now
+A169 later: external clients arrive with the API
+A170 now
+A171 now
+A172 now
+A173 now
+A174 now
+A175 now
+A176 later: TAN is not stored yet
+A177 now
+A178 now
+A179 now
+A180 now
+A181 now
+A182 fix now: Phone accepts +91, 91 or 0 prefixes and spaces, then stores 10 digits.
+A183 now
+A184 now
+A185 now
+A186 now
+A187 now
+A188 now
+A189 now
+A190 now
+A191 now
+A192 fix now: Email send checks the recipient format and the suppression flag before queueing; blocked sends say which check failed.
+A193 now
+A194 now
+A195 now
+A196 now
+A197 fix now: Email is sent from a product address with the firm's name as sender and the firm's email as Reply-To, used only after a verification email to that address is confirmed.
+A198 fix now: The sending domain has SPF, DKIM and DMARC set before launch and a sample message is checked for all three.
+A199 now
+A200 now
+A201 now
+A202 later: WhatsApp API needs template approval
+A203 later: opt-in tied to WhatsApp API
+A204 later: STOP replies need WhatsApp API
+A205 now
+A206 no: SMS is not a channel here
+A207 no: SMS text rules go with SMS
+A208 now
+A209 now
+A210 now
+A211 now
+A212 now
+A213 fix now: Payment receipt message goes automatically after a payment unless the box is unticked, and states amount, TDS, balance left and receipt number.
+A214 later: digest email is a nicety
+A215 fix now: Owner gets alerts for e-invoice failure, trial ending in 7 and 1 days, and plan limit at 80 and 100 percent; LUT expiry 30 days ahead.
+A216 fix now: The share page shows invoice, balance due, a Pay with UPI button that opens the customer's UPI app with payee, balance and invoice number, a QR on desktop, and a PDF download; it stays usable after the due date, says plainly when the invoice is paid or voided, needs no login, carries no internal notes and stays light on slow phones.
+A217 now
+A218 now
+A219 now
+A220 now
+A221 now
+A222 now
+A223 now
+A224 now
+A225 fix now: Each job run stores start, end, counts and errors.
+A226 now
+A227 now
+A228 fix now: A nightly integrity job checks that stored totals equal a recomputation from lines, balances equal payments plus credits, allocations never exceed payments, counters match the highest issued number with gaps listed, and stored PDF hashes equal their files, and alerts engineers on any difference.
+A229 now
+A230 now
+A231 now
+A232 fix now: Trial-end job moves the firm to the Free plan, never to a blocked state, and no job deletes any firm's books.
+A233 later: outbound webhooks follow the API
+A234 later: reconciliation needs the gateway
+A235 dup D228
+A236 fix now: Backup runs nightly, encrypted and kept in a second region in India, and a restore test into a clean database runs weekly and checks counts of invoices and payments; one firm can be restored alone.
+A237 now
+A238 now
+A239 now
+A240 dup A009
+A241 now
+A242 fix now: Migrated invoices keep their original numbers even if longer or differently formatted, up to 16 characters, never touch the counters, and a number that clashes with an existing one in the same series is rejected.
+A243 now
+A244 now
+A245 now
+A246 fix now: Import reads UTF-8 and Windows-1252 files and Excel date formats, cleans amounts with commas, rupee sign or spaces, and keeps leading zeros in pincode, phone and HSN.
+A247 fix now: Import accepts CSV and XLSX up to 5 MB and 5,000 rows and tells the user to split larger files before it reads anything.
+A248 now
+A249 now
+A250 later: registers first, portal file after
+A251 now
+A252 fix now: Exports prefix cells starting with =, +, - or @ with a single quote, and imports save such cells as text, so customer names cannot run formulas in Excel.
+A253 now
+A254 now
+A255 now
+A256 now
+A257 now
+A258 later: merge needs careful money moves
+A259 room
+A260 room
+A261 dup W008
+A262 dup A132
+A263 later: legal-name history is rare
+B001 dup D248
+B002 later: financial-year totals are a second row
+B003 later: dashboard period memory is polish
+B004 later: expected-receipts buckets need history
+B005 now
+B006 now
+B007 no: filters cover small firms
+B008 later: live column filters on reports
+B009 no: tap-first product skips keyboard shortcuts
+B010 now
+B011 now
+B012 no: TDS stays a payment figure
+B013 later: timed sending is extra
+B014 no: repeat entry rarely matters
+B015 dup W033
+B016 later: auto-send waits for review habit
+B017 later: saved mappings serve repeat imports
+B018 later: global search is extra
+B019 no: no shortcuts to list
+B020 no: no go-to keys offered
+B021 no: no range keys offered
+B022 dup A034
+B023 now
+B024 later: per-user sales report is team-size feature
+B025 fix now: Custom roles are not offered; the Users page says roles are fixed and lists exactly what each of the four roles (owner, accountant, staff, viewer) can do.
+B026 no: roles are fixed
+B027 dup A002
+B028 no: owner-only deletion already covers it
+B029 later: customer portal sign-in not built
+B030 later: passkeys after TOTP
+B031 later: social sign-in after password login
+B032 dup A015
+B033 no: one language per firm is enough
+B034 no: Indian financial year is fixed April to March
+B035 no: Indian number formats only
+B036 dup A194
+B037 no: one logo covers it
+B038 fix now: One brand colour setting applies to emails, the shared invoice page and PDFs.
+B039 no: file name stays fixed
+B040 dup A095
+B041 later: custom domain is a paid extra
+B042 fix now: The template gallery offers three style families (plain, standard, modern), all passing GST rules; switching never changes a figure, and editing a template changes only documents issued afterwards, since issued documents keep the template they were first printed with.
+B043 now
+B044 later: multi-branch variants follow multi GSTIN
+B045 fix now: Email subject and body for invoice, receipt, credit note, quote and three reminders accept merge tags for number, amount and view link, with a live preview.
+B046 dup A058
+B047 no: line groups clutter small invoices
+B048 later: tier setup beyond fixed 1, 7, 15
+B049 later: expected-date rules are an extra
+B050 later: late fee by reminder needs consent text
+B051 later: thank-you note follows online payments
+B052 now
+B053 later: credit auto-apply is automation extra
+B054 no: summary tabs add nothing
+B055 dup A137
+B056 dup A026
+B057 no: separate invoices read clearer
+B058 dup W089
+B059 no: same as timed sending
+B060 fix now: Aging summary buckets unpaid balances per customer into not yet due, 0-30, 31-60, 61-90 and over 90 days past due date, and each figure opens the invoices behind it.
+B061 now
+B062 later: sales by customer is secondary report
+B063 later: item-wise sales is secondary report
+B064 now
+B065 later: refunds report follows refund tracking
+B066 dup A125
+B067 now
+B068 fix now: Every report has a date-range preset and a customer filter, and exports exactly what is shown.
+B069 fix now: Reports leave voided invoices out of totals, a switch lists them as marked rows so numbers reconcile, and the documents-issued summary always counts them as cancelled.
+B070 dup A101
+B071 no: the outbox already lists mail
+B072 later: portal activity needs a portal
+B073 dup A187
+B074 later: scheduled reports are automation extra
+B075 later: emailed reports are automation extra
+B076 dup A216
+B077 later: pay methods follow the gateway
+B078 dup A010
+B079 no: viewed flag must stay truthful
+B080 later: customer portal is wave two
+B081 later: portal access follows portal
+B082 later: portal settings follow portal
+B083 later: portal payments follow portal
+B084 later: portal notices follow portal
+B085 no: portal colours need a portal
+B086 fix now: The phone app is an installable web app; recent invoices, customers and drafts open readable with no network, and issuing needs the network.
+B087 fix now: Sharing an invoice from the phone to WhatsApp attaches a real, non-empty PDF or its share link; a blank file counts as a failure.
+B088 dup C004
+B089 dup B086
+B090 dup A248
+B091 later: Tally import is a migration extra
+B092 no: PO photos are not service work
+B093 no: reports already answer these
+B094 later: assistant access follows the API
+B095 no: English and Hindi are enough
+B096 no: nine languages exceed small-firm need
+B097 no: depends on B095
+B098 no: renamed labels confuse accountants
+B099 dup A001
+B100 now
+B101 dup A057
+B102 dup W077
+B103 dup D262
+B104 now
+B105 dup A065
+B106 dup W010
+B107 dup W009
+B108 fix now: CSV and XLSX files import with a choice of character encoding and field mapping, and a sample file is downloadable.
+B109 dup A241
+B110 later: paid-history import is a second step
+B111 no: the result screen is enough
+B112 no: the checklist replaces a guide
+B113 later: statement import is bank matching
+B114 later: payment import follows invoice import
+B115 later: Tally open bills import is migration extra
+B116 no: demo data is marketing
+B117 later: help centre comes with launch content
+B118 no: support quality is not a feature
+B119 no: a changelog is marketing
+B120 later: gateway errors follow gateway
+B121 fix now: The free plan allows a stated number of issued invoices per month, shown on the plan page and in the limit message.
+B122 dup B123
+B123 fix now: Plans state their limits in users and issued invoices per firm; every paid plan includes one accountant seat that does not count as a user.
+B124 no: books are never removed for inactivity
+B125 no: settings already group sensibly
+B126 no: unused modules just stay quiet
+B127 no: the audit log shows setting changes
+B128 no: customer groups are too heavy
+B129 no: number format is fixed by GST rules
+B130 later: custom fields wait for demand
+B131 dup A253
+B132 no: an export tick is needless
+B133 later: own-data request handled by support first
+B134 later: link expiry follows payment links
+B135 later: part payment links follow gateway
+B136 later: link reminders follow gateway
+B137 later: gateway choice waits for owner
+B138 dup D073
+B139 later: fee notes follow gateway
+B140 later: fee display follows gateway
+B141 later: gateway fee split follows gateway
+B142 no: one gateway is enough
+B143 later: failed-payment mails follow gateway
+B144 later: standalone links follow gateway
+B145 later: bank matching is not in launch
+B146 later: auto-match rules are risky early
+B147 later: bank lines follow bank matching
+B148 later: reconciliation is its own module
+B149 later: statement formats need samples
+B150 no: PDF statements are too fragile
+B151 no: bank connectors cost too much
+B152 fix now: For one period the documents-issued summary, the outward summary and the HSN summary carry the same taxable total; any rupee mismatch shows as an error listing the invoices that differ.
+B153 dup W084
+B154 dup B152
+B155 dup B208
+B156 now
+B157 later: Excel export of 3B is convenience
+B158 dup A123
+B159 dup W017
+B160 later: filed marks need lock rules
+B161 later: filed marks follow B160
+B162 later: debit notes come later
+B163 now
+B164 no: manual overrides invite wrong tax
+B165 dup A250
+B166 dup A122
+B167 dup A096
+B168 dup A097
+B169 dup A102
+B170 now
+B171 no: TDS belongs to payments only
+B172 dup A101
+B173 dup B123
+B174 dup B123
+B175 later: shared-period limits are extra
+B176 dup A230
+B177 dup A248
+B178 later: WhatsApp API needs approval
+B179 dup B087
+B180 dup B178
+B181 no: no SMS credits to sell
+B182 dup A229
+B183 dup A229
+B184 now
+B185 dup A109
+B186 dup A239
+B187 now
+B188 dup A104
+B189 room
+B190 dup W018
+B191 now
+B192 room
+B193 later: invoice-level discount needs spread rules
+B194 no: A121 fixes one rounding rule
+B195 dup W042
+B196 dup A054
+B197 dup A021
+B198 dup A023
+B199 later: time entries wait for time billing
+B200 later: expense lines wait for expense module
+B201 later: customer price lists are extra
+B202 fix now: A default tax treatment (regular, SEZ, export, unregistered) and a default TDS section can be set per customer so each new invoice and payment starts right.
+B203 no: advice is not billing truth
+B204 no: send hold duplicates scheduled send
+B205 dup D099
+B206 dup D302
+B207 dup D302
+B208 now
+B209 fix now: A customer carries its own invoicing currency set at creation and printed on the PDF; it cannot change once an invoice exists for them.
+B210 later: portal flag follows portal
+B211 later: debit note citation follows debit notes
+B212 fix now: A credit note's excess becomes customer credit; the owner can apply it to a later invoice of the same customer or record a manual refund that reduces it.
+B213 dup A029
+B214 dup A030
+B215 no: interest charging is legal advice
+B216 dup W088
+B217 dup W089
+B218 no: no self-hosted edition in v1
+B219 dup A254
+B220 dup A040
+B221 later: layout editing is a template extra
+B222 now
+B223 now
+B224 later: optional quote lines are extra
+B225 later: time rounding follows time billing
+B226 dup A239
+B227 dup B209
+B228 later: proof files are convenience
+B229 no: a web app has no store versions
+B230 fix now: A month with 5,000 invoice lines builds its registers and summaries without a timeout, with progress shown.
+B231 now
+B232 now
+B233 no: internal customers are off-market
+B234 no: subtotal rows clutter lines
+B235 dup A062
+B236 no: mileage is an expense matter
+B237 dup A003
+B238 no: automatic feeds add risk
+B239 no: accountant directory is marketing
+B240 dup D373
+C001 later: phone OTP login follows email login
+C002 dup D302
+C003 dup A039
+C004 now
+C005 dup B086
+C006 later: offline drafts need sync rules
+C007 dup B086
+C008 dup A168
+C009 dup A168
+C010 now
+C011 fix now: A new customer can be created inside the invoice picker with only a name typed; type defaults to business and state to the firm's state, and the rest stays optional unless the invoice needs it.
+C012 fix now: Picking a customer prefills payment terms, place of supply and default tax treatment; last-used lines are wave 2.
+C013 now
+C014 later: curated SAC suggestions need research
+C015 dup W025
+C016 now
+C017 dup B011
+C018 dup A039
+C019 fix now: After Issue, the next screen offers Send on WhatsApp (opens WhatsApp with the customer's number and a message holding the share link), Send by email, Copy link and Download PDF, WhatsApp first.
+C020 dup C019
+C021 dup C019
+C022 now
+C023 dup A216
+C024 dup A216
+C025 dup A216
+C026 dup A216
+C027 later: part payment option follows gateway
+C028 later: live paid status needs gateway
+C029 later: auto-match is gateway work
+C030 now
+C031 now
+C032 dup A216
+C033 dup D341
+C034 fix now: Marking an invoice paid by hand takes at most 3 taps: open invoice, Record payment (prefilled with the full balance, today, the last-used mode and the customer's usual TDS percent, with balance due on top and a Full amount chip), Save.
+C035 dup C034
+C036 dup W059
+C037 now
+C038 later: bulk reminders are an extra
+C039 now
+C040 dup A210
+C041 dup D248
+C042 dup W080
+C043 now
+C044 dup D346
+C045 now
+C046 dup B191
+C047 later: bulk entry suits big agencies
+C048 later: bulk issue not in launch
+C049 later: bulk WhatsApp follows bulk issue
+C050 later: bulk email follows bulk issue
+C051 dup A038
+C052 later: review screen for forty drafts
+C053 later: uninvoiced-retainer checklist is extra
+C054 fix now: The customer list shows the outstanding balance per customer in one view and sorts by outstanding and by oldest due date.
+C055 dup A041
+C056 dup A029
+C057 dup A119
+C058 dup D099
+C059 dup D100
+C060 dup B200
+C061 no: matters need a project module
+C062 dup D005
+C063 dup A002
+C064 later: approval queue is polish
+C065 dup A019
+C066 dup A186
+C067 dup W004
+C068 no: guessing amounts creates noise
+C069 no: depends on C068
+C070 no: comments cover correction asks
+C071 dup W044
+C072 dup A001
+C073 no: screen memory is polish
+C074 later: cross-firm accountant home
+C075 dup A230
+C076 dup A037
+C077 dup D343
+C078 dup W073
+C079 dup A250
+C080 no: history already shows it
+C081 dup A216
+C082 dup A196
+C083 dup A033
+C084 no: share links exist only after issue
+C085 later: Hindi client page follows translations
+C086 later: payee name check needs gateway
+C087 dup D155
+C088 dup A062
+C089 dup A059
+C090 dup D160
+C091 dup D160
+C092 dup D161
+C093 fix now: The firm's bank block can carry a SWIFT code, and export invoices print it with the bank details for international transfer.
+C094 dup D162
+C095 dup A040
+C096 dup A253
+C097 dup A254
+C098 dup D276
+C099 dup A040
+C100 later: WhatsApp renewal notices need the API
+C101 dup D269
+C102 dup D269
+C103 now
+C104 dup D275
+C105 later: phone-number recovery follows phone login
+C106 later: OTP login follows phone login
+C107 later: phone change rules follow phone login
+C108 later: OTP auto-read follows phone login
+C109 no: push needs a store app
+C110 no: depends on C109
+C111 no: swipe actions are fiddly
+C112 dup W040
+C113 no: contact picker is a gimmick
+C114 no: typed parsing misleads
+C115 no: depends on C114
+C116 dup D141
+C117 dup B042
+C118 dup A218
+C119 dup D073
+C120 dup A218
+C121 no: transliteration search is unreliable
+C122 dup W043
+C123 later: live words beside amount
+C124 no: shorthand invites errors
+C125 dup A220
+C126 later: Hindi screens follow translations
+C127 later: in-app help follows content
+C128 later: support context needs consent tooling
+C129 no: void already keeps the number
+C130 dup A168
+C131 now
+C132 dup D301
+C133 no: penny-drop checks cost money
+C134 later: changed-bank banner needs design
+C135 dup A043
+C136 fix now: Only an owner can change the firm's bank details or UPI ID, and every change emails all owners at once with the old and new last four digits.
+C137 later: payout checks follow gateway
+C138 later: settlement rules follow gateway
+C139 fix now: Reversing a payment, voiding an invoice or issuing a credit note over Rs 10,000 emails all owners at once with the actor and amount.
+C140 no: cash watching is trust detail
+C141 no: daily by-hand digest is noisy
+C142 later: statement proof follows bank import
+C143 no: discount approval suits bigger teams
+C144 no: amount approval suits bigger teams
+C145 dup W075
+C146 dup A017
+C147 dup A005
+C148 later: API keys follow the API
+C149 dup W044
+C150 no: throttling guesses add support load
+C151 dup W044
+C152 dup W077
+C153 dup W077
+C154 dup A067
+C155 dup A067
+C156 dup A006
+C157 dup A013
+C158 dup A069
+C159 dup A228
+C160 dup A168
+C161 dup A236
+C162 dup A236
+C163 later: restore edge case needs design
+C164 dup A242
+C165 dup W055
+C166 dup A150
+C167 dup W049
+C168 later: late gateway money follows gateway
+C169 later: overpaid UPI follows gateway
+C170 later: pending-state lock follows gateway
+C171 later: status polling follows gateway
+C172 later: failed UPI handling follows gateway
+C173 now
+C174 dup A155
+C175 dup A060
+C176 no: an operations promise, not a feature
+C177 dup A091
+C178 dup A132
+C179 dup A121
+C180 dup A252
+C181 dup A252
+C182 now
+C183 no: link limits harm honest templates
+C184 dup A198
+C185 no: new-firm review is internal ops
+C186 no: name similarity gives false blocks
+C187 no: claim fights are support cases
+C188 later: SIM-swap needs phone login
+C189 later: fresh OTP needs phone login
+C190 dup A004
+C191 dup A170
+C192 now
+C193 now
+C194 dup A013
+C195 no: a business metric, not a feature
+C196 no: a business metric, not a feature
+C197 dup A239
+C198 no: free-plan abuse is an ops matter
+C199 dup A072
+C200 dup A106
+C201 dup A109
+C202 dup A104
+C203 no: applies only above Rs 500 crore
+C204 dup A083
+C205 no: realisation tracking is FEMA advice
+C206 dup A081
+C207 dup A256
+C208 fix now: The terms and privacy page state that the firm is the data fiduciary for its customers' data and the product is its processor.
+C209 dup B133
+C210 now
+C211 now
+C212 dup A036
+C213 dup A100
+C214 dup A098
+C215 dup D099
+C216 dup A119
+C217 dup A089
+C218 dup A087
+C219 dup A071
+C220 dup A074
+C221 dup A057
+C222 dup D302
+C223 later: confidential text option is niche
+C224 dup C223
+D001 now
+D002 dup A022
+D003 later: client replies need quote link actions
+D004 dup A021
+D005 later: part billing of quotes is advanced
+D006 now
+D007 later: quote revisions are an extra
+D008 now
+D009 no: quote copy is minor
+D010 now
+D011 later: webhooks come with the API
+D012 dup B013
+D013 dup A023
+D014 dup A023
+D015 dup D100
+D016 fix now: A service item has name, SAC code, unit, default rate, default tax rate, description and active flag, with the name unique per firm ignoring case; picking an item copies its values into the line, and later catalogue edits never change drafts or issued invoices.
+D017 now
+D018 now
+D019 dup D016
+D020 dup D152
+D021 now
+D022 no: standard columns suffice
+D023 later: customer price lists are an extra
+D024 no: bulk rate edits are rare
+D025 fix now: Item CSV import matches on item name; shows rows to create, update and skip before running; bad SAC or rate rows download as an error file.
+D026 now
+D027 dup W089
+D028 no: full export holds items
+D029 later: fixed fields cover launch needs
+D030 no: item copy is minor
+D031 later: expense records are bookkeeping scope
+D032 later: re-billing needs expense records
+D033 later: markup rules follow re-billing
+D034 later: receipt uploads follow expenses
+D035 no: category lists belong in accounting software
+D036 no: bulk expense edits are bookkeeping
+D037 later: billed locks follow re-billing
+D038 no: expense reports are an accounting job
+D039 no: expense trash is bookkeeping
+D040 no: vendor books belong to the accountant
+D041 no: bank-to-expense is accounting work
+D042 no: expense copy is bookkeeping
+D043 later: hours tracking is its own module
+D044 later: timers need time module
+D045 later: time-to-invoice needs time module
+D046 later: rate order needs time module
+D047 later: billed locks need time module
+D048 later: time lists need time module
+D049 later: own-entries rule needs time module
+D050 later: time exports need time module
+D051 later: included hours need time module
+D052 fix now: A recurring plan has customer, lines, frequency (monthly, quarterly or yearly), start date and an optional end date or run count; every run creates a draft for review and never issues it.
+D053 no: preview adds screen weight
+D054 fix now: A recurring plan can be paused and resumed; resuming asks whether to skip the missed periods or create each of them once; Skip next run is a separate one-click action.
+D055 now
+D056 now
+D057 now
+D058 no: anniversary rises are contract matters
+D059 no: proration is done by hand
+D060 no: few plans per firm
+D061 now
+D062 later: auto-issue is not in launch
+D063 later: events follow the API
+D064 no: plan copy is minor
+D065 later: advance drafting is an extra
+D066 later: hosted gateway page needs a gateway
+D067 later: link states need a gateway
+D068 later: auto-recording needs a gateway
+D069 dup A150
+D070 later: race handling needs a gateway
+D071 later: fee books need a gateway
+D072 later: link list needs a gateway
+D073 fix now: The invoice PDF and share page print a UPI QR with the firm's UPI ID, the balance due as amount and the invoice number in the note; the QR shows only while the balance due is above 0.
+D074 later: attempt timeline needs a gateway
+D075 later: gateway refunds need a gateway
+D076 later: settlement report needs a gateway
+D077 later: key storage needs a gateway
+D078 dup A058
+D079 room
+D080 later: statement mapping is bank matching
+D081 later: re-import checks are bank matching
+D082 later: bad-row repair is bank matching
+D083 later: match suggestions are bank matching
+D084 later: split matches are bank matching
+D085 later: ignore actions are bank matching
+D086 later: statement lists are bank matching
+D087 later: bulk accept is bank matching
+D088 later: net-of-TDS guess is bank matching
+D089 later: reconciliation page is accountant work
+D090 later: batch deletion is bank matching
+D091 later: statement export is bank matching
+D092 later: immutability rule is bank matching
+D093 fix now: A refund of customer credit records an amount up to the credit balance, date, mode, reference and bank account, is numbered REF/YY-YY/NNNNN without gaps, and two refunds at once can never exceed the balance.
+D094 now
+D095 later: refund reversal is rare
+D096 now
+D097 dup D093
+D098 later: refund events follow the API
+D099 room
+D100 room
+D101 room
+D102 room
+D103 later: unapplying advances follows advances
+D104 later: refund vouchers follow advances
+D105 later: advance ageing follows advances
+D106 later: advance register tables follow advances
+D107 dup A036
+D108 later: debit note balance follows debit notes
+D109 later: debit note print follows debit notes
+D110 later: debit note register follows debit notes
+D111 later: debit note IRN follows debit notes
+D112 later: debit note void follows debit notes
+D113 dup A100
+D114 dup A096
+D115 later: certificate lists follow certificates
+D116 later: certificate matching follows certificates
+D117 dup A101
+D118 later: 26AS import is advanced
+D119 no: chasing certificates is the accountant's job
+D120 later: TDS export follows certificates
+D121 later: certificate replacement follows certificates
+D122 dup A109
+D123 dup A106
+D124 dup W089
+D125 later: manual JSON is a fallback
+D126 later: bulk e-invoicing is an extra
+D127 dup A229
+D128 now
+D129 dup A108
+D130 later: e-invoice events follow the API
+D131 no: fixed steps suffice for small firms
+D132 dup A212
+D133 dup A211
+D134 dup A034
+D135 dup B052
+D136 dup A205
+D137 dup A208
+D138 dup B222
+D139 dup A065
+D140 no: owner sees the overdue list
+D141 fix now: Invoice template settings hold logo, accent colour, footer text, signature image and A4 paper, with a live preview using a sample invoice.
+D142 dup B045
+D143 dup A205
+D144 no: template history is overkill
+D145 dup D337
+D146 now
+D147 later: Hindi labels follow translations
+D148 no: the preview already shows it
+D149 dup A060
+D150 dup A056
+D151 dup A112
+D152 now
+D153 dup A060
+D154 dup A061
+D155 now
+D156 dup A062
+D157 now
+D158 dup A082
+D159 dup A084
+D160 now
+D161 later: remittance tracking is an export extra
+D162 now
+D163 dup B209
+D164 now
+D165 room
+D166 later: multi-contact sends need contacts
+D167 later: contact rules need contacts
+D168 later: contact bounce marks need bounce tracking
+D169 later: contact consent needs WhatsApp
+D170 later: contact delete rules need contacts
+D171 later: contact import needs contacts
+D172 later: client portal is wave two
+D173 later: portal pages are wave two
+D174 later: portal disputes are wave two
+D175 later: portal revocation is wave two
+D176 later: portal views are wave two
+D177 later: portal sessions are wave two
+D178 later: portal branding is wave two
+D179 dup A057
+D180 later: branch issuing needs multi GSTIN
+D181 later: branch counters need multi GSTIN
+D182 later: branch lifecycle needs multi GSTIN
+D183 later: branch GSTIN checks need multi GSTIN
+D184 later: per-GSTIN filters need multi GSTIN
+D185 dup A132
+D186 fix now: Firm profile also holds the PAN (derived from GSTIN characters 3 to 12, a mismatch is refused), the Udyam number and the tax scheme: regular, composition or unregistered.
+D187 dup A194
+D188 dup A037
+D189 dup A256
+D190 dup A255
+D191 dup A003
+D192 dup A006
+D193 later: end-dated outside access is an extra
+D194 dup A004
+D195 later: own-records view is a team feature
+D196 dup A011
+D197 dup A011
+D198 fix now: An invited email that already has a login attaches the firm to that login after sign-in, and no message ever reveals which other firms that person belongs to.
+D199 now
+D200 later: bulk invites are an extra
+D201 dup A011
+D202 dup A014
+D203 later: cursor paging follows the API
+D204 dup A169
+D205 dup A170
+D206 dup A233
+D207 dup A233
+D208 later: endpoint auto-disable follows webhooks
+D209 dup A248
+D210 dup A197
+D211 later: integration list follows integrations
+D212 later: external refs follow the API
+D213 later: API error format follows the API
+D214 dup A243
+D215 dup A247
+D216 dup A246
+D217 dup A244
+D218 dup A245
+D219 now
+D220 later: full history import is second step
+D221 dup A242
+D222 later: import undo is rare
+D223 later: import history page is polish
+D224 dup B108
+D225 dup A241
+D226 later: payment imports follow bank matching
+D227 no: column memory is polish
+D228 fix now: Exports over 5,000 rows run as a background job with states queued, ready and expired, an email with the link when ready, and a link that dies after 7 days with the file deleted while the job record stays.
+D229 dup D228
+D230 no: full export holds PDFs
+D231 dup A250
+D232 dup B156
+D233 no: CSV opens in Excel
+D234 dup A253
+D235 dup B104
+D236 later: custom field columns need fields
+D237 dup B060
+D238 dup B062
+D239 dup A126
+D240 dup A125
+D241 no: aging already covers it
+D242 dup A041
+D243 no: days-to-pay is analytics
+D244 no: stamps are cosmetic
+D245 dup W090
+D246 dup A230
+D247 dup W075
+D248 now
+D249 dup B067
+D250 no: filters and search suffice
+D251 no: views are not shared
+D252 no: no default views
+D253 no: no view tabs
+D254 no: no views to go stale
+D255 no: no starter views
+D256 later: bell centre is polish
+D257 later: notice settings are polish
+D258 later: daily digest is an extra
+D259 no: bell history is not kept
+D260 no: customer muting is clutter
+D261 dup B223
+D262 fix now: The audit log lists time, actor, action, object, record number and summary, filterable by actor, object type, action and date range, searchable by record number such as INV/26-27/00012, newest first.
+D263 dup W089
+D264 fix now: Audit also records sign-ins, failed sign-ins, role changes, exports and permission-denied attempts, with IP address and device.
+D265 no: audit CSV is rarely needed
+D266 dup A068
+D267 dup D262
+D268 dup B123
+D269 now
+D270 dup A040
+D271 now
+D272 now
+D273 now
+D274 dup A223
+D275 fix now: A failed subscription payment gives a 7-day grace with a banner and emails on day 1, 3 and 6 before read-only mode; the firm can pay by UPI AutoPay, card or one-time UPI.
+D276 now
+D277 now
+D278 now
+D279 dup A013
+D280 dup A013
+D281 dup A013
+D282 now
+D283 dup A013
+D284 no: tags suit bigger teams
+D285 no: no tags to rename
+D286 no: no tags to filter
+D287 later: attachments are a file feature
+D288 later: emailed attachments follow attachments
+D289 later: post-issue files follow attachments
+D290 fix now: Uploaded files are checked by content, not name; an executable renamed to .png or .pdf is refused.
+D291 later: dispute records follow share-page actions
+D292 later: dispute outcomes follow disputes
+D293 fix now: Numbering settings show per series the next number, last issued number and date, and the year; the next number moves only upward, as A009 allows.
+D294 dup A228
+D295 room
+D296 later: late fees need consent text
+D297 later: late fee drafts follow late fees
+D298 now
+D299 dup A228
+D300 now
+D301 now
+D302 later: needs a GSTIN lookup provider
+D303 no: sample data muddles real books
+D304 later: one search box is an extra
+D305 no: grouped results follow no global search
+D306 now
+D307 later: delivery and open states need callbacks
+D308 no: queue cancel is rare
+D309 now
+D310 later: payment-speed headline needs history
+D311 no: standard columns suffice
+D312 no: search is enough for customers
+D313 dup B202
+D314 dup D302
+D315 no: bulk customer edits are rare
+D316 dup A245
+D317 dup A253
+D318 no: archive already acts as trash
+D319 no: customer copy is minor
+D320 dup A258
+D321 no: customer files go in agreements elsewhere
+D322 no: fixed fields cover launch needs
+D323 no: customer owners suit bigger teams
+D324 dup A211
+D325 later: customer events follow the API
+D326 later: statement links need statement page
+D327 dup W090
+D328 dup A073
+D329 no: extra columns clutter phones
+D330 no: extra filters clutter phones
+D331 no: grouped lists clutter phones
+D332 no: no starter views
+D333 later: bulk email follows bulk actions
+D334 later: bulk issue is not in launch
+D335 no: single downloads suffice
+D336 dup W083
+D337 fix now: At issue the PDF is rendered once and stored with its content hash and template version; reopening or resending later serves that file with the same layout, logo and wording, and its name is the document number with slashes replaced by hyphens.
+D338 dup A221
+D339 dup B011
+D340 dup B013
+D341 fix now: The share page records the first and last time it was viewed and shows both on the invoice.
+D342 no: invoice owner suits bigger teams
+D343 later: internal comments are team feature
+D344 later: invoice files follow attachments
+D345 no: fixed PO fields cover it
+D346 now
+D347 no: related panel is clutter
+D348 dup W040
+D349 no: drafts are simply deleted
+D350 dup A034
+D351 later: draft API follows the API
+D352 later: invoice events follow the API
+D353 now
+D354 dup D353
+D355 later: first-view alerts follow notices
+D356 dup W090
+D357 fix now: The payments list shows date, receipt, customer, invoice, mode, amount, TDS, reference and recorded-by, newest first, filterable by mode, date, customer and reversed; reversed rows are greyed and left out of totals.
+D358 no: lists already filter
+D359 dup A029
+D360 no: fixed modes cover India
+D361 later: deposit accounts need several accounts
+D362 dup A031
+D363 no: clearing dates are accountant detail
+D364 dup B228
+D365 dup B114
+D366 dup A251
+D367 dup A213
+D368 dup W059
+D369 dup W057
+D370 later: payment API follows the API
+D371 later: payment events follow the API
+D372 dup W059
+D373 later: rest-as-advance follows advances
+D374 no: daybook is accountant detail
+D375 later: gateway rows follow gateway
+D376 dup D357
+D377 fix now: The credit note list shows number, date, customer, original invoice, reason, total and status, filterable by status, date and customer.
+D378 dup D377
+D379 now
+D380 now
+D381 dup A107
+D382 fix now: Draft credit notes can be deleted after a confirm; issued ones cannot.
+D383 no: credit note files are clutter
+D384 no: related panel is clutter
+D385 dup D300
+D386 later: credit note API follows the API
+D387 dup W068
+D388 dup A117
+D389 dup A249
+K001 dup W070
+K002 dup W073
+K003 dup W059
+K004 dup W075
+K005 dup W075
+K006 dup W075
+K007 dup W075
+K008 dup W074
+K009 dup W073
+K010 dup A020
+K011 dup W077
+K012 dup W089
+K013 dup D193
+K014 no: accountant sees the whole firm
+K015 dup A002
+K016 dup W035
+K017 dup W066
+K018 dup W038
+K019 dup W060
+K020 dup W054
+K021 dup W053
+K022 dup W059
+K023 dup W066
+K024 dup W067
+K025 dup D093
+K026 dup W040
+K027 dup W047
+K028 dup W087
+K029 dup W088
+K030 dup W046
+K031 dup W038
+K032 dup W073
+K033 dup W009
+K034 dup A230
+K035 dup W008
+K036 dup W015
+K037 dup W065
+K038 dup W077
+K039 now
+K040 dup W001
+K041 now
+K042 now
+K043 now
+K044 dup W060
+K045 dup D298
+K046 dup W076
+K047 dup W070
+K048 dup W019
+K049 dup W086
+K050 dup W089
+K051 dup W044
+K052 dup W047
+K053 dup D228
+K054 dup D287
+K055 dup D029
+K056 fix now: Foreign-currency invoices for export of services are in wave 1: money is stored as integer paise in INR, with the foreign amount, currency and rate kept beside it.
+K057 dup W017
+K058 dup W018
+K059 dup W020
+K060 dup W028
+K061 dup W029
+K062 dup W027
+K063 dup W024
+K064 dup W025
+K065 dup A121
+K066 dup W060
+K067 dup W065
+K068 dup W062
+K069 dup W032
+K070 dup W053
+K071 dup W049
+K072 dup A087
+K073 dup A089
+K074 dup A103
+K075 dup A081
+K076 dup A104
+K077 dup W014
+K078 dup W016
+K079 dup W050
+K080 dup D296
+K081 dup W035
+K082 dup W036
+K083 dup W069
+K084 dup W059
+K085 dup W087
+K086 dup W009
+K087 dup W073
+K088 dup A147
+K089 dup W044
+K090 dup W035
+K091 dup W020
+K092 dup W020
+K093 dup W055
+K094 dup W049
+K095 dup W048
+K096 dup W062
+K097 dup W038
+K098 dup W010
+K099 dup W074
+K100 dup W033
+K101 dup A237
+K102 dup W015
+K103 dup W046
+K104 dup W044
+K105 dup W076
+K106 dup D346
+K107 fix now: When two users edit the same draft, the second save is refused with a notice that shows the newer version.
+K108 dup W077
+K109 dup W002
+K110 dup W003
+K111 dup W004
+K112 dup W005
+K113 dup W006
+K114 dup W006
+K115 dup W001
+K116 dup W022
+K117 dup W022
+K118 dup W022
+K119 dup W023
+K120 dup W021
+K121 dup W031
+K122 dup W052
+K123 dup W041
+K124 dup W038
+K125 dup W071
+K126 dup W007
+K127 dup W076
+K128 dup A175
+K129 dup A177
+K130 dup A220
+K131 dup W086
+K132 dup W073
+K133 dup W088
+K134 dup A213
+K135 now
+K136 dup W090
+K137 dup W090
+K138 dup C043
+K139 dup W089
+K140 dup A202
+K141 dup D256
+K142 dup W087
+K143 dup W088
+K144 dup W047
+K145 dup W044
+K146 dup W076
+K147 dup A236
+K148 dup W046
+K149 dup A243
+K150 dup A241
+K151 dup W083
+K152 dup W084
+K153 dup A253
+K154 dup A253
+K155 dup A257
+K156 dup A258
+K157 dup W009
+K158 dup A256
+K159 dup A250
+K160 dup W009
+K161 dup W009
+K162 dup W081
+K163 dup W081
+K164 dup C054
+K165 no: saved views are not offered
+K166 no: bulk customer edits are rare
+K167 dup A243
+K168 now
+K169 dup A258
+K170 dup W090
+K171 dup W085
+K172 dup W039
+K173 dup W038
+K174 dup W080
+K175 dup W079
+K176 dup W082
+K177 no: saved views are not offered
+K178 dup D334
+K179 dup W083
+K180 dup W042
+K181 dup W044
+K182 dup W041
+K183 dup W089
+K184 dup W088
+K185 dup W047
+K186 dup W071
+K187 no: invoices are never merged
+K188 dup W075
+K189 dup W090
+K190 fix now: Lines can be added, edited and removed on a draft; reordering and duplicating a line are wave 2.
+K191 dup W025
+K192 dup D016
+K193 dup W021
+K194 dup W058
+K195 dup D357
+K196 dup W057
+K197 dup W055
+K198 dup W053
+K199 dup W089
+K200 dup W060
+K201 dup W068
+K202 dup W067
+K203 dup D093
+K204 dup W064
+K205 dup W074
+K206 fix now: A user who forgot the password asks for a reset link by email; the link comes through the outbox, expires in 1 hour and works once.
+K207 dup W089
+K208 dup W070
+K209 dup A037
+K210 dup A194
+K211 dup W087
+K212 dup W087
+K213 dup W083
+K214 dup W084
+K215 dup B104
+W001 now
+W002 now
+W003 now
+W004 now
+W005 now
+W006 now
+W007 now
+W008 now
+W009 now
+W010 now
+W011 now
+W012 now
+W013 now
+W014 now
+W015 now
+W016 now
+W017 now
+W018 now
+W019 now
+W020 now
+W021 now
+W022 now
+W023 now
+W024 fix now: When the firm has a GSTIN, every line needs an HSN or SAC code of 4, 6 or 8 digits, and the minimum digits follow the firm's turnover band (4 digits up to Rs 5 crore, 6 above).
+W025 now
+W026 now
+W027 now
+W028 now
+W029 now
+W030 now
+W031 now
+W032 now
+W033 now
+W034 now
+W035 now
+W036 now
+W037 now
+W038 now
+W039 now
+W040 now
+W041 now
+W042 now
+W043 now
+W044 fix now: Owner or accountant can create a read-only share link for an issued invoice with a random token of at least 128 bits and no client name or amount in the address; it is not indexed by search engines or cached by shared proxies, expires after 30 days by default, can be revoked, and needs no login.
+W045 fix now: With e-invoicing on, Generate e-invoice on an issued invoice to a customer with a GSTIN calls the e-invoice provider through one adapter and returns a 64-hex IRN; a fake adapter with modes succeed, fail and fail 1 in 5 serves tests and the sandbox.
+W046 now
+W047 now
+W048 now
+W049 fix now: Payment amount must be above 0 with 2 decimals, and amount plus TDS cannot exceed the invoice balance due; larger amounts are rejected with a message, because advance receipts are wave 2.
+W050 now
+W051 now
+W052 now
+W053 now
+W054 now
+W055 now
+W056 now
+W057 fix now: The receipt print page shows receipt number, payment date, invoice number or the invoices it settles with each allocation, customer, amount received in figures and words, TDS, mode, reference, balance after, and a note that it is not a tax document.
+W058 now
+W059 fix now: Only an owner can reverse a payment with a reason of 5 to 200 characters, and the user who saved a payment can undo it within 10 seconds with no reason; the row stays listed as reversed, balance and status are recalculated, and its receipt number is never reused.
+W060 now
+W061 now
+W062 now
+W063 now
+W064 now
+W065 now
+W066 now
+W067 now
+W068 fix now: The credit note print page is titled "Credit Note" and shows its number and date, the original invoice number and date, reason, lines, tax split, total, and each application to other invoices.
+W069 now
+W070 now
+W071 now
+W072 now
+W073 fix now: Owner can invite a user by email with role owner, accountant, staff or viewer; one login can belong to several firms with one role in each, email is unique system-wide per login, and the invite link expires in 7 days and works only for the invited email.
+W074 fix now: An owner can change a user's role, deactivate them or reactivate them, but the last active owner of a firm cannot be demoted or deactivated.
+W075 fix now: A viewer can only view, search and print; staff create and edit drafts only; an accountant can do everything except edit firm settings, manage users, void invoices or credit notes and reverse payments; forbidden actions return 403.
+W076 now
+W077 fix now: Every record belongs to one firm and users reach only their own firm's data; requesting another firm's record by ID, in lists, search, export or share link, returns 404, and the firm scope is enforced in the data layer with an automated test that tries one firm's token on other firms' IDs.
+W078 now
+W079 now
+W080 now
+W081 now
+W082 now
+W083 fix now: Owner or accountant can export the current filtered invoice list as CSV, UTF-8 with byte-order mark, ISO dates, plain 2-decimal amounts, up to 50,000 rows, with columns number, date, due, customer, GSTIN, place of supply, taxable, CGST, SGST, IGST, round-off, total, paid, TDS, credited, balance and status, and a line-level option with one row per line.
+W084 now
+W085 now
+W086 now
+W087 fix now: The outbox page lists rows newest first with status queued, sent or failed; the sender job marks queued rows sent or failed from the email provider's answer within 60 seconds, test recipients ending @fail.test fail, and Retry requeues failed rows.
+W088 fix now: A daily job at 09:00 IST queues reminders 1, 7 and 15 days after due date, at most 3 per invoice, none after paid or void and none for invoices with a pause; one message per customer lists all their overdue invoices.
+W089 now
+W090 now

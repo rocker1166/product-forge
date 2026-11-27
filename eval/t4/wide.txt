@@ -1,0 +1,234 @@
+# AREA 1 ROLES
+roles: owner can edit firm profile, numbering prefixes, defaults and e-invoice mode
+roles: owner can invite, change role, deactivate users
+roles: owner only can void invoices, void credit notes, reverse payments
+roles: accountant can create and edit customers, drafts, payments, credit notes
+roles: accountant cannot edit settings or users
+roles: viewer can view, search, print only
+roles: viewer cannot export, share, or email
+roles: at least one active owner per firm
+roles: one user belongs to one firm; email unique system-wide
+roles: forbidden actions return 403, hidden buttons are not security
+roles: tenant isolation, other firm record returns 404
+roles: roles shown on user list; role change recorded in history
+roles: auditor/CA read-only external role (deferred)
+roles: per-customer assignment of accountants (deferred)
+roles: maker-checker approval before issue (deferred)
+# AREA 2 WORKFLOWS WITH EXCEPTIONS
+workflow: draft -> issue -> pay -> paid
+workflow: issue -> credit note -> reduced balance
+workflow: issue with wrong data -> void (no payments) -> new invoice
+workflow: issue with wrong data and payments -> credit note, re-invoice
+workflow: partial payment, then second payment
+workflow: client deducts TDS and pays net; record cash + TDS
+workflow: payment recorded by mistake -> reverse and re-record
+workflow: credit note larger than balance due -> customer credit
+workflow: customer credit applied to next invoice
+workflow: customer credit refunded manually (deferred)
+workflow: duplicate invoice for repeat work
+workflow: monthly retainer -> recurring draft
+workflow: email invoice -> outbox -> sent or failed -> retry
+workflow: overdue -> reminder at 1, 7, 15 days
+workflow: e-invoice generate -> portal fails -> retry
+workflow: e-invoice generated -> void blocked -> credit note
+workflow: invite user -> set password -> login
+workflow: archive customer with open invoices -> still collectable
+workflow: month-end register export for accountant
+workflow: customer GSTIN changes after issue -> old invoices keep snapshot
+workflow: backdated invoice blocked by number order
+workflow: credit note after 30 Nov deadline blocked
+# AREA 3 DATA
+data: firm id on every row
+data: money stored as integer paise
+data: customer: name, type, GSTIN, state, address, email, phone, terms days, archived at
+data: invoice: number, series, FY, dates, customer snapshot, place of supply, status, notes, IRN fields, totals
+data: line: description, HSN/SAC, qty, rate, discount, tax rate, taxable, cgst, sgst, igst
+data: payment: invoice, amount, TDS, date, mode, reference, receipt number, reversed flag
+data: credit note: original invoice, reason, lines, number, dates, status
+data: customer credit ledger
+data: user: email, password hash, role, active, failed attempts
+data: firm settings: profile, prefixes, defaults, e-invoice mode
+data: counters per firm, prefix, FY
+data: outbox message: to, subject, body, status, reason, attempts
+data: history entries: actor, time, entity, old, new
+data: share link: token, invoice, expiry, revoked
+data: recurring schedule: day, last run
+data: export job record (deferred)
+data: attachments on invoice (deferred)
+data: custom fields (deferred)
+data: multi-currency (deferred; INR only)
+# AREA 4 BUSINESS RULES (GST)
+rules: FY April to March, label YY-YY
+rules: number max 16 characters (CGST Rule 46)
+rules: number unique per FY, consecutive
+rules: intra-state = CGST + SGST half each
+rules: inter-state = IGST
+rules: place of supply defaults to customer state
+rules: HSN/SAC 4,6,8 digits
+rules: allowed rates 0, 0.25, 3, 5, 18, 40
+rules: rounding per line half up to paise, total to whole rupee with round-off line
+rules: credit note linked to invoice, own series, reason
+rules: credit note deadline 30 Nov after FY end (Section 34)
+rules: credit note cannot exceed original value
+rules: unregistered firm issues Bill of Supply, no tax
+rules: TDS reduces cash but settles invoice
+rules: no advance payments in v1
+rules: reverse charge (deferred)
+rules: composition scheme firm (deferred)
+rules: TCS (deferred)
+rules: export / SEZ supplies, LUT (deferred)
+rules: e-invoice threshold by turnover (fake portal skips threshold)
+rules: invoice date not future
+rules: due date not before issue
+rules: payment date between issue date and today
+rules: late fee / interest (deferred)
+# AREA 5 STATES
+states: invoice draft, issued, partially_paid, paid, void
+states: overdue derived, not stored
+states: credit note draft, issued, void
+states: payment active, reversed
+states: outbox queued, sent, failed
+states: customer active, archived
+states: user invited, active, deactivated
+states: e-invoice none, generated, failed
+states: share link active, expired, revoked
+states: status computed from balance due
+# AREA 6 EXCEPTIONS
+exception: two users issue at once -> distinct numbers
+exception: issue fails midway -> no number consumed
+exception: double click on pay -> duplicate guard
+exception: payment above balance
+exception: payment on void / draft invoice
+exception: credit above remaining creditable value
+exception: void with payments blocked
+exception: delete customer with documents blocked
+exception: last owner demotion blocked
+exception: edit issued invoice blocked
+exception: FY rollover resets counter
+exception: backdate before latest issued
+exception: portal failure leaves invoice payable
+exception: expired / revoked share link
+exception: invalid login lockout
+exception: session timeout mid-form (draft preserved)
+exception: concurrent edit of same draft (last-write warning)
+exception: other firm's ID in URL
+# AREA 7 VALIDATION
+validate: GSTIN format + check char
+validate: GSTIN state code matches state
+validate: GSTIN unique per firm
+validate: pincode 6 digits
+validate: phone 10 digits starting 6-9
+validate: email format, 120 chars
+validate: name 1-100
+validate: description 1-200
+validate: qty > 0, 3 decimals
+validate: rate 2 decimals
+validate: discount 0-100
+validate: lines 1-50
+validate: total below 100 crore
+validate: reference 60 chars
+validate: notes lengths
+validate: reason 5-200
+validate: prefix 1-4 upper alphanumeric
+validate: terms 0-90 days
+validate: password 10+ chars
+validate: PAN (deferred)
+validate: bank IFSC (deferred)
+# AREA 8 MESSAGES
+msg: field-level error text states field and limit
+msg: outbox invoice email with share link
+msg: outbox invite with set-password link
+msg: outbox overdue reminder
+msg: outbox payment receipt email (deferred)
+msg: toast on success
+msg: empty list message with create button by role
+msg: error screen with retry
+msg: confirm dialogs for delete, void, reverse
+msg: history timeline on documents
+msg: WhatsApp / SMS (out: external)
+msg: in-app notifications (deferred)
+# AREA 9 BACKGROUND JOBS
+job: outbox sender, every minute
+job: overdue reminders daily 09:00 IST
+job: recurring invoice drafts daily 06:00 IST
+job: share link expiry sweep
+job: session / lockout cleanup
+job: nightly backup (deferred)
+job: e-invoice retry queue (manual retry only)
+# AREA 10 JOINING, LEAVING, MOVING DATA
+move: customer CSV import (deferred)
+move: invoice opening balances import (deferred)
+move: CSV export of invoices
+move: GST sales register CSV
+move: customer export CSV (deferred)
+move: full firm data export (deferred)
+move: user leaves -> deactivate, history keeps name
+move: customer merge (deferred)
+move: archive/restore customer
+move: firm delete (deferred)
+move: JSON export of GSTR-1 (deferred)
+# OBJECT SWEEP: customer
+customer: create, edit, duplicate (skip), archive, restore, delete when empty
+customer: undo (none; archive is the undo)
+customer: search name/GSTIN/phone
+customer: filter by archived, state (state filter deferred)
+customer: sort by name, outstanding (deferred)
+customer: saved view (deferred)
+customer: bulk archive (deferred)
+customer: import / export (deferred)
+customer: notes, history
+customer: merge (deferred)
+customer: empty list screen
+customer: phone width card layout
+# OBJECT SWEEP: invoice
+invoice: create draft, edit draft, delete draft, issue, void, duplicate
+invoice: undo issue (none; void or credit note)
+invoice: search number, customer, GSTIN
+invoice: filters status, customer, date range
+invoice: sort date, number, total, due, balance
+invoice: saved view (deferred)
+invoice: bulk issue, bulk email (deferred)
+invoice: CSV export
+invoice: print page A4, amount in words
+invoice: share link
+invoice: notes customer and internal
+invoice: history
+invoice: reminders
+invoice: recurring
+invoice: custom numbering prefix
+invoice: merge (n/a)
+invoice: permissions
+invoice: empty / error screens, phone width
+# OBJECT SWEEP: line
+line: add, edit, remove, reorder (deferred), duplicate line (deferred)
+line: tax rate, discount, HSN/SAC
+line: saved items catalogue (deferred)
+line: 50 line limit
+# OBJECT SWEEP: payment
+payment: record, reverse (no delete), edit reference only
+payment: filter by mode, date (deferred)
+payment: receipt print
+payment: duplicate guard
+payment: TDS
+payment: history
+# OBJECT SWEEP: credit note
+credit note: create from invoice, draft, issue, void
+credit note: print
+credit note: apply customer credit
+credit note: refund (deferred)
+credit note: history, number series
+# OBJECT SWEEP: user
+user: invite, change role, deactivate, reactivate (deferred)
+user: login, lockout, password reset via outbox (deferred)
+user: history
+# OBJECT SWEEP: firm settings
+settings: profile, GSTIN, prefixes, defaults, e-invoice mode
+settings: FY lock date (deferred)
+settings: logo upload (deferred)
+# OBJECT SWEEP: outbox message
+outbox: list, status, retry, view body
+outbox: delete (none, append-only)
+# OBJECT SWEEP: export
+export: invoice CSV
+export: GST register CSV
+export: audit of who exported (history)

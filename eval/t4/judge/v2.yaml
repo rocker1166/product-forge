@@ -1,0 +1,30 @@
+- {id: W031, p: "right", pn: "API+UI: ₹99,99,99,999.00 saves; +₹1 rejected with limit message on create/edit/tax-pushed", q: "right", qn: "Same: at limit saves, +₹1 rejected, message names the 99,99,99,999 limit"}
+- {id: W032, p: "right", pn: "f2 cleared GSTIN: Bill of Supply, tax forced 0, HSN/tax fields hidden, no tax columns", q: "right", qn: "Bill of Supply, rates 0, HSN/tax hidden in form and print. API rejects bad HSN text if sent"}
+- {id: W033, p: "right", pn: "409 on customer/lines/issue date/place of supply, clear message", q: "right", qn: "Same four refused, message points to credit note"}
+- {id: W034, p: "right", pn: "Due date, both notes editable; due before issue refused; history rows; viewer 403", q: "right", qn: "Same; history shows old/new"}
+- {id: W035, p: "right", pn: "issued, partially_paid (bal 850.00 after 300+30 TDS), paid at 0", q: "right", qn: "Same values"}
+- {id: W036, p: "right", pn: "due yesterday overdue (also part-paid); due today, paid, draft not; label only", q: "right", qn: "Same results; list and detail show overdue label"}
+- {id: W037, p: "right", pn: "Paise-exact with payment, TDS, credit note, applied credit; floor 0; credit left 330.00", q: "right", qn: "Same balances; capped at 0, credit 330.00. Reversal blocked while CN credit unused"}
+- {id: W038, p: "right", pn: "Owner only; payment/CN/IRN blocks; reason 4/201 refused, 5-200 ok; number stays used", q: "right", qn: "Same; UI says number stays used"}
+- {id: W039, p: "right", pn: "Owner/accountant delete draft with confirm; viewer 403; issued/void 409", q: "right", qn: "Same, UI confirm step present"}
+- {id: W040, p: "right", pn: "Draft, no number, today, customer/lines/POS/notes copied, no payments", q: "right", qn: "Same"}
+- {id: W041, p: "right", pn: "500/1000 ok, 501/1001 refused; internal note absent from print, share, email", q: "right", qn: "Same limits; internal note not in print, share, email"}
+- {id: W042, p: "right", pn: "A4 @page; firm, GSTIN, dates, HSN, tax summary, round-off, words, bank, note, Disc % shown", q: "right", qn: "A4; all required parts present; discount % column not printed"}
+- {id: W043, p: "right", pn: "₹12,34,567.50 grouping and DD-MM-YYYY on all pages scanned", q: "right", qn: "Same; no raw ISO dates or bad grouping found"}
+- {id: W044, p: "right", pn: "Owner/acct only; 48-char token; +30 days; revoke; no login; expired 404; draft 409", q: "right", qn: "40-char token; +30 days; revoke; expired 410; no login; internal note hidden"}
+- {id: W045, p: "right", pn: "Off/no-GSTIN/draft refused; 64-hex IRN; mode flaky 29/40 ok; second call 409", q: "right", qn: "Same; flaky 32/40 ok"}
+- {id: W046, p: "right", pn: "Stays issued, payable; PORTAL-503 code and message shown; unlimited Retry", q: "right", qn: "Stays issued; FAKE-5001 shown; Retry works repeatedly"}
+- {id: W047, p: "right", pn: "Day 0/29/1.5 refused, 1-28 ok; job made one draft, never issued, no duplicate", q: "right", qn: "Same; today's day starts next month, draft made once repeat_from set to this month"}
+- {id: W048, p: "right", pn: "Draft, paid, void refuse with clear text; viewer 403", q: "right", qn: "Same"}
+- {id: W049, p: "right", pn: "0, negative, 1.5 paise, 3dp refused; amount+tds = balance ok, +0.01 refused", q: "right", qn: "Same; 3dp message is generic"}
+- {id: W050, p: "right", pn: "Future and before-issue refused; issue date and today accepted", q: "right", qn: "Same, one combined message"}
+- {id: W051, p: "right", pn: "Six modes ok; Cash, wire, empty refused", q: "right", qn: "Same"}
+- {id: W052, p: "right", pn: "Ref 60 ok, 61 refused (UI cuts at 60); required for cheque/bank/UPI incl. blank", q: "right", qn: "Same; one shared message"}
+- {id: W053, p: "right", pn: "TDS separate in totals, receipt and rows; settles balance", q: "right", qn: "Same"}
+- {id: W054, p: "right", pn: "partially_paid then paid at exactly 0", q: "right", qn: "Same"}
+- {id: W055, p: "right", pn: "Duplicate 409, confirm records; ok after 25h or reversal; UI Record anyway", q: "right", qn: "Same; UI 'Is this a double entry?' Yes/No"}
+- {id: W056, p: "right", pn: "REC/25-26/00001 and REC/26-27 split by date; per firm; no gaps", q: "right", qn: "Same"}
+- {id: W057, p: "right", pn: "Receipt page: number, date, invoice, customer, amount, TDS, mode, reference", q: "right", qn: "Same plus invoice date"}
+- {id: W058, p: "right", pn: "Only reference, note editable; amount/date/mode 409; reversed locked", q: "right", qn: "Same"}
+- {id: W059, p: "right", pn: "Owner only; reason 5-200; row stays Reversed; balance back; number not reused", q: "right", qn: "Same; but refused while CN credit unused (extra rule)"}
+- {id: W060, p: "right", pn: "Issued, part-paid, paid ok; draft, void refused; three CNs linked", q: "right", qn: "Same; accepts same set"}

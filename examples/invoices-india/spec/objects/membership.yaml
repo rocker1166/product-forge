@@ -1,0 +1,71 @@
+id: membership
+name: Membership
+module: core
+kinds: [person, setting]
+why: the role of one login inside one firm; the unit every 403 test runs against
+links:
+  - {to: firm, on_delete: "memberships go inactive when the firm is sealed; rows stay for history"}
+  - {to: user, on_delete: "a closed login makes its memberships inactive; rows stay"}
+abilities:
+  create: {d: now, how: "Made by sign-up (the first owner, active at once) or by sending an invite (waits as invited). No form makes a membership without an invite.", e: [wide:W073, judge]}
+  edit: {d: now, how: "Owner changes a role from the users page; it applies on the next request with no sign-out, and the person is told in the app and by email. Nobody changes their own role.", e: [wide:W074, judge]}
+  delete: {d: no, how: "A membership is never deleted; deactivating keeps the name on history.", e: ["judge"]}
+  merge: {d: no, how: "Two logins are never merged; move drafts with reassign and deactivate one.", e: [judge]}
+  reverse: {d: no, how: "A role change or removal is undone by changing the role or reactivating, not by a separate reverse.", e: ["judge"]}
+  duplicate: {d: no, how: "A copied membership would copy access.", e: [judge]}
+  version: {d: no, how: "Role changes are read in history, not as versions.", e: ["judge"]}
+  preview: {d: later, how: "View as a role later; for now the users page lists what each of the four roles may do.", e: [wide:B025]}
+  schedule: {d: no, how: "No timed access in wave 1; only a support grant on the firm has an end date.", e: [judge]}
+  notify: {d: now, how: "Told on invite, role change, removal, return and ownership offer.", e: [judge]}
+answers:
+  secret: {a: "A membership holds no secret; its power comes from the login that signs in.", e: ["judge"]}
+  scope: {a: "One of owner, accountant, staff, viewer, fixed by the table; no custom roles. Accountant seats from the firm list come free, one per firm.", e: [wide:W075, wide:B025, wide:B123]}
+  expiry: {a: "None once active. A support grant on the firm is the only timed access.", e: [judge]}
+  last: {a: "The last active owner cannot be demoted, deactivated or left behind; the message says to make another owner first. Several owners are allowed.", e: [wide:W074, wide:W074]}
+  leave: {a: "Access ends on the very next request: it is checked against the membership record every time, with no delay. Drafts stay with the firm and can be reassigned in one step; the name stays on history; share links keep working.", e: [wide:W074, wide:W074, "walk:X032"]}
+  proof: {a: "The membership relies on the login's proof; an owner may demand a second step for everyone.", e: [judge]}
+  layers: {a: "Firm first (another firm returns 404), then the role table (forbidden returns 403 with the missing permission named).", e: [wide:W077, wide:W075]}
+  audit: {a: "Every invite, role change, removal, return and ownership move is in firm history with actor and old and new role.", e: [wide:W089, judge]}
+  used: {a: "Nothing is copied from a membership onto a document, only the person's name and id on history.", e: [judge]}
+  default: {a: "A new invite defaults to staff; the first owner is owner; the default is shown, never silent.", e: ["judge"]}
+  effective: {a: "A role change applies on the next request, never later and never on a future date.", e: [judge]}
+  order: {a: "The users page orders by name; owners first is a sort choice.", e: [judge]}
+  who: {a: "Only an owner invites, changes roles, removes or restores. Viewers do not see the user list.", e: [wide:W073, wide:W075]}
+  limit: {a: "The seat count comes from the plan; reactivating or accepting over the limit is refused with how many to remove. One accountant seat per firm is free.", e: [wide:D273, wide:B123]}
+tracks:
+  access:
+    states: [{id: invited, start: true}, {id: active}, {id: deactivated}]
+    moves:
+      - {do: activate, from: invited, to: active, who: [system], guard: "its invite was accepted", effect: "the firm appears in the person's switcher", reverse: deactivate, notify: [invite_accepted], e: ["judge"]}
+      - {do: cancel_invited, from: invited, to: deactivated, who: [owner, system], guard: "its last live invite was revoked or expired", effect: "no access; a later invite can wake it", reverse: reinvite, notify: none, e: [judge]}
+      - {do: reinvite, from: deactivated, to: invited, who: [owner], guard: "never accepted before", effect: "a new invite is sent", reverse: cancel_invited, notify: [invite_sent], e: [judge]}
+      - {do: change_role, from: active, to: active, who: [owner], guard: "not your own, not the last active owner, seats allow. one owner may demote or remove another owner only after a 24-hour notice mailed to all owners that either can cancel; the owner count is checked inside the same transaction with a lock on the firm and the database refuses a state with no active owner", effect: "applies on the next request; an open page fails its next action with 403 and a notice", reverse: "change it again", notify: [role_changed], e: [wide:W074, judge, "walk:F038", "walk:X031"]}
+      - {do: deactivate, from: active, to: deactivated, who: [owner], guard: "not yourself, not the last active owner. the owner picks who gets the person's open drafts in the same confirm; one owner removes another only after the 24-hour notice (change_role)", effect: "access ends on the next request; drafts stay with the firm. a pack address equal to the person's email is cleared and the owners are told; the offline copy on their phone is wiped at the next sign-in; history of their last 30 days is shown", reverse: reactivate, notify: [access_removed], e: [wide:W074, wide:W074, wide:W074, "walk:F040", "walk:F038", "walk:X033", "walk:X038"]}
+      - {do: leave, from: active, to: deactivated, who: [accountant, staff, viewer], guard: "owners cannot leave; make another owner first. before the confirm the screen lists the drafts waiting, the unlocked months and any failed month-end pack of this firm", effect: "the firm drops from the switcher; the owner is told. that list is copied into the owner's notice; a pack address equal to the person's email is cleared", reverse: "an owner sends a new invite", notify: [member_left], e: [wide:W073, wide:W074, "walk:F018", "walk:X033"]}
+      - {do: reactivate, from: deactivated, to: active, who: [owner], guard: "was active before, and a seat is free", effect: "role returns as it was", reverse: deactivate, notify: [access_returned], e: [wide:W074, wide:D273]}
+      - {do: offer_ownership, from: active, to: active, who: [owner], guard: "the target is another active member", effect: "target is emailed a confirm link that lasts 7 days; nothing changes yet", reverse: "the offer lapses or the target declines", notify: [owner_transfer_ask], e: [judge]}
+      - {do: accept_ownership, from: active, to: active, who: [accountant, staff, viewer], guard: "offer is open and the link belongs to this login", effect: "this person becomes owner and the offering owner becomes accountant; both are logged", reverse: "the new owner may offer it back", notify: [owner_transfer_done], e: [judge]}
+      - {do: decline_ownership, from: active, to: active, who: [accountant, staff, viewer], guard: "offer is open", effect: "offer cleared; roles stay", reverse: "the owner offers again", notify: [owner_transfer_declined], e: [judge]}
+fields:
+  - {id: user, type: link, required: true, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: role, type: choice, required: true, edit: "owner; not your own", msg: "Choose owner, accountant, staff or viewer."}
+  - {id: invited_by, type: link, required: false, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: may_issue, type: choice, required: false, default: no, edit: "owner", msg: "Choose yes or no; yes needs an amount cap per invoice."}
+  - {id: issue_cap, type: money, required: false, limit: "0 to 10 crore, 2 decimals", edit: "owner", msg: "Enter the highest total this person may issue."}
+  - {id: accepted_at, type: date, required: false, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: deactivated_at, type: date, required: false, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: deactivated_by, type: link, required: false, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: ownership_offer_from, type: link, required: false, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: ownership_offer_expires, type: date, required: false, auto: true, edit: "system; 7 days", msg: "Set by the system."}
+  - {id: last_active_at, type: date, required: false, auto: true, edit: "system", msg: "Set by the system."}
+fields_e: [wide:W073, wide:W074, judge, wide:W074]
+list:
+  search: [name, email]
+  filters: [access, role]
+  sorts: [name, last_active_at, role]
+  default_sort: name
+  columns: [name, email, role, status, last_active_at]
+  page: 50
+  e: ["judge"]
+volume: {y1: 8, y3: 20}
+queries: []

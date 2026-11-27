@@ -1,0 +1,5 @@
+- {id: invoice_sent, on: invoice.issue, to: [customer contact], channels: [email, WhatsApp], text: "Invoice {number} for {total} is due on {due}. Pay or download here.", mute: false, e: [stripe-004, ninja-002]}
+- {id: invoice_voided, on: invoice.void, to: [customer contact], channels: [email], text: "Invoice {number} was cancelled. Nothing is due.", mute: false, e: [stripe-003]}
+- {id: invoice_paid, on: invoice.record_full, to: [owner], channels: [app, email], text: "{customer} paid {total} for {number}.", mute: true, e: ["S:stripe/invoice.status"]}
+- {id: tax_failed, on: invoice.portal_refused, to: [accountant], channels: [app, email], text: "The tax portal refused {number}: {reason}. Fix and retry.", mute: false, e: [ic-001]}
+- {id: overdue, on: "time:due_at + 7 days", to: [customer contact], channels: [email, WhatsApp], text: "Invoice {number} is 7 days late. {balance} is due.", mute: true, e: [ninja-002]}

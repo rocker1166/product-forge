@@ -1,0 +1,53 @@
+id: invite
+name: Invite
+module: core
+kinds: [person]
+why: a pending offer to join one firm in one role, usable only by the invited email
+links:
+  - {to: firm, on_delete: "invites end with the firm closing; they show as revoked"}
+  - {to: user, on_delete: "an invite is bound to an email, not to a login"}
+  - {to: membership, on_delete: "accepting makes or wakes the membership; the invite row stays as proof"}
+abilities:
+  create: {d: now, how: "Owner invites by email with a role of owner, accountant, staff or viewer. One live invite per email per firm: a new one replaces the old. An email already active in the firm is refused with its words.", e: [wide:W073, judge]}
+  edit: {d: no, how: "A pending invite cannot be edited. Revoke it and send a new one, so the link and the role always agree.", e: [judge]}
+  archive: {d: no, how: "Expired, revoked and accepted invites stay on the list with their status; nothing is put away.", e: [judge]}
+  restore: {d: no, how: "An expired or revoked invite is not revived; a new invite is sent.", e: [judge]}
+  share_link: {d: no, how: "The link works for the invited email only; it is never public.", e: [wide:W073]}
+  assign: {d: no, how: "The role is fixed on the invite when it is sent.", e: ["judge"]}
+  api: {d: later, how: "Invites through an API come with the API wave.", e: ["judge"]}
+answers:
+  secret: {a: "The link holds a random token stored hashed. It is shown only in the email and never in the list.", e: [wide:W044, wide:W073]}
+  scope: {a: "It grants one role in one firm, only to the invited email, only after the signed-in email matches and is confirmed.", e: ["judge"]}
+  expiry: {a: "7 days. After that the link says the invite expired and an owner may send a new one.", e: [wide:W073, judge]}
+  last: {a: "An invite can make a second owner, so the last-owner rule stays safe; revoking an invite never touches the active owners.", e: [wide:W074]}
+  leave: {a: "A revoked or expired invite leaves no access. If the person already had a login, only the membership that waited on the invite goes inactive.", e: [judge, wide:W073]}
+  proof: {a: "The person proves the email by opening the link and signing in as that same email; a different signed-in user is refused.", e: ["judge"]}
+  layers: {a: "Only an owner sends, resends or revokes. The page before accepting shows the firm name, role and who invited, and never names any other firm.", e: [wide:D199, wide:W073]}
+  audit: {a: "Send, resend, accept, revoke and expiry are in the firm history with the actor.", e: [wide:W089, judge]}
+tracks:
+  access:
+    states: [{id: pending, start: true}, {id: accepted, end: true}, {id: expired, end: true}, {id: revoked, end: true}]
+    moves:
+      - {do: accept, from: pending, to: accepted, who: [owner, accountant, staff, viewer], guard: "signed in as the invited email, email confirmed, link not used, seat free (an accountant seat is free)", effect: "membership becomes active with the invited role; the firm shows in the switcher", reverse: "none: an owner may deactivate the membership", notify: [invite_accepted], e: [wide:W073, wide:W073, wide:W073]}
+      - {do: revoke, from: pending, to: revoked, who: [owner], guard: "none", effect: "the link shows 'invite expired' or 'replaced'", reverse: "send a new invite", notify: none, e: [judge]}
+      - {do: resend, from: pending, to: revoked, who: [owner], guard: "none", effect: "a new invite row and a new link are made; the old link says 'This invite was replaced'", reverse: "none: the new invite stands", notify: [invite_sent], e: [judge]}
+      - {do: expire, from: pending, to: expired, who: [system], guard: "7 days passed", effect: "link dead; the waiting membership goes inactive", reverse: "send a new invite", notify: [invite_expired_owner], e: ["judge"]}
+fields:
+  - {id: email, type: text, required: true, limit: 254, edit: "set when sent; never changed", msg: "Enter the person's email. This one does not look right."}
+  - {id: role, type: choice, required: true, edit: "set when sent; never changed", msg: "Choose owner, accountant, staff or viewer."}
+  - {id: invited_by, type: link, required: true, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: token_hash, type: text, required: true, limit: 128, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: expires_at, type: date, required: true, auto: true, edit: "system; 7 days after sending", msg: "Set by the system."}
+  - {id: accepted_at, type: date, required: false, auto: true, edit: "system", msg: "Set by the system."}
+  - {id: replaced_by, type: link, required: false, auto: true, edit: "system", msg: "Set by the system."}
+fields_e: [wide:W073, judge, wide:D199]
+list:
+  search: [email]
+  filters: [access, role]
+  sorts: [created_at, email]
+  default_sort: created_at
+  columns: [email, role, invited_by, status, created_at]
+  page: 50
+  e: [judge]
+volume: {y1: 10, y3: 30}
+queries: []

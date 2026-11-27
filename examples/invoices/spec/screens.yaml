@@ -1,0 +1,21 @@
+defaults:
+  loading: "Grey rows in the final shape, at most a few seconds."
+  error: "What failed in one sentence, a Retry button, typed text kept."
+  denied: "Says who can give access, with their name."
+  read_only: "A bar says the plan has stopped and what still works."
+  plan_locked: "Shows the feature, what it needs, and the price."
+  big: "10,000 rows: pages of 50, count shown as 10,000+, filters stay fast."
+  not_found: "Says it is gone or never existed, with a link to the list."
+  phone: "One column, no sideways scroll, main action within thumb reach."
+  invalid: "Summary on top, message at each field, shown on submit."
+  saving: "Saving, then Saved, beside the button."
+  failed: "Nothing is lost; the same button tries again."
+  leave: "Unsaved changes: Save or Discard."
+screens:
+  - {id: home, name: Home, path: /, type: home, for: [owner, accountant], from: [menu], primary: "New invoice", shows: [], does: [invoice.create]}
+  - {id: invoices, name: Invoices, path: /invoices, type: list, for: [owner, accountant], from: [home, menu], primary: "New invoice", shows: [invoice], states: {first_use: "No invoices yet. Make your first one, it takes two minutes.", no_match: "No invoice matches these filters. Clear them or widen the dates."}}
+  - {id: invoice_form, name: Write an invoice, path: /invoices/new, type: form, for: [owner, accountant], from: [invoices, home, invoice], primary: Issue, shows: [invoice], does: [invoice.issue, customer.create], states: {done: "Invoice INV-26-0007 is issued. Send it now or copy the link."}}
+  - {id: invoice, name: An invoice, path: "/invoices/:id", type: detail, for: [owner, accountant], from: [invoices, link], primary: "Record payment", shows: [invoice], does: [invoice.void, invoice.record_part, invoice.record_full, invoice.remove_payment, invoice.write_off, invoice.send_to_portal, invoice.cancel_irn]}
+  - {id: customers, name: Customers, path: /customers, type: list, for: [owner, accountant], from: [home, menu], primary: "New customer", shows: [customer], states: {first_use: "No customers yet. Add one or bring a list from Excel.", no_match: "No customer matches. Try part of the name or the GSTIN."}}
+  - {id: customer_form, name: Edit a customer, path: /customers/new, type: form, for: [owner, accountant], from: [customers, customer, invoice_form], primary: Save, shows: [customer], states: {done: "Saved. You can invoice this customer now."}}
+  - {id: customer, name: A customer, path: "/customers/:id", type: detail, for: [owner, accountant], from: [customers, invoice], primary: "New invoice", shows: [customer], does: [customer.put_away, customer.bring_back, invoice.create]}

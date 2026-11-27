@@ -1,0 +1,106 @@
+- {"id":"F001","status":"fixed","fix":"R36 adds a Practice invoice (PRACTICE watermark, no number, never counted) and the last invoice number asked in /setup before the first Issue; J01 text, setup_guide notes."}
+- {"id":"F002","status":"fixed","fix":"setup_guide notes and J01 order the last number before any import; settings_tax notes say opening invoices keep old numbers; number_series.edit and R36 lock the next number after the first document of the year."}
+- {"id":"F003","status":"fixed","fix":"R50 fills state, place of supply and PAN from the GSTIN digits at once; CSV import fills the same fields; the portal lookup stays later under Q11."}
+- {"id":"F004","status":"fixed","fix":"R60 rewritten: money before an invoice or above the balance is kept On account with its real date; R25, R26, payment.create/amount/record, credit_ledger.add_credit, Q3 and risk K16 follow; the numbered receipt voucher stays wave 2."}
+- {"id":"F005","status":"fixed","fix":"invoice screen notes and J09 step 1: one Correct this invoice button picks void or credit note plus new draft from the state and says which and why first."}
+- {"id":"F006","status":"fixed","fix":"invoice_void_notice text names both numbers with both PDFs; void effect pre-fills the send step; the share page shows Replaced by (invoice share_link ability, shared_document notes, J09 step 4)."}
+- {"id":"F007","status":"fixed","fix":"R42 and invoice.issue effect: a corrected copy of a voided invoice never counts against the plan limit; subscription.limit answer updated."}
+- {"id":"F008","status":"fixed","fix":"R25 duplicate test is per firm and per customer (same UTR anywhere, or same customer and amount within 3 days) with the earlier row named, reversed rows ignored; payment.match and a worked example."}
+- {"id":"F009","status":"fixed","fix":"payment.reverse and allocation.reassign now allow the accountant (moves and ability text); the all-owners mail stays."}
+- {"id":"F010","status":"fixed","fix":"R30, payment.reverse/bounce guards and undo answer: a reversal in a locked period writes a new correction row dated today, tagged prior-period correction, linked to the original; the lock never moves."}
+- {"id":"F011","status":"rejected","why":"Owner choice: moving the GSTR-1 JSON file into wave 1 changes scope and risk; asked in Q4, whose why now carries this finding and K4 tests it."}
+- {"id":"F012","status":"fixed","fix":"firm_switcher notes: accountant columns drafts waiting, overdue, failed e-invoices, month locked, pack built; filter Not locked; Build pack for selected firms."}
+- {"id":"F013","status":"fixed","fix":"roles accountant firm create, firm.create ability text, firm_switcher does firm.create; accountant creates the firm and presses Hand to owner (membership.offer_ownership, 7-day link); roles joins text."}
+- {"id":"F014","status":"fixed","fix":"new move invoice.request_void (accountant) with message void_requested mailing every owner one tap; invoice screen notes; J19 undo text."}
+- {"id":"F015","status":"fixed","fix":"invoice.write_off allows the accountant up to Rs 10.00 per invoice with reason rounding; R23 text and worked example."}
+- {"id":"F016","status":"fixed","fix":"report screen notes add the TDS without certificate report by customer and quarter with a bulk tick and a per-customer export."}
+- {"id":"F017","status":"fixed","fix":"invoice.bulk already holds issue; J17 now uses invoices:invoice.bulk (Issue selected) with failing rows listed; invoices screen notes."}
+- {"id":"F018","status":"fixed","fix":"membership.leave guard and effect list open drafts, unlocked months and failed pack and copy them into the owner's notice; firm_switcher notes; J21."}
+- {"id":"F019","status":"fixed","fix":"roles staff payment create/view; payment.create ability: staff file Money received as a Pending check claim confirmed by owner or accountant."}
+- {"id":"F020","status":"fixed","fix":"membership fields may_issue and issue_cap; invoice.issue who adds staff with the switch and cap in the guard; history names the issuer."}
+- {"id":"F021","status":"fixed","fix":"new message invoice_needs_look to owners (event invoice.staff_comment), invoice and home notes, J26 done line."}
+- {"id":"F022","status":"fixed","fix":"item field needs_review set when staff create, cleared by owner or accountant; item.create text; Drafts badge."}
+- {"id":"F023","status":"fixed","fix":"roles staff payment view and invoice screen notes: payment date and mode on the invoice, never TDS or reference; J30 for the viewer."}
+- {"id":"F024","status":"fixed","fix":"new R64: drafts can be created and edited offline and are queued as Not sent yet; Issue and Send stay online."}
+- {"id":"F025","status":"fixed","fix":"home notes and J29: Viewer Home is a read-only strip of unpaid, overdue and issued this month with links; J29 gets a Home step (budget 3)."}
+- {"id":"F026","status":"fixed","fix":"Viewer removed from /payments and /payments/:id; roles viewer payment view only on the invoice (date, mode, amount, never TDS or reference); J30 text."}
+- {"id":"F027","status":"rejected","why":"The finding says a seat is limited, but R45 gives every firm one free accountant seat, so an advisor who needs files is an Accountant and a Viewer stays read-only on screen."}
+- {"id":"F028","status":"fixed","fix":"new move share_link.report_problem and message client_reports_problem; share page Something is wrong with reasons; reminders stop for 7 days and the invoice shows In dispute (R40, invoice fields in_dispute and dispute_note)."}
+- {"id":"F029","status":"fixed","fix":"invoice fields in_dispute and dispute_note, invoice.edit ability and R40: In dispute pauses reminders and closing needs a credit note or write-off; invoice.dispute answer."}
+- {"id":"F030","status":"rejected","why":"Owner choice: a statement link with one total QR is a second payment surface; kept wave 2 under Q9 (why updated) because the per-invoice QR must show the live balance (R52)."}
+- {"id":"F031","status":"fixed","fix":"R52: I deduct TDS on the page changes the link and QR amount and the claim carries the TDS; worked example; shared_document notes."}
+- {"id":"F032","status":"fixed","fix":"share_link.renew allows the client on the expired page for any document (mail to the address on file) and extend allows never on a paid or void one; shared_document notes."}
+- {"id":"F033","status":"fixed","fix":"invoice.share_link ability and shared_document notes: a receipt download for a confirmed payment."}
+- {"id":"F034","status":"rejected","why":"Owner choice already open as Q9 (accept-quote link, recommended no); Q9 now carries this finding; until answered the owner marks the quote accepted by hand."}
+- {"id":"F035","status":"fixed","fix":"shared_document notes: UPI ID with Copy and an Open in browser hint when the page runs inside an in-app browser."}
+- {"id":"F036","status":"fixed","fix":"new R62: bank or UPI change takes effect after 24 hours, any owner can cancel, open invoices listed for Send again with new details as a new PDF version, share page shows Bank details changed on a date; firm.edit, message firm_bank_changed, connection upi_pay, running settings."}
+- {"id":"F037","status":"fixed","fix":"R62, invoice share_link ability and shared_document notes: last four digits of the account, IFSC and the date last changed on the page and the PDF."}
+- {"id":"F038","status":"fixed","fix":"membership.change_role and deactivate allow one owner to remove another after a 24-hour notice mailed to all owners that either can cancel; firm.start_closing needs a second owner's confirm; messages owner_change_notice and closing_confirm_ask."}
+- {"id":"F039","status":"fixed","fix":"connection login off text: 8 one-time recovery codes (user.recovery_codes) and a support reset (new move user.reset_second_step: email and GSTIN proved, 48 hours, owners mailed)."}
+- {"id":"F040","status":"fixed","fix":"membership.deactivate guard and effect: the owner picks who gets the drafts in the same confirm and the person's last 30 days of history is shown."}
+- {"id":"F041","status":"fixed","fix":"R12 and invoice.portal_ok effect: Send shows Waiting for IRN, retries every 15 minutes up to the 30-day limit and goes by itself; connection einvoice broken text."}
+- {"id":"F042","status":"fixed","fix":"R40 and message reminder_eve_preview: 18:00 mail with Paid already per row and a setting owner confirms the first batch (running settings)."}
+- {"id":"F043","status":"fixed","fix":"R56 and recurring_plan.auto_issue: opt-in Issue and send automatically for fixed amount plans with unchanged lines, owner mailed the list."}
+- {"id":"F044","status":"fixed","fix":"customer field billing_contacts (up to 3, one marked accounts), R61 no longer lists contacts as later, message.create text uses the accounts address by default."}
+- {"id":"F045","status":"fixed","fix":"R36: banner Last Issue may have gone through from the idempotency key on reopening, and Issue on an already issued draft is blocked; invoice screen notes."}
+- {"id":"F046","status":"fixed","fix":"R25 and payment field client_key: every save carries an idempotency key; the longer undo window is not taken because the owner or accountant can now reverse with a reason (F009) and R30 and the receipt rules use the 10 second window."}
+- {"id":"F047","status":"fixed","fix":"R50 says in words that the portal status is not checked and customer field gstin_checked_on holds a hand tick with its date; the lookup itself is Q11."}
+- {"id":"F048","status":"fixed","fix":"message month_end_pack and pack_out_of_date, connection month_pack: a pack is marked Out of date with Build again and asks to lock the month before it is mailed."}
+- {"id":"F049","status":"fixed","fix":"J42 rewritten (2 steps), roles support export_job create/view/history, export_job.create ability, new R65: sealed firms only, after proofs, to the proved email."}
+- {"id":"F050","status":"fixed","fix":"new move subscription.refund_charge (support, last 30 days, ticket number, once per charge) with message sub_refund_notice; settings_billing does; running support list."}
+- {"id":"F051","status":"fixed","fix":"One rule 24 hours, 3 days or 7 days: roles support joins, connection support_access, R65."}
+- {"id":"F052","status":"fixed","fix":"user.deactivate guard: proved email, ticket in history, offered only while an owner's grant is open."}
+- {"id":"X001","status":"fixed","fix":"R29 and credit_note.issue, credit_ledger.add_credit: credit = excess less TDS share of the part credited; refund cap is cash received less refunded; examples 11,800 gives 10,800 and 4,720 gives 4,320."}
+- {"id":"X002","status":"fixed","fix":"R30, payment.reverse and bounce guards, credit_ledger moves record_shortfall, clear_owed, write_off_owed and state owed: a reversal is never refused, the shortfall shows Customer owes."}
+- {"id":"X003","status":"fixed","fix":"invoice.void guard now refuses applied credit and write-off; einvoice.money_arrives counts applied credit and write-off."}
+- {"id":"X004","status":"fixed","fix":"refund states reserved, recorded, released with moves confirm_paid and release_reserved; credit_ledger.apply cannot touch reserved credit; R29 example."}
+- {"id":"X005","status":"fixed","fix":"R28 replaced by cumulative rounding with the 0.50 at 5% example computed by script (0.01, 0.00, 0.01, 0.00, 0.01)."}
+- {"id":"X006","status":"fixed","fix":"R43: tax = price minus taxable, no round-off on our plan invoices (carve-out of R6), charge equals invoice total; examples Rs 1.02, 4,766.13 (727.04 tax) and 1,500.00 (CGST 114.40, SGST 114.41)."}
+- {"id":"X007","status":"fixed","fix":"R6 and R9: foreign invoices carry no round-off in INR either; export example now Rs 1,04,320.88, IGST case 1,23,098.64; R11 gain is measured on that figure."}
+- {"id":"X008","status":"fixed","fix":"R11: the typed platform fee is converted at the locked rate (USD 12.50 gives INR 1,043.21) and added to the gain test, which now gives 0.00 in the example."}
+- {"id":"X009","status":"fixed","fix":"R60, R25 and payment.record guard: payment before the invoice date is recorded on account with its real date and flagged tax due in the receipt month in registers and screen."}
+- {"id":"X010","status":"fixed","fix":"R60 no longer tells firms to backdate; the invoice keeps its date and place in the order (R37), only the money carries the earlier date."}
+- {"id":"X011","status":"fixed","fix":"R33 and payment.record: an accountant is blocked, an owner records real cash over the limit with a reason, marked red, owners told."}
+- {"id":"X012","status":"fixed","fix":"R23 and payment.tds_amount: TDS capped at 20 percent of taxable value across rows (law-009), owner override with reason, TDS-only needs a reference; examples 10,000 on 50,000."}
+- {"id":"X013","status":"fixed","fix":"message credit_note_large_alert counts credits per invoice and customer per day and month; refund.confirm_paid needs an owner above Rs 10,000.00 for an accountant."}
+- {"id":"X014","status":"fixed","fix":"payment.confirm_claim: reference needed for UPI and bank, accountant cannot confirm above Rs 10,000.00, daily digest message pay_digest_no_reference."}
+- {"id":"X015","status":"fixed","fix":"R40 and payment.fail: after one lapse or decline a new claim needs an owner, reminders resume the day it lapses, repeat claimants on the call list."}
+- {"id":"X016","status":"fixed","fix":"invoice.void guard refuses while an I-have-paid claim is pending."}
+- {"id":"X017","status":"fixed","fix":"number_series.edit and R36: raise only before the first document of the year; the field is locked afterwards; running settings text."}
+- {"id":"X018","status":"fixed","fix":"R37 and invoice.issue guard: the typed date must be in the same financial year as today; a series closes at year end even without a lock date; example 31-03 typed on 02-04."}
+- {"id":"X019","status":"fixed","fix":"R35: a document type's prefix may never equal another type's prefix; number_series.edit text."}
+- {"id":"X020","status":"fixed","fix":"The filed-return clause is removed from invoice.cancel_irn and einvoice.cancel_irn; R14 says only 24 hours, payment and credit note are tested."}
+- {"id":"X021","status":"fixed","fix":"einvoice.direction answer: a duplicate-IRN answer is accepted only when document number, date, value and buyer GSTIN match, else failed with the reason."}
+- {"id":"X022","status":"fixed","fix":"R36: an append-only ledger of numbers taken outside the main database; after a restore the counter starts at the higher figure and owners are alerted; example."}
+- {"id":"X023","status":"fixed","fix":"subscription moves renewal_fails, retry_paid, grace_starts and go_read_only now run one timeline: failure is day 1, grace 7 days, read-only day 8, matching R44."}
+- {"id":"X024","status":"fixed","fix":"subscription.period_ends now goes to Free, not read-only; R44 text."}
+- {"id":"X025","status":"fixed","fix":"subscription.trial_ends and R44: users above the Free limit become viewers, oldest kept, owner told; example."}
+- {"id":"X026","status":"fixed","fix":"subscription.go_read_only effect and R44 list what still sends in read-only: reminders, receipts, credit note mails, void notices."}
+- {"id":"X027","status":"fixed","fix":"R61 and firm.identity: a new GSTIN is a new firm, a sealed firm's GSTIN may be reused; the old same-firm series example is replaced."}
+- {"id":"X028","status":"rejected","why":"Owner choice and a paid provider: GSTIN verification at sign-up is asked as Q11; meanwhile R63 limits an unverified firm to 20 mails a day and prints unverified."}
+- {"id":"X029","status":"fixed","fix":"new R63: daily send caps, unverified firms capped at 20 a day with unverified printed, first send to a new address needs an owner, auto-pause on complaint rate."}
+- {"id":"X030","status":"fixed","fix":"R62 and firm.edit: password and second step again, 24-hour delay, cancel link, share page note; the live page uses the details of the latest PDF version so one invoice has one payee."}
+- {"id":"X031","status":"fixed","fix":"membership.change_role guard: owner count is checked in the same transaction with a firm lock and the database refuses zero active owners."}
+- {"id":"X032","status":"fixed","fix":"membership.leave answer: access is checked on every request against the membership record, the 60 seconds are removed; roles already said next request."}
+- {"id":"X033","status":"fixed","fix":"membership.deactivate and leave clear a pack address equal to the person's email and tell the owners."}
+- {"id":"X034","status":"fixed","fix":"export_job.share_link ability: an owner creates links to outside addresses only, a code to the same address opens it, 24 hour life."}
+- {"id":"X035","status":"fixed","fix":"new R63 and message.create text: extra To, Cc and Bcc are for owners and accountants only; daily send cap per user."}
+- {"id":"X036","status":"fixed","fix":"invoice.print_pdf ability and invoice notes: a viewer's PDF copy has no bank block."}
+- {"id":"X037","status":"fixed","fix":"rate_master.publish guard: a second support approval and at least 24 hours notice unless both mark a correction; the issue screen shows rate changed this week."}
+- {"id":"X038","status":"fixed","fix":"R64: the offline copy is keyed by firm, labelled with the firm name and wiped on sign-out, when membership ends and every 24 hours; membership.deactivate effect."}
+- {"id":"X039","status":"fixed","fix":"new R65 and J42: GSTIN or PAN proof, signed request, 7-day wait and a mail to the last known phone before a sealed firm's export; logged under the support label."}
+- {"id":"X040","status":"fixed","fix":"R23: a balance under Rs 1.00 sends no reminder and shows no QR and offers one tap write-off; accountant write-off up to Rs 10.00 (invoice.write_off)."}
+- {"id":"X041","status":"fixed","fix":"R23 example and R24: a written-off invoice counts as settled for reminders and ageing but not as collected."}
+- {"id":"X042","status":"fixed","fix":"R30, payment.reverse and bounce: both write a new row dated today in a locked period and leave the original untouched."}
+- {"id":"X043","status":"fixed","fix":"invoice.void guard: after the return month's due date the screen warns and offers a credit note, and the reason must say it was not filed."}
+- {"id":"X044","status":"fixed","fix":"R8 now holds intermediary services as one dated row, unconfirmed until a chartered accountant checks section 13(8)(b); CA1 gets items 13 and 14."}
+- {"id":"X045","status":"fixed","fix":"R2 adds UTGST for the five union territories without a legislature with an example; registers and e-invoice name the head."}
+- {"id":"X046","status":"fixed","fix":"R37 and invoice.edit ability: a due date moves later only by an owner; an accountant's move over 15 days mails the owners."}
+- {"id":"X047","status":"fixed","fix":"firm.edit text and field lock_date, running settings: the lock date is at most the last day of the previous month."}
+- {"id":"X048","status":"fixed","fix":"R45, firm.create text and subscription.default answer: one trial and one free allowance per owner email and PAN, at most 3 firms per owner on Free."}
+- {"id":"X049","status":"rejected","why":"Owner choice with a paid provider: checking a buyer GSTIN before an e-invoice issue is part of Q11; until answered an owner or accountant ticks the check by hand (customer.gstin_checked_on)."}
+- {"id":"X050","status":"fixed","fix":"R27 and credit_note.create list the same invoice states including credited and written-off, with a written-off example."}
+- {"id":"X051","status":"fixed","fix":"R25: reversed rows are ignored by the duplicate test and every save carries a client key (payment field client_key); examples."}
+- {"id":"X052","status":"fixed","fix":"allocation.reassign: TDS moves with the row, refused above 20 percent of the new invoice's taxable value, invoice-wise TDS marked changed."}
+- {"id":"X053","status":"fixed","fix":"R52: a QR in a PDF or email carries no amount; only the live page shows the balance; example."}
+- {"id":"X054","status":"fixed","fix":"R42 and invoice.void: a void within 24 hours with nothing sent or viewed leaves the plan count; example."}
