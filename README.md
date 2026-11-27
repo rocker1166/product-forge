@@ -38,7 +38,15 @@ That's it. You get a PRD, a two-page sheet of decisions for you, and a clickable
 | **standard** (default) | a module or a small product | 8 to 12 | ~1.5M |
 | **full** | a product you will really build | 20 to 25 | ~3.5M |
 
-The lead agent picks the **cheapest model that can do each job** (session model to coordinate and judge, Sonnet to research, fill and build, Haiku to audit and count), writes a token budget in `COST.md` before fanning out, logs every agent's tokens, and stops when a step runs 50% over.
+**The lead agent chooses the model for each job.** Defaults:
+
+| Job | Default model |
+|---|---|
+| Coordinate, judge, write the owner sheet | your session model |
+| Research, fill the spec, build, fix, review | Sonnet |
+| Audit sources, count, read one fact from a long file | Haiku |
+
+These are defaults, not rules: when the lead judges a task needs more (core money, tax or security logic, a hard architecture call, a part that failed once), it uses **Opus** for that task, and goes cheaper when a job is plain. Every choice and its reason goes in `COST.md`, with the tokens each agent used and a budget it stops at when a step runs 50% over.
 
 ## 🧭 How it works
 

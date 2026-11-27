@@ -25,6 +25,8 @@ Pass C (walk minute by minute) added 2.5 points of coverage in the test but find
 | Research passes, structure fillers, attack, fact check | Sonnet |
 | Evidence audit, harvest summaries, reading a long file for one fact, counting | Haiku |
 
+**These are defaults, not rules.** The lead may give any task a stronger model (Opus) when it judges the job needs it, for example the core money, tax or security logic, a hard architecture call, or a part that failed once with Sonnet; or a cheaper one when the job is plain. Write the choice and one line of why in `COST.md`.
+
 **Tokens are the lead's job.** Before fanning out, write the plan and its token guess in `spec/COST.md`. After each agent, add one line: step, model, tokens it reported, what it produced. Stop and say so when the run passes its guess by half. Small briefs, exact file paths, word caps on what agents return, no agent reads more than its slice.
 
 ## 1. Brief

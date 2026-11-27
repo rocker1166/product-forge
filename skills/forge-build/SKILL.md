@@ -11,7 +11,7 @@ Tested 2026-11-27 (`~/product-forge/eval/T4.md`): building from a numbered list 
 `bun ~/product-forge/bin/forge.ts handoff <spec> <project>` writes REQUIREMENTS.md (the wave's `now` lines by module), ids.txt, a short AGENTS.md, modules/*/CONTEXT.md (what the module owns, its lines, where the detail is), PROGRESS.md, and copies the PRD. No forge spec? Write REQUIREMENTS.md by hand: `W001 <one testable sentence>`, numbers and limits written out; ids in ids.txt. Anything not in the list is out of scope for this build. A change to the list is a decision, written down.
 
 ## 2. Stack and skeleton
-Stack from your own stack choice (newest stable versions, checked live). One thin slice that signs in, saves, lists and is tested end to end before any feature. Seed with realistic volume.
+Stack from `decision_new_project_stack` (versions checked live). One thin slice that signs in, saves, lists and is tested end to end before any feature. Seed with realistic volume.
 
 ## 3. Contract first
 The server agent writes `API.md` (every endpoint, body, answer, errors, roles) **before** code. Page builders start from it at once. Paths and names stay stable; a change updates API.md in the same step.
@@ -33,7 +33,7 @@ A separate agent (Sonnet) goes through the SEC lines of `library/baseline.yaml` 
 A reviewer who did not build uses the running app against the list and reports right / wrong / skipped per line. Fix what is wrong, then run step 6 once more. The builder never scores its own work.
 
 ## Models and tokens
-Builders, fix pass, security review, blind review: Sonnet. Counting, reading logs, running the gate and walk: Haiku or the lead itself. The lead keeps `COST.md` (step, model, tokens, result) and stops when a step passes its guess by half. Measured: one 90-line module cost about 1M tokens with three builders and one fix pass.
+Builders, fix pass, security review, blind review: Sonnet. Counting, reading logs, running the gate and walk: Haiku or the lead itself. **These are defaults, not rules.** The lead may give any task a stronger model (Opus) when it judges the job needs it, for example the core money, tax or security logic, a hard architecture call, or a part that failed once with Sonnet; or a cheaper one when the job is plain. Write the choice and one line of why in `COST.md`. The lead keeps `COST.md` (step, model, tokens, result) and stops when a step passes its guess by half. Measured: one 90-line module cost about 1M tokens with three builders and one fix pass.
 
 ## Briefs
 Ready-to-use agent briefs (server, pages, fix pass, blind reviewer): `~/product-forge/skills/forge-build/briefs.md`.
