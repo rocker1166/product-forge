@@ -24,10 +24,16 @@ Rules in every brief: every line needs a real test whose name holds `[W0xx]`; on
 `bun gate.ts` (or `bun gate.ts ids.txt results.xml` for another stack with JUnit output). Done means 0 open and the full suite green. Nothing else counts.
 
 ## 6. Fix pass (the one that matters)
-A fresh agent who owns everything: gate to 0, then **does not trust the tests**: starts the app and goes through every line in the browser as each role and firm, to the paisa and the word; then walks as a careful user (double press, reload, Back, two tabs, phone width, long names, another tenant's ids, forbidden actions). In the test it found 15 real defects behind a green gate.
+First run the measured walk: `bun ~/product-forge/bin/walk.ts http://localhost:<port> --email <seed user> --password <pw>`. It visits every page at desktop and phone width and lists console errors, server errors, slow pages, sideways scroll, unlabeled inputs, nameless buttons, repeated titles and a wrong not-found status. Then a fresh agent who owns everything: gate to 0, clears the walk, then **does not trust the tests**: starts the app and goes through every line in the browser as each role and firm, to the paisa and the word; then walks as a careful user (double press, reload, Back, two tabs, phone width, long names, another tenant's ids, forbidden actions). In the test it found 15 real defects behind a green gate.
+
+## 6b. Security review
+A separate agent (Sonnet) goes through the SEC lines of `library/baseline.yaml` against the running app and the code: another tenant's ids, each role's forbidden actions, links, uploads, sign-in limits, logs, headers, secrets. Every failure gets a fix and a test.
 
 ## 7. Blind review
 A reviewer who did not build uses the running app against the list and reports right / wrong / skipped per line. Fix what is wrong, then run step 6 once more. The builder never scores its own work.
+
+## Models and tokens
+Builders, fix pass, security review, blind review: Sonnet. Counting, reading logs, running the gate and walk: Haiku or the lead itself. The lead keeps `COST.md` (step, model, tokens, result) and stops when a step passes its guess by half. Measured: one 90-line module cost about 1M tokens with three builders and one fix pass.
 
 ## Briefs
 Ready-to-use agent briefs (server, pages, fix pass, blind reviewer): `~/product-forge/skills/forge-build/briefs.md`.

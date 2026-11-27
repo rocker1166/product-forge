@@ -174,3 +174,11 @@ test("handoff: every now line once, in the list, the ids and one module", () => 
   expect(f["ids.txt"].trim().split("\n")).toEqual(now); for (const id of now) expect(f["REQUIREMENTS.md"]).toContain(id);
   expect(f["modules/billing/CONTEXT.md"]).toContain("W004"); expect(f["AGENTS.md"].split("\n").length).toBeLessThan(100); expect(Object.values(f).join()).not.toContain("undefined");
 });
+test("baseline: every line is plain and has a fixed id", () => {
+  const b = Bun.YAML.parse(require("node:fs").readFileSync(join(import.meta.dir, "..", "library", "baseline.yaml"), "utf8")) as any;
+  expect(Object.keys(b).length).toBe(44); for (const [k, v] of Object.entries<any>(b)) { expect(k).toMatch(/^(CS|SEC)\d\d$/); expect(String(v).split(" ").length).toBeLessThan(35); }
+});
+test("handoff puts a line in the module most of it lands in", () => {
+  const m = fresh(); m.objects[0].module = "people"; m.wide[0].at = ["customer.create", "invoice.create", "invoice.issue"];
+  expect(handoff(m)["modules/billing/CONTEXT.md"]).toContain(m.wide[0].id);
+});

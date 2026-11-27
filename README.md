@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude%20Code-skills-f97316" alt="Claude Code skills">
   <img src="https://img.shields.io/badge/runtime-Bun%201.3%2B-0f172a" alt="Bun">
-  <img src="https://img.shields.io/badge/tests-91%20passing-84cc16" alt="tests">
+  <img src="https://img.shields.io/badge/tests-92%20passing-84cc16" alt="tests">
   <img src="https://img.shields.io/badge/licence-MIT-38bdf8" alt="MIT">
 </p>
 
@@ -29,6 +29,16 @@ Then, in Claude Code, in any project:
 ```
 
 That's it. You get a PRD, a two-page sheet of decisions for you, and a clickable mock.
+
+## 🎚️ Three modes: pay for the depth you need
+
+| Mode | For | Agents | Tokens (measured) |
+|---|---|---|---|
+| **lite** | a feature, a quick idea check | 2 to 3 | ~0.4M |
+| **standard** (default) | a module or a small product | 8 to 12 | ~1.5M |
+| **full** | a product you will really build | 20 to 25 | ~3.5M |
+
+The lead agent picks the **cheapest model that can do each job** (session model to coordinate and judge, Sonnet to research, fill and build, Haiku to audit and count), writes a token budget in `COST.md` before fanning out, logs every agent's tokens, and stops when a step runs 50% over.
 
 ## 🧭 How it works
 
@@ -60,6 +70,20 @@ JOURNEY (1)
 
 **A real example:** [`examples/invoices-india`](examples/invoices-india), a full PRD for invoices and payments for small Indian service firms. 452 wave-1 requirements, 27 objects, 68 money and tax rules with worked numbers, 54 screens, a mock and an owner sheet.
 
+## 🛡️ Common sense and security, built in
+
+`forge baseline spec` adds **44 requirements every product needs** to your PRD, and the check stays red until each one is landed or refused in words:
+- **24 common sense:** reload keeps filters, Back works, unsaved-changes warning, no double submit, not-found page, keyboard and labels, local money format, print pages…
+- **20 security (OWASP ASVS L1 in plain words):** tenant isolation, server-side role checks, rate limits, safe uploads, expiring share links, no secrets in logs, delayed bank-detail changes, consented support access…
+
+In the blind build test, both apps missed about 12 of 40 common-sense checks because no PRD said them. Now every PRD says them.
+
+**`walk.ts` measures the running app:** every page at desktop and phone width, reporting console and server errors, slow pages, sideways scroll, unlabeled inputs, nameless buttons, repeated titles and a wrong not-found status. On a test app it found exactly what the blind judges had flagged.
+
+```bash
+bun ~/product-forge/bin/walk.ts http://localhost:3000 --email owner@test.dev --password secret
+```
+
 ## 🧪 Tested, failures kept in
 
 We did not trust it, so we tested it against plain methods, with blind judges.
@@ -83,8 +107,11 @@ forge check spec                # what is missing or unlinked (exit 1 if anythin
 forge print spec                # PRD.md, prd/*.md, OWNER-SHEET.md
 forge mock spec                 # MOCK.html, clickable
 forge harvest spec stripe openapi https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json invoice
+forge baseline spec             # add 24 common-sense + 20 security requirements
+forge demote spec               # after an audit: weak sources become "judgement"
 forge handoff spec ./my-app     # requirements, ids, AGENTS.md, module context
 bun ~/product-forge/bin/gate.ts # every requirement has a passing test?
+bun ~/product-forge/bin/walk.ts http://localhost:3000   # measured walk of the running app
 ```
 
 `harvest` reads public **GraphQL, OpenAPI, Frappe DocType, Prisma and Rails** schemas, so you copy a mature product's real depth, deprecated fields included (that's the list of what they regret).
@@ -105,8 +132,8 @@ More: [docs/USE-CASES.md](docs/USE-CASES.md)
 
 ```text
 skills/     forge · forge-prd · forge-build (+ ready briefs for each agent)
-bin/        forge.ts · mock.ts · gate.ts · 91 tests
-library/    13 object kinds · 37 abilities · 36 product areas · 21 flow rules · 30 production checks · 12 day-one decisions
+bin/        forge.ts · mock.ts · gate.ts · walk.ts · 92 tests
+library/    44 baseline requirements · 13 object kinds · 37 abilities · 36 product areas · 21 flow rules · 30 production checks · 12 day-one decisions
 examples/   invoices (small) · invoices-india (full PRD)
 research/   what mature products and open-source logs taught us
 eval/       both tests, judges' verdicts, scoring scripts
@@ -121,7 +148,7 @@ eval/       both tests, judges' verdicts, scoring scripts
 
 ## 🗺️ Roadmap
 
-Common-sense requirement pack · measured fix pass on the running app · smarter module split in `handoff` · more schema formats. See [ROADMAP.md](ROADMAP.md).
+A real end-to-end product run with published numbers · walk.ts that also fills forms safely · more schema formats. See [ROADMAP.md](ROADMAP.md).
 
 ## 📥 Install details
 

@@ -358,7 +358,7 @@ const list = (v: any) => arr(v).map(x => (typeof x === "object" ? JSON.stringify
 // Hand a finished PRD to builders: the frozen list, the ids for the gate, a short root AGENTS.md and one CONTEXT.md per module.
 // Generated, never hand-written: context files written by an agent from the code gave no gain and cost more (research/06).
 export function handoff(m: any): Record<string, string> {
-  const now = m.wide.filter((w: any) => w.d === "now"), mod = (w: any) => m.objects.find((o: any) => arr(w.at).some((a: string) => String(a).split(".")[0] === o.id))?.module ?? "product";
+  const now = m.wide.filter((w: any) => w.d === "now"), mod = (w: any) => { const c: Record<string, number> = {}; for (const a of arr(w.at)) { const o = m.objects.find((x: any) => x.id === String(a).split(".")[0]); if (o) c[o.module] = (c[o.module] ?? 0) + 1; } return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "product"; };
   const mods = [...new Set([...m.objects.map((o: any) => o.module), ...now.map(mod)])] as string[], files: Record<string, string> = {};
   files["REQUIREMENTS.md"] = mods.map(x => `## ${x}\n` + now.filter((w: any) => mod(w) === x).map((w: any) => `${w.id} ${w.text}`).join("\n")).join("\n\n") + "\n";
   files["ids.txt"] = now.map((w: any) => w.id).join("\n") + "\n";
@@ -574,6 +574,19 @@ if (import.meta.main) {
     } else if (cmd === "mock") {
       const { mock } = await import("./mock.ts"), out = join(dir, "..", "MOCK.html");
       writeFileSync(out, mock(load(dir))); console.log(`${out} written. Open it, or run measure() in its console.`);
+    } else if (cmd === "baseline") {
+      const base = read(join(LIB, "baseline.yaml")), have = new Set(load(dir).wide.map((w: any) => w.id)), add = Object.entries<string>(base).filter(([id]) => !have.has(id));
+      mkdirSync(join(dir, "wide"), { recursive: true }); const f = join(dir, "wide", "baseline.yaml"), old = existsSync(f) ? readFileSync(f, "utf8") : "";
+      writeFileSync(f, old + add.map(([id, text]) => `- ${JSON.stringify({ id, text, d: "", at: [], why: "", src: "library/baseline.yaml" })}\n`).join(""));
+      console.log(`${add.length} baseline lines added to wide/baseline.yaml; land each (now) or refuse it (no: why)`);
+    } else if (cmd === "demote") { // after an audit: every tag judged loose or wrong becomes judge
+      const verdicts = read(rest[0] ?? join(dir, "raw", "audit.yaml")) as any[], bad = new Set(verdicts.filter(v => ["loose", "wrong"].includes(v.verdict)).flatMap(v => arr(v.tags).filter((x: string) => x !== "judge").map((x: string) => `${v.at}|${x}`)));
+      let n = 0;
+      for (const f of readdirSync(join(dir, "objects")).filter(x => x.endsWith(".yaml"))) {
+        const o = read(join(dir, "objects", f)), walk = (x: any, at: string): any => { if (Array.isArray(x)) return x; if (x && typeof x === "object") { for (const k of Object.keys(x)) { if (k === "e" || k.endsWith("_e")) { const before = arr(x[k]); x[k] = before.map((tag: string) => (bad.has(`${at}|${tag}`) || bad.has(`${o.id}|${tag}`) ? (n++, "judge") : tag)); x[k] = [...new Set(x[k])]; } else walk(x[k], at); } } return x; };
+        walk(o, o.id); writeFileSync(join(dir, "objects", f), Bun.YAML.stringify(o, null, 2));
+      }
+      console.log(`${n} tags set to judge from ${bad.size} loose or wrong verdicts`);
     } else if (cmd === "handoff") {
       const out = rest[0]; if (!out) throw new Error("forge handoff <spec> <project folder>");
       for (const [f, s] of Object.entries(handoff(load(dir)))) { if (["AGENTS.md", "PROGRESS.md"].includes(f) && existsSync(join(out, f))) { console.log(`kept your ${f}`); continue; } mkdirSync(join(out, f, ".."), { recursive: true }); writeFileSync(join(out, f), s); }
@@ -582,6 +595,6 @@ if (import.meta.main) {
     } else if (cmd === "todo") for (const x of todo(load(dir))) console.log(`${x.id} ${x.text}`);
     else if (cmd === "flat") for (const x of flat(load(dir))) console.log(`${x.id} ${x.text}`);
     else if (cmd === "sample") console.log(Bun.YAML.stringify(sample(load(dir), Number(rest[0] ?? 10)), null, 2));
-    else console.log("forge init|check|print|mock|todo|flat|sample <spec> · forge handoff <spec> <project> · forge harvest <spec> <name> <graphql|openapi|doctype|prisma|rails> <url or file> [Only,These]");
+    else console.log("forge init|check|print|mock|todo|flat|sample|baseline|demote <spec> · forge handoff <spec> <project> · forge harvest <spec> <name> <graphql|openapi|doctype|prisma|rails> <url or file> [Only,These]");
   } catch (e: any) { console.error(`forge: ${e.message}`); process.exit(2); }
 }

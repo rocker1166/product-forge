@@ -10,6 +10,23 @@ Brief → four passes → merge → fact check → structure → walk → mock �
 
 You are the lead. Passes, fillers and walkers are Sonnet agents, 6 to 8 at once, one owner per file. The one who wrote never audits. `forge` = `bun ~/product-forge/bin/forge.ts`. Folder: `<project>/spec`. Shapes: `examples/invoices/spec`.
 
+## 0. Pick a mode, and who works on what
+| Mode | For | Steps | Agents | Tokens (measured on one product) |
+|---|---|---|---|---|
+| **lite** | a feature, a quick check of an idea | 1, passes A+D in one agent, baseline, structure in one agent, 7 | 2 to 3 | about 0.4M |
+| **standard** (default) | a module or a small product | 1, 2 (A, B, D), 3, 4, baseline, 5, attack, audit, 7 | 8 to 12 | about 1.5M |
+| **full** | a product you will build for real | everything | 20 to 25 | about 3.5M |
+Pass C (walk minute by minute) added 2.5 points of coverage in the test but finds what is wrong: in standard only the attack runs.
+
+**Models: the cheapest one that can do the job.**
+| Work | Model |
+|---|---|
+| You, the lead: scope, briefs, merge decisions, judging results, owner sheet | the session model |
+| Research passes, structure fillers, attack, fact check | Sonnet |
+| Evidence audit, harvest summaries, reading a long file for one fact, counting | Haiku |
+
+**Tokens are the lead's job.** Before fanning out, write the plan and its token guess in `spec/COST.md`. After each agent, add one line: step, model, tokens it reported, what it produced. Stop and say so when the run passes its guess by half. Small briefs, exact file paths, word caps on what agents return, no agent reads more than its slice.
+
 ## 1. Brief
 `forge init <project>/spec`, fill `brief.yaml`. At most five questions, only if the answer is not known: who pays, the job, country and law, money model, will customers make their own fields or objects.
 
@@ -29,13 +46,17 @@ One agent reads all lines and writes one row per line: `now`, `room`, `later: wh
 ## 4. Fact check
 A different agent checks every law, tax, money and platform fact on pages it opens now: RIGHT, WRONG, CHANGED, UNSURE. Wrong facts are fixed in the list. Unsure ones go to the owner sheet with the name of the expert who must confirm. Never skip this for money, tax, health or law.
 
+## 4b. Baseline: common sense and security
+`forge baseline spec` adds 24 common-sense and 20 security lines (`library/baseline.yaml`) to the wide list with no decision. Each must be landed (now) or refused (no: why) before the check passes. In a blind test both builds missed about 12 of 40 common-sense checks because no PRD said them.
+
 ## 5. Structure pass
 Fillers (at most 5 objects each) write `spec/objects/*.yaml`; others own roles, screens, journeys, messages, rules, connections, running. Each also writes `spec/land/<name>.yaml`: where each wave-1 line lands (`invoice.issue`, `rule:R3`, `screen:home`, `message:x`, `connection:x`, `setting:text`, `product:views`).
 Rules for fillers: the list wins over a kind default; carry exact numbers; every state has a way out; every move says who, guard, effect, reverse, notify; every refusal has words; evidence is `wide:ID`, a ledger id, `S:product/Object.field` or `judge`. Judgement is allowed and counted; a tag that does not support the answer is a lie and worse than `judge`. **Write down every gap and clash the structure shows**; that is what this pass is for.
 `forge check spec` until it exits 0. Fix by answering, never by deleting a question.
 
 ## 6. Walk, attack, audit
-Walkers run in the mock and the PRD with jobs from outside the map; they may only press what exists; a finding names the step that fails. One attacker. Then `forge sample spec 10` to a **different** agent: does each link support the answer? Under 90%: the filler redoes its file.
+Walkers run in the mock and the PRD with jobs from outside the map; they may only press what exists; a finding names the step that fails. One attacker, who always covers security: access by role and tenant, links, files, payments and bank changes, logs, support access, sign-in abuse.
+**Audit, always** (Haiku): `forge sample spec 10` to a different agent, which writes `spec/raw/audit.yaml` (holds, loose, wrong, judge). Then `forge demote spec` turns every loose or wrong tag into `judge`. Report the share that held; in our run only about half did.
 
 ## 7. Give it to the owner
 `forge print spec` (PRD.md, OWNER-SHEET.md), `forge mock spec` (MOCK.html), `forge todo spec` (what a builder must prove). The owner reads the sheet and clicks the mock. Answers go to `decisions.yaml`. Say what is unsure, what was not read, and that filled does not mean right. Later changes: edit the map, check, print again.
