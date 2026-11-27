@@ -18,13 +18,13 @@ abilities:
   api: {d: later, how: "People and keys through an API come with the API wave.", e: ["judge"]}
   notify: {d: now, how: "Emails: sign-in from a new place, password reset link (1 hour, once), role changed, second step turned on.", e: [wide:K206, judge]}
 answers:
-  secret: {a: "The password is stored hashed and never shown; the second-step secret is shown once as a QR and saved only after one valid code is typed.", e: [wide:W076, judge]}
+  secret: {a: "The password is stored with a slow salted hash (argon2id) and never shown; the second-step secret is shown once as a QR and saved only after one valid code is typed.", e: [wide:SEC03, wide:W076, judge]}
   scope: {a: "A login has no power on its own. Each membership gives one role in one firm and every request is checked on the server.", e: ["judge"]}
-  expiry: {a: "Sessions end after 8 hours idle; the reset link lasts 1 hour and works once. An invite link lasts 7 days.", e: [wide:W076, wide:K206, wide:W073]}
+  expiry: {a: "Sessions end after 8 hours idle; the reset link lasts 1 hour and works once. An invite link lasts 7 days. Signing out ends that session, or every session when the person picks Sign out everywhere. The session cookie is HttpOnly, Secure and SameSite Lax. A person who is closed, deactivated or removed from the firm is signed out at their next click or reload, never later.", e: [wide:W076, wide:K206, wide:W073, wide:CS08, wide:SEC04]}
   last: {a: "A login that is the only active owner of any firm cannot be closed or deactivated; the message names the firm and says transfer first.", e: [wide:W074, wide:W074]}
   leave: {a: "Sessions end at once, memberships end, the name stays on history, and drafts they made stay with the firm for an owner to reassign.", e: ["judge"]}
-  proof: {a: "Email and password, five wrong tries lock it for 15 minutes; an optional authenticator code becomes required when the owner turns it on for the firm.", e: [wide:W076, judge]}
-  layers: {a: "Two layers: firm membership first, then role. Another firm's record returns 404, a forbidden action in your own firm returns 403.", e: [wide:W077, wide:W075]}
+  proof: {a: "Email and password, five wrong tries lock it for 15 minutes, and tries from one address are slowed and capped across accounts too, so one address cannot guess at many logins; an optional authenticator code becomes required when the owner turns it on for the firm.", e: [wide:SEC03, wide:W076, judge]}
+  layers: {a: "Two layers: firm membership first, then role. Another firm's record returns 404, a forbidden action in your own firm returns 403.", e: [wide:SEC01, wide:W077, wide:W075]}
   audit: {a: "Sign-ins, failed tries, password and second-step changes and role changes are logged with IP and device and kept at least 8 years.", e: [judge, wide:A068]}
 tracks:
   access:

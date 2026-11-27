@@ -3,11 +3,11 @@
 | Screen | Path | Type | For | Main action | Reached from | First use | No match | Done |
 |---|---|---|---|---|---|---|---|---|
 | Create account | /sign-up | public | owner | Create account | link |  |  |  |
-| Sign in | /sign-in | public | owner, accountant, staff, viewer, support | Sign in | link |  |  |  |
+| Sign in | /sign-in | public | owner, accountant, staff, viewer, support | Sign in | link | Opened from a deep link: after sign-in the person lands on that page. A return address that points outside the app is ignored and they land on Home. |  |  |
 | Second step | /sign-in/code | public | owner, accountant, staff, viewer, support | Confirm code | sign_in |  |  |  |
 | Reset password | /reset-password | public | owner, accountant, staff, viewer, support | Send reset link | sign_in |  |  |  |
 | Accept an invite | /invite/:token | public | owner, accountant, staff, viewer | Accept invite | link |  |  |  |
-| Page not found | /* | public | owner, accountant, staff, viewer, client, support | Go to start | link |  |  |  |
+| Page not found | /* | public | owner, accountant, staff, viewer, client, support | Go to start | link | This page is gone or never existed. Go to start, or open the list the link was meant for. Another firm's record looks exactly like this. The API gives 404 JSON with the same words, never a stack trace. |  |  |
 | Your firms | /firms | list | owner, accountant, staff, viewer | Open firm | menu, sign_in | You are not in any firm yet. Create yours, or open the invite link your accountant or boss sent. | No firm matches. Try part of the firm name or the GSTIN. |  |
 | Setup guide | /setup | wizard | owner | Continue setup | home, firm_switcher, sign_up |  |  |  |
 | Home | / | home | owner, accountant, staff, viewer | New invoice | menu |  |  |  |

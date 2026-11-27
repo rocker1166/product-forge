@@ -106,7 +106,7 @@ One module of the PRD. The front book is ../PRD.md.
 
 | Question | Answer |
 |---|---|
-| what | A row of who did what to which record and when, with old and new values, IP, device and a support label. Owners and accountants read it; it proves a record was never quietly changed. |
+| what | A row of who did what to which record and when, with old and new values, IP, device and a support label. Every change to money, bank or UPI details, roles and ownership is a row with the old and new value, and the owners are mailed. Owners and accountants read it; it proves a record was never quietly changed. |
 | states | One state: written. It never changes, so it has no way out and none is needed. |
 | remove | Nothing removes a row. Deleting a draft leaves a row; closing a firm keeps rows at least 8 years. Personal values are stored masked so erasure does not need an edit. |
 | who | Owner and accountant read the whole log. Staff read rows of the documents they may open. Viewers see a document's rows without sign-in, role or export rows. Support sees it only inside an owner grant. |
@@ -303,12 +303,12 @@ One module of the PRD. The front book is ../PRD.md.
 
 | Question | Answer |
 |---|---|
-| secret | The password is stored hashed and never shown; the second-step secret is shown once as a QR and saved only after one valid code is typed. |
+| secret | The password is stored with a slow salted hash (argon2id) and never shown; the second-step secret is shown once as a QR and saved only after one valid code is typed. |
 | scope | A login has no power on its own. Each membership gives one role in one firm and every request is checked on the server. |
-| expiry | Sessions end after 8 hours idle; the reset link lasts 1 hour and works once. An invite link lasts 7 days. |
+| expiry | Sessions end after 8 hours idle; the reset link lasts 1 hour and works once. An invite link lasts 7 days. Signing out ends that session, or every session when the person picks Sign out everywhere. The session cookie is HttpOnly, Secure and SameSite Lax. A person who is closed, deactivated or removed from the firm is signed out at their next click or reload, never later. |
 | last | A login that is the only active owner of any firm cannot be closed or deactivated; the message names the firm and says transfer first. |
 | leave | Sessions end at once, memberships end, the name stays on history, and drafts they made stay with the firm for an owner to reassign. |
-| proof | Email and password, five wrong tries lock it for 15 minutes; an optional authenticator code becomes required when the owner turns it on for the firm. |
+| proof | Email and password, five wrong tries lock it for 15 minutes, and tries from one address are slowed and capped across accounts too, so one address cannot guess at many logins; an optional authenticator code becomes required when the owner turns it on for the firm. |
 | layers | Two layers: firm membership first, then role. Another firm's record returns 404, a forbidden action in your own firm returns 403. |
 | audit | Sign-ins, failed tries, password and second-step changes and role changes are logged with IP and device and kept at least 8 years. |
 
@@ -362,7 +362,7 @@ One module of the PRD. The front book is ../PRD.md.
 | invite_sent | invite.resend | invitee | email | {inviter} invited you to join {firm} as {role}. Open the link within 7 days; it works only for this email. Any earlier invite from them is replaced. |
 | invite_accepted | invite.accept | owner | email, app | {person} accepted the invite to {firm} as {role}. The firm now shows in their switcher. |
 | invite_expired_owner | invite.expire | owner | email, app | The invite to {email} for {firm} ended after 7 days without an answer. Send a new one if they still need access. |
-| role_changed | membership.change_role | person | email, app | {actor} changed your role in {firm} from {old_role} to {new_role}. It applies from your next click; what you already did is not changed. |
+| role_changed | membership.change_role | person, owner | email, app | {actor} changed your role in {firm} from {old_role} to {new_role}. It applies from your next click; what you already did is not changed. |
 | access_removed | membership.deactivate | person | email | {actor} removed your access to {firm}. Your sessions there ended. The drafts you made stay with the firm. |
 | member_left | membership.leave | owner | email, app | {person} left {firm} on {date}. Their drafts stay with the firm and their entries keep their name. |
 | access_returned | membership.reactivate | person | email | {actor} gave you back your access to {firm} as {role}. Sign in to carry on. |
@@ -375,6 +375,11 @@ One module of the PRD. The front book is ../PRD.md.
 
 | Id | Requirement | When | Where |
 |---|---|---|---|
+| CS08 | A disabled or removed user is signed out at their next action or reload. | now | user.expiry |
+| SEC01 | Every request checks the user's role and tenant on the server; hiding a button is not access control. | now | user.layers |
+| SEC03 | Passwords are stored with a slow hash; sign-in failures are limited and slowed per account and per address. | now | user.proof, user.secret |
+| SEC04 | Sessions expire when idle, end on sign-out everywhere chosen, and cookies are HttpOnly, Secure and SameSite. | now | user.expiry |
+| SEC11 | Changes to money, bank details, roles and ownership are logged with who, when and old and new values, and the owner is told. | now | history_entry.what |
 | A001 | A CA invited by several firms signs in once and switches firm from a header menu; the header always shows firm name and role. | now | firm.search |
 | A004 | Owner can transfer ownership to another active user; the new owner confirms by emailed link, then the old owner becomes accountant. | now | membership.offer_ownership |
 | A005 | Deactivating a user ends all their sessions at once, not at next expiry; their next request returns 401. | now | membership.deactivate |

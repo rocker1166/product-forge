@@ -16,7 +16,7 @@
 | invite_sent | invite.resend | invitee | email | {inviter} invited you to join {firm} as {role}. Open the link within 7 days; it works only for this email. Any earlier invite from them is replaced. | false |
 | invite_accepted | invite.accept | owner | email, app | {person} accepted the invite to {firm} as {role}. The firm now shows in their switcher. | true |
 | invite_expired_owner | invite.expire | owner | email, app | The invite to {email} for {firm} ended after 7 days without an answer. Send a new one if they still need access. | true |
-| role_changed | membership.change_role | person | email, app | {actor} changed your role in {firm} from {old_role} to {new_role}. It applies from your next click; what you already did is not changed. | false |
+| role_changed | membership.change_role | person, owner | email, app | {actor} changed your role in {firm} from {old_role} to {new_role}. It applies from your next click; what you already did is not changed. | false |
 | access_removed | membership.deactivate | person | email | {actor} removed your access to {firm}. Your sessions there ended. The drafts you made stay with the firm. | false |
 | member_left | membership.leave | owner | email, app | {person} left {firm} on {date}. Their drafts stay with the firm and their entries keep their name. | true |
 | access_returned | membership.reactivate | person | email | {actor} gave you back your access to {firm} as {role}. Sign in to carry on. | false |

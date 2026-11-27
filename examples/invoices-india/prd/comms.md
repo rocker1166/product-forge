@@ -232,6 +232,7 @@ One module of the PRD. The front book is ../PRD.md.
 
 | Id | Requirement | When | Where |
 |---|---|---|---|
+| SEC08 | Shared links carry long random tokens, expire, can be revoked, and show only what they were made for. | now | share_link.secret, share_link.scope |
 | A005 | Deactivating a user ends all their sessions at once, not at next expiry; their next request returns 401. | now | share_link.gone |
 | A010 | Share link visitors see only the one document it was made for, never the customer's other invoices; the customer's other documents and statement are on the customer's password-protected client page, never on a document link. | now | share_link.scope |
 | A011 | Owner can revoke a pending invite; its link then shows 'invite expired'. Resend issues a new link and kills the old one. | now | message.type |

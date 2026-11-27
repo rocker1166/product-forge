@@ -3,8 +3,8 @@
 Invoices and payments for small Indian service firms.
 
 For the owner of a service firm of 1 to 20 people (design, IT, legal, consulting, agencies, repair, coaching), who also does the billing. 27 objects, 6 roles, 54 screens, 46 journeys.
-All 13712 answers filled. Filled does not mean right.
-Evidence: single 241, judge 775, strong 202.
+All 13848 answers filled. Filled does not mean right.
+Evidence: single 243, judge 776, strong 202.
 
 ## Your questions (0)
 

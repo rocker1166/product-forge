@@ -28,6 +28,9 @@ screens:
     for: ["owner","accountant","staff","viewer","support"]
     from: ["link"]
     primary: "Sign in"
+    states:
+      first_use: "Opened from a deep link: after sign-in the person lands on that page. A return address that points outside the app is ignored and they land on Home."
+      locked: "Too many tries: 'Wait 15 minutes, or reset your password.' Sign-up, reset and public pages answer a rate limit the same way: 'Too many tries. Try again in {n} minutes.' with the wait."
   - id: second_step
     name: "Second step"
     path: "/sign-in/code"
@@ -58,6 +61,8 @@ screens:
     for: ["owner","accountant","staff","viewer","client","support"]
     from: ["link"]
     primary: "Go to start"
+    states:
+      first_use: "This page is gone or never existed. Go to start, or open the list the link was meant for. Another firm's record looks exactly like this. The API gives 404 JSON with the same words, never a stack trace."
   - id: firm_switcher
     name: "Your firms"
     path: "/firms"
